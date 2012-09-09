@@ -4,11 +4,11 @@ runtime: python27
 api_version: 1
 threadsafe: true
 
-handlers:
+handlers
 - url: /.*
   script: main.app
 
-libraries:
+libraries
 - name: webapp2
   version: latest
 

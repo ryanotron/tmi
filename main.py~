@@ -21,10 +21,7 @@ class SuperHandler(webapp2.RequestHandler):
 
 class MainPageHandler(SuperHandler):
     def get(self):
-        name = self.request.get('name')
-        if not name:
-            name = 'anon'
-        self.render('mainpage.html', name = name)
+        self.render('mainpage.html', user='derp')
 
 app = webapp2.WSGIApplication([('/', MainPageHandler),],
                               debug = True)
