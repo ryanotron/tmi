@@ -1,5 +1,5 @@
 import webapp2
-import jinja2, os
+import jinja2, os, datetime
 from google.appengine.ext import db
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
@@ -7,6 +7,12 @@ jinjaenv = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir), au
 
 class ActivityModel(db.Model):
     name = db.StringProperty(required = True)
+    start = db.DateTimeProperty(required = True)
+    end = db.DateTimeProperty(required = True)
+    
+class CommuteModel(db.Model):
+    origin = db.StringProperty(required = True)
+    destination = db.StringProperty(required = True)
     start = db.DateTimeProperty(required = True)
     end = db.DateTimeProperty(required = True)
 
@@ -35,9 +41,34 @@ class PanelHandler(SuperHandler):
     def get(self):
         self.render('panelpage.html')
         
+class ActivityHandler(SuperHandler):
     def post(self):
-        self.render('panelpage.html')
-
+        act_name = self.request.get('act_name')
+        act_start_h = self.request.get('act_start_h')
+        act_start_m = self.request.get('act_start_m')
+        act_finish_h = self.request.get('act_finish_h')
+        act_finish_m = self.request.get('act_finish_m')
+        act_duration = self.request.get('act_duration')
+        
+        activity = ActivityModel()
+        activity.name = act_name
+        
+        today = datetime.datetime.today()
+        if act_start_h:
+            activity.start = datetime.datetime(today.year, today.month, today.day, int(act_start_h), int(act_start_m))
+            if act_duration:
+                duration = datetime.timedelta(minutes = float(act_duration))
+                activity.end = activity.start + duration
+            else:
+                activity.end = datetime.datetime(today.year, today.month, today.day, int(act_finish_h), int(act_finish_m))
+        else:
+            activity.end = datetime.datetime(today.year, today.month, today.day, int(act_finish_h), int(act_finish_m))
+            duration = datetime.timedelta(minutes = float(act_duration))
+            activity.start = activity.end - duration
+            
+        activity.put()
+            
 app = webapp2.WSGIApplication([('/', MainPageHandler),
-                               ('/panel/?', PanelHandler)],
+                               ('/panel/?', PanelHandler),
+                               ('/activity/?', ActivityHandler)],
                               debug = True)
