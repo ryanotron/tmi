@@ -1,19 +1,22 @@
 ﻿{% extends 'basepage.html' %}
 
 {% block content %}
+<h3>Activity</h3>
 <form method="post" action="/activity">
     what did you do? <input type="text" name="act_name"><br>
     Fill any two of the following:<br>
-    when did you start? <input type="text" name="act_start_h">:<input type="text" name="act_start_m"><br>
-    when did you finish? <input type="text" name="act_finish_h">:<input type="text" name="act_finish_m"><br>
-    how long did it take? <input type="text" name="act_duration">
+    when did you start? <input type="text" size=2 maxlength=2 name="act_start_h">:<input type="text" name="act_start_m" size=2 maxlength=2><br>
+    when did you finish? <input type="text" size=2 maxlength=2 name="act_finish_h">:<input type="text" name="act_finish_m" size=2 maxlength=2><br>
+    how long did it take? <input type="text" name="act_duration"><br>
     <input type="submit">
 </form>
+<hr>
+<h3>Commute</h3>
 <form method="post" action="/commute">
     where did you start? <input type="text" name="origin"><br>
     where did you finish? <input type="text" name="destination"><br>
-    when did you start? <input type="text" name="com_start_h">:<input type="text" name="com_start_m"><br>
-    when did you finish? <input type="text" name="com_finish_h">:<input type="text" name="com_finish_m"><br>
+    when did you start? <input type="text" name="com_start_h" size=2 maxlength=2>:<input type="text" name="com_start_m" size=2 maxlength=2><br>
+    when did you finish? <input type="text" name="com_finish_h" size=2 maxlength=2>:<input type="text" name="com_finish_m" size=2 maxlength=2><br>
     <input type="submit">
 </form>
 {% endblock %}

@@ -5,6 +5,12 @@ from google.appengine.ext import db
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinjaenv = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir), autoescape = True)
 
+class UserModel(db.Model):
+    username = db.StringProperty(required = True)
+    hashedpw = db.StringProperty(required = True)
+    nameday  = db.DateTimeProperty(auto_now_add = True)
+    email    = db.EmailProperty()
+
 class ActivityModel(db.Model):
     name = db.StringProperty(required = True)
     start = db.DateTimeProperty(required = True)
@@ -50,8 +56,9 @@ class ActivityHandler(SuperHandler):
         act_finish_m = self.request.get('act_finish_m')
         act_duration = self.request.get('act_duration')
         
-        activity = ActivityModel()
-        activity.name = act_name
+        activity = ActivityModel(name  = act_name,
+                                 start = datetime.datetime.now(),
+                                 end   = datetime.datetime.now())
         
         today = datetime.datetime.today()
         if act_start_h:
@@ -67,6 +74,20 @@ class ActivityHandler(SuperHandler):
             activity.start = activity.end - duration
             
         activity.put()
+        self.redirect('/panel')
+        
+class SignupHandler(SuperHandler):
+    def get(self):
+        self.render('signuppage.html')
+        
+    def post(self):
+        username = self.request.get('username')
+        password = self.request.get('password')
+        verify   = self.request.get('verify')
+        email    = self.request.get('verify')
+        
+        if username:
+            ###
             
 app = webapp2.WSGIApplication([('/', MainPageHandler),
                                ('/panel/?', PanelHandler),

@@ -1,0 +1,28 @@
+﻿{% extends 'basepage.html' %}
+
+{% block content %}
+    <h2>Sign up to tell people Too Much Information about yourself!</h2>
+    <form method="post">
+        <table>
+            <tr>
+                <td>username
+                <td><input type="text" name="username" value="{{username}}">
+                <td>{{username_error}}
+            <tr>
+                <td>password
+                <td><input type="password" name="password">
+                <td>{{password_error}}
+            <tr>
+                <td>verify password
+                <td><input type="password" name="verify">
+                <td>{{verification_error}}
+            <tr>
+                <td>email (optional)
+                <td><input type="text" name="email" value="{{email}}">
+                <td>{{email_error}}
+            <tr>
+                <td><input type="submit" value="sign up!">
+        </table>
+    </form>
+
+{% endblock %}
