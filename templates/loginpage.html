@@ -1,0 +1,19 @@
+﻿{% extends 'basepage.html' %}
+
+{% block content %}
+<form method="post">
+    <table>
+        <tr>
+            <td>username
+            <td><input type="text" name="username">
+        <tr>
+            <td>password
+            <td><input type="password" name="password">
+        <tr>
+            <td>{{error_message}}
+        <tr>
+            <td><input type="submit" value="login">
+    </table>
+</form>
+    <p>Don't have an account? <a href="/signup">Sign up!</a></p>
+{% endblock %}
