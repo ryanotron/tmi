@@ -1,5 +1,5 @@
 import webapp2, jinja2
-import os, re, random, datetime, hashlib
+import os, re, random, datetime, hashlib, logging
 from google.appengine.ext import db
 from string import letters
 
@@ -22,12 +22,19 @@ class ActivityModel(db.Model):
     name = db.StringProperty(required = True)
     start = db.DateTimeProperty(required = True)
     end = db.DateTimeProperty(required = True)
+    userid = db.StringProperty(required = True)
+    
+class EventModel(db.Model):
+    name = db.StringProperty(required = True)
+    when = db.DateTimeProperty(required = True)
+    userid = db.StringProperty(required = True)
     
 class CommuteModel(db.Model):
     origin = db.StringProperty(required = True)
     destination = db.StringProperty(required = True)
     start = db.DateTimeProperty(required = True)
     end = db.DateTimeProperty(required = True)
+    userid = db.StringProperty(required = True)
 
 def render_str(template, **params):
     t = jinjaenv.get_template(template)
@@ -80,9 +87,9 @@ class PanelHandler(SuperHandler):
                 user = db.get(key)
                 self.render('panelpage.html', username = user.username)
             else:
-                self.redirect('/signup')
+                self.redirect('/login')
         else:
-            self.redirect('/signup')
+            self.redirect('/login')
         
 class ActivityHandler(SuperHandler):
     def post(self):
@@ -93,9 +100,16 @@ class ActivityHandler(SuperHandler):
         act_finish_m = self.request.get('act_finish_m')
         act_duration = self.request.get('act_duration')
         
-        activity = ActivityModel(name  = act_name,
-                                 start = datetime.datetime.now(),
-                                 end   = datetime.datetime.now())
+        userid = self.request.cookies.get('userid')
+        if userid:
+            userid = verify_cookie(userid)
+        else:
+            self.redirect('/login')
+        
+        activity = ActivityModel(name   = act_name,
+                                 start  = datetime.datetime.now(),
+                                 end    = datetime.datetime.now(),
+                                 userid = userid)
         
         today = datetime.datetime.today()
         if act_start_h:
@@ -112,6 +126,89 @@ class ActivityHandler(SuperHandler):
             
         activity.put()
         self.redirect('/panel')
+        
+class CommuteHandler(SuperHandler):
+    def post(self):
+        userid = self.request.cookies.get('userid')
+        if userid:
+            userid = verify_cookie(userid)
+        else:
+            self.redirect('/login')
+            
+        user = db.Key.from_path('UserModel', int(userid))
+        origin = self.request.get('origin')
+        destination = self.request.get('destination')
+        com_start_h = self.request.get('com_start_h')
+        com_start_m = self.request.get('com_start_m')
+        com_finish_h = self.request.get('com_finish_h')
+        com_finish_m = self.request.get('com_finish_m')
+        com_duration = self.request.get('com_duration')
+        
+        error = False
+        
+        if not origin or not destination:
+            error = True
+            self.redirect('/panel')
+        
+        now = datetime.datetime.now()
+        if com_start_h:
+            com_start = datetime.datetime(now.year, now.month, now.day, int(com_start_h), int(com_start_m))
+            if com_finish_h:
+                com_finish = datetime.datetime(now.year, now.month, now.day, int(com_finish_h), int(com_finish_m))
+            elif com_duration:
+                com_finish = com_start + datetime.timedelta(minutes = float(com_duration))
+            else:
+                error = True
+        elif com_finish_h:
+            com_finish = datetime.datetime(now.year, now.month, now.day, int(com_finish_h), int(com_finish_m))
+            if com_start_h:
+                com_start = datetime.datetime(now.year, now.month, now.day, int(com_start_h), int(com_start_m))
+            elif com_duration:
+                com_start = com_finish - datetime.timedelta(minutes = float(com_duration))
+            else:
+                error = True
+        else:
+            error = True
+            
+        if not error:
+            commute = CommuteModel(userid = userid,
+                                   origin = origin,
+                                   destination = destination,
+                                   start = com_start,
+                                   end = com_finish)
+            commute.put()
+            self.redirect('/panel')
+        else:
+            self.redirect('/panel')
+            
+class EventHandler(SuperHandler):
+    def post(self):
+        userid = self.request.cookies.get('userid')
+        if userid:
+            userid = verify_cookie(userid)
+            if not userid:
+                self.redirect('/login')
+        else:
+            self.redirect('/login')
+            
+        event_name = self.request.get('event_name')
+        event_when_h = self.request.get('event_when_h')
+        event_when_m = self.request.get('event_when_m')
+        
+        if not event_name or not event_when_h or not event_when_m:
+            self.redirect('/panel')
+        else:
+            user = db.Key.from_path('UserModel', int(userid))
+            if user:
+                now = datetime.datetime.now()
+                event_when = datetime.datetime(now.year, now.month, now.day, int(event_when_h), int(event_when_m))
+                new_event = EventModel(name = event_name,
+                                       when = event_when,
+                                       userid = userid)
+                new_event.put()
+            else:
+                self.redirect('/login')
+                
         
 class SignupHandler(SuperHandler):
     def get(self):
@@ -175,14 +272,43 @@ class SignupHandler(SuperHandler):
             self.response.headers.add_header('Set-Cookie', 'userid=%s; Path=/' % securify_cookie(userid))
             self.redirect('/panel')
             
+class LoginHandler(SuperHandler):
+    def get(self):
+        self.render('loginpage.html')
+        
+    def post(self):
+        username = self.request.get('username')
+        password = self.request.get('password')
+        
+        error = False
+        error_message = 'Invalid login, try again!'
+        
+        if username:
+            users = db.GqlQuery('select * from UserModel where username = \'%s\' limit 1' % username)
+            user = list(users)[0]
+            
+            if verify_password(username, password, user.hashedpw):
+                userid = str(user.key().id())
+                self.response.headers.add_header('Set-Cookie', 'userid=%s; Path=/' % securify_cookie(userid))
+                self.redirect('/panel')
+            else:
+                error = True
+        else:
+            error = True
+            
+        if error:
+            self.render('loginpage.html', error_message = error_message)
+            
 class LogoutHandler(SuperHandler):
     def get(self):
         self.response.headers.add_header('Set-Cookie', 'userid=; Path=/')
-        self.redirect('/signup')
+        self.redirect('/login')
             
 app = webapp2.WSGIApplication([('/', MainPageHandler),
                                ('/panel/?', PanelHandler),
                                ('/activity/?', ActivityHandler),
+                               ('/commute/?', CommuteHandler),
                                ('/signup/?', SignupHandler),
+                               ('/login/?', LoginHandler),
                                ('/logout/?', LogoutHandler)],
                               debug = True)
