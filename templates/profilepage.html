@@ -1,0 +1,23 @@
+﻿{% extends 'basepage.html' %}
+
+{% block content %}
+<h2>Comrade {{username}}</h2>
+<form method="post">
+    <table>
+        <tr>
+            <td>timezone
+            <td><input type="text" name="new_timezone" value="{{timezone}}">
+        <tr>
+            <td>currency
+            <td><input type="text" name="new_currency" value="{{currency}}">
+        <tr>
+            <td>email
+            <td><input type="text" name="new_email" value="{{email}}">
+        <tr>
+            <td><input type="submit" value="save">
+    </table>
+</form>
+
+<a href="/comrade/{{username}}">Back to your page</a>
+            
+{% endblock %}
