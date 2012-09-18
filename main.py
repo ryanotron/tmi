@@ -102,7 +102,7 @@ class PanelHandler(SuperHandler):
             self.redirect('/login')
             
 class ProfileHandler(SuperHandler):
-    def get(self):
+    def get(self, username):
         userid = self.request.cookies.get('userid')
         if userid:
             userid = verify_cookie(userid)
@@ -118,24 +118,29 @@ class ProfileHandler(SuperHandler):
         else:
             self.redirect('/login')
             
-    def post(self):
+    def post(self, username):
         userid = self.request.cookies.get('userid')
         if userid:
             userid = verify_cookie(userid)
             if userid:
                 key = db.Key.from_path('UserModel', int(userid))
                 user = db.get(key)
-                new_timezone = self.request.get('timezone')
-                new_currency = self.request.get('currency')
+                new_timezone = self.request.get('new_timezone')
+                new_currency = self.request.get('new_currency')
+                new_email    = self.request.get('new_email')
                 
                 changed = False
                 
-                if new_timezone and new_timezone != user.timezone:
-                    user.timezone = new_timezone
+                if new_timezone and new_timezone != str(user.timezone):
+                    user.timezone = float(new_timezone)
                     changed = True
                     
                 if new_currency and new_currency != user.currency:
                     user.currency = new_currency
+                    changed = True
+                    
+                if new_email and new_email != user.email:
+                    user.email = new_email
                     changed = True
                     
                 if changed:
@@ -162,7 +167,14 @@ class ActivityHandler(SuperHandler):
         userid = self.request.cookies.get('userid')
         if userid:
             userid = verify_cookie(userid)
+            if not userid:
+                self.redirect('/login')
         else:
+            self.redirect('/login')
+            
+        key = db.Key.from_path('UserModel', int(userid))
+        user = db.get(key)
+        if not user:
             self.redirect('/login')
         
         activity = ActivityModel(name   = act_name,
@@ -184,6 +196,8 @@ class ActivityHandler(SuperHandler):
             activity.start = activity.end - duration
             
         activity.put()
+        user.last_seen = datetime.datetime.now()
+        user.put()
         self.redirect('/panel')
         
 class CommuteHandler(SuperHandler):
@@ -257,14 +271,17 @@ class EventHandler(SuperHandler):
         event_when_h = self.request.get('event_when_h')
         event_when_m = self.request.get('event_when_m')
         
-        if not event_name or not event_when_h or not event_when_m:
+        if not event_name:
             self.redirect('/panel')
         else:
             user = db.Key.from_path('UserModel', int(userid))
             if user:
                 user = db.get(user)
                 now = datetime.datetime.now()
-                event_when = datetime.datetime(now.year, now.month, now.day, int(event_when_h), int(event_when_m))
+                if event_when_h and event_when_m:
+                    event_when = datetime.datetime(now.year, now.month, now.day, int(event_when_h), int(event_when_m))
+                else:
+                    event_when = now
                 new_event = EventModel(name = event_name,
                                        when = event_when,
                                        userid = userid)
@@ -274,6 +291,46 @@ class EventHandler(SuperHandler):
                 self.redirect('/panel')
             else:
                 self.redirect('/login')
+
+class ExpenseHandler(SuperHandler):
+    def post(self):
+        userid = self.request.cookies.get('userid')
+        if userid:
+            userid = verify_cookie(userid)
+            if userid:
+                key = db.Key.from_path('UserModel', int(userid))
+                if key:
+                    user = db.get(key)
+                    name = self.request.get('name')
+                    category = self.request.get('category')
+                    amount = self.request.get('amount')
+                    when = self.request.get('when')
+                    
+                    if not name or not amount:
+                        self.redirect('/panel')
+                        
+                    if not category:
+                        category = 'unclassified'
+                        
+                    if not when:
+                        when = datetime.datetime.today()
+                        
+                    expense = ExpenseModel(name = name,
+                                      category = category,
+                                      amount = float(amount),
+                                      when = when,
+                                      userid = userid)
+                                      
+                    expense.put()
+                    user.last_seen = datetime.datetime.now()
+                    user.put()
+                    self.redirect('/panel')
+                else:
+                    self.redirect('/login')
+            else:
+                self.redirect('/login')
+        else:
+            self.redirect('/login')
 
 class UserpageHandler(SuperHandler):
     def get(self, username):
@@ -296,21 +353,37 @@ class UserpageHandler(SuperHandler):
             else:
                 alive_message = 'Unknown. Did Comrade %s left a goodbye note to anyone?' % user.username
             userid = str(user.key().id())
-            commutes = db.GqlQuery('select * from CommuteModel where userid = \'%s\'' % userid)
-            events   = db.GqlQuery('select * from EventModel where userid = \'%s\'' % userid)
+            commutes = db.GqlQuery('select * from CommuteModel where userid = \'%s\' order by end desc limit 5' % userid)
+            events   = db.GqlQuery('select * from EventModel where userid = \'%s\' order by when desc limit 5' % userid)
+            sleeps   = db.GqlQuery('select * from ActivityModel where userid = :1 and name = \'sleep\' order by end desc limit 1', userid)
             
-            commute = list(commutes)[0]
-            event   = list(events)[0]
+            commutes = list(commutes)
+            events   = list(events)
+            sleeps   = list(sleeps)
+            
+            commute = ''
+            if len(commutes) > 0:
+                commute = commutes[0]
+                
+            last_coffee = ''
+            event = ''
+            if len(events) > 0:
+                event = events[0]
+                for event in events:
+                    if event.name == 'coffee':
+                        last_coffee = event.when
+                        break
+                     
+            last_sleep = ''
+            if len(sleeps) > 0:
+                last_sleep = sleeps[0]
             
             self.render('userpage.html', username = username,
-                                         origin = commute.origin,
-                                         destination = commute.destination,
-                                         travel_start = commute.start,
-                                         travel_finish = commute.end,
-                                         travel_duration = (commute.end - commute.start).seconds / 60,
-                                         event_name = event.name,
-                                         event_time = event.when,
-                                         alive_message = alive_message)
+                                         commute = commute,
+                                         event = event,
+                                         alive_message = alive_message,
+                                         last_sleep = last_sleep,
+                                         last_coffee = last_coffee)
         else:
             self.redirect('/signup')
             
@@ -358,12 +431,13 @@ class SignupHandler(SuperHandler):
                     valid_email = email_re.match(email)
                     if valid_email:
                         new_user.email = email
-                        new_user.put()
+                        #new_user.put()
                     else:
                         email_error = 'This is an invalid email!'
                         error = True
                 else:
-                    new_user.put()
+                    #new_user.put()
+                    pass
         if error:
             self.render('signuppage.html', username = username,
                                            email = email,
@@ -372,6 +446,10 @@ class SignupHandler(SuperHandler):
                                            verification_error = verification_error,
                                            email_error = email_error)
         else:
+            new_user.timezone = 0.0
+            new_user.currency = 'SGD'
+            new_user.last_seen = datetime.datetime.now()
+            new_user.put()
             userid = str(new_user.key().id())
             self.response.headers.add_header('Set-Cookie', 'userid=%s; Path=/' % securify_cookie(userid))
             self.redirect('/panel')
@@ -413,10 +491,11 @@ app = webapp2.WSGIApplication([('/', MainPageHandler),
                                ('/panel/?', PanelHandler),
                                ('/activity/?', ActivityHandler),
                                ('/commute/?', CommuteHandler),
+                               ('/expense/?', ExpenseHandler),
                                ('/signup/?', SignupHandler),
                                ('/login/?', LoginHandler),
                                ('/logout/?', LogoutHandler),
                                ('/event/?', EventHandler),
-                               ('/comrade/' + userpage_re + '/?profile/?', ProfileHandler),
+                               ('/comrade/' + userpage_re + 'profile/?', ProfileHandler),
                                ('/comrade/' + userpage_re, UserpageHandler)],
                               debug = True)

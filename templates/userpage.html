@@ -3,8 +3,29 @@
 <h1>Information on Comrade {{username}}</h1>
 <p>Is comrade {{username}} alive? {{alive_message}}</p>
 <hr>
+{% if last_coffee %}
+    <p>Latest cup of coffee was had at {{last_coffee}}. {{coffee_message}}</p>
+{% else %}
+    <p>Comrade {{username}} has no recorded coffee time. How does Comrade {{username}} stay awake?</p>
+{% endif %}
+{% if last_sleep %}
+    <p>Comrade {{username}} woke up at {{last_sleep.end}} after sleeping for {{ (last_sleep.end - last_sleep.start).total_seconds()/3600 }} hours. {{sleep_message}}</p>
+{% else %}
+    <p>Comrade {{username}} has no recorded sleep time. Perhaps Comrade {{username}} never sleeps?</p>
+{% endif %}
+
 <h2>Comrade {{username}}'s latest travel</h2>
-<p>Left {{origin}} at {{travel_start}} for {{destination}}. Arrived at {{travel_finish}}. It took {{travel_duration}} minutes</p>
+{% if commute %}
+    <p>Left {{commute.origin}} at {{commute.start}} for {{commute.destination}}. Arrived at {{commute.end}}. It took {{ (commute.end - commute.start).total_seconds() / 60 }} minutes</p>
+{% else %}
+    <p>Comrade {{username}} has no recorded travel. Does Comrade {{username}} ever go out?</p>
+{% endif %}
+
 <h2>Latest event</h2>
-<p>Did {{event_name}} at {{event_time}}</p>
+{% if event %}
+    <p>Did {{event.name}} at {{event.when}}</p>
+{% else %}
+    <p>Comrade {{username}} has not recorded anything. Perhaps Comrade {{username}} has done nothing with Comrade {{username}}'s life?</p>
+{% endif %}
+<hr>
 {% endblock %}
