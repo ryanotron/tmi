@@ -45,6 +45,17 @@ class ExpenseModel(db.Model):
     amount = db.FloatProperty()
     when = db.DateTimeProperty()
     userid = db.StringProperty(required = True)
+    
+class SelfMessageModel(db.Model):
+    userid = db.StringProperty(required = True)
+    message = db.StringProperty(required = True)
+    when = db.DateTimeProperty(auto_now_add = True)
+    
+class VisitorMessageModel(db.Model):
+    userid = db.StringProperty(required = True)
+    username = db.StringProperty()
+    message = db.StringProperty()
+    when = db.DateTimeProperty(auto_now_add = True)
 
 def render_str(template, **params):
     t = jinjaenv.get_template(template)
@@ -332,6 +343,40 @@ class ExpenseHandler(SuperHandler):
         else:
             self.redirect('/login')
 
+class SelfMessageHandler(SuperHandler):
+    def post(self):
+        userid = self.request.cookies.get('userid')
+        if userid:
+            userid = verify_cookie(userid)
+            if userid:
+                user = db.get(db.Key.from_path('UserModel', int(userid)))
+                if user:
+                    message = self.request.get('message')
+                    if message:
+                        new_message = SelfMessageModel(userid = userid, message = message)
+                        new_message.put()
+                        user.last_seen = datetime.datetime.now()
+                    self.redirect('/panel')
+                else:
+                    self.redirect('/login')
+            else:
+                self.redirect('/login')
+        else:
+            self.redirect('/login')
+
+class VisitorMessageHandler(SuperHandler):
+    def post(self):
+        name = self.request.get('name')
+        message = self.request.get('message')
+        pagename = self.request.get('pagename')
+        
+        if not name:
+            name = 'anon'
+        
+        if not message:
+            self.redirect('/comrade/' + pagename)
+        else:
+            pass
 class UserpageHandler(SuperHandler):
     def get(self, username):
         users = db.GqlQuery('select * from UserModel where username = \'%s\' limit 1' % username)
@@ -356,10 +401,12 @@ class UserpageHandler(SuperHandler):
             commutes = db.GqlQuery('select * from CommuteModel where userid = \'%s\' order by end desc limit 5' % userid)
             events   = db.GqlQuery('select * from EventModel where userid = \'%s\' order by when desc limit 5' % userid)
             sleeps   = db.GqlQuery('select * from ActivityModel where userid = :1 and name = \'sleep\' order by end desc limit 1', userid)
+            messages = db.GqlQuery('select * from SelfMessageModel where userid = :1 order by when desc limit 1', userid)
             
             commutes = list(commutes)
             events   = list(events)
             sleeps   = list(sleeps)
+            messages = list(messages)
             
             commute = ''
             if len(commutes) > 0:
@@ -377,11 +424,16 @@ class UserpageHandler(SuperHandler):
             last_sleep = ''
             if len(sleeps) > 0:
                 last_sleep = sleeps[0]
+                
+            last_message = ''
+            if len(messages) > 0:
+                last_message = messages[0]
             
             self.render('userpage.html', username = username,
                                          commute = commute,
                                          event = event,
                                          alive_message = alive_message,
+                                         latest_message = last_message,
                                          last_sleep = last_sleep,
                                          last_coffee = last_coffee)
         else:
@@ -496,6 +548,8 @@ app = webapp2.WSGIApplication([('/', MainPageHandler),
                                ('/login/?', LoginHandler),
                                ('/logout/?', LogoutHandler),
                                ('/event/?', EventHandler),
+                               ('/selfmessage/?', SelfMessageHandler),
+                               ('/comment/?', VisitorMessageHandler),
                                ('/comrade/' + userpage_re + 'profile/?', ProfileHandler),
                                ('/comrade/' + userpage_re, UserpageHandler)],
                               debug = True)

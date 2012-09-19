@@ -2,6 +2,13 @@
 {% block content %}
 <h1>Information on Comrade {{username}}</h1>
 <p>Is comrade {{username}} alive? {{alive_message}}</p>
+<p>Latest message from Comrade {{username}}:</p>
+{% if latest_message %}
+    <blockquote>{{latest_message.message}}</blockquote>
+    <p>On {{latest_message.when.strftime('%A, %d %B %Y')}}</p>
+{% else %}
+    <p>Comrade {{username}} has not left any message yet.</p>
+{% endif %}
 <hr>
 {% if last_coffee %}
     <p>Latest cup of coffee was had at {{last_coffee}}. {{coffee_message}}</p>
@@ -28,4 +35,11 @@
     <p>Comrade {{username}} has not recorded anything. Perhaps Comrade {{username}} has done nothing with Comrade {{username}}'s life?</p>
 {% endif %}
 <hr>
+Tell Comrade {{username}} something!
+<form action="/comment" method="post">
+    Your name: <input type="text" name="name"><br>
+    <textarea name="comment" rows="4" cols="20"></textarea><br>
+    <input type="hidden" name="pagename" value="username">
+    <input type="submit">
+</form>
 {% endblock %}

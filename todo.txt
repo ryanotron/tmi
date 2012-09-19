@@ -1,0 +1,5 @@
+﻿TODO:
+- make timezones consistent for the user
+- format time properly in userpage
+- mockup a good userpage
+- implement a comment system

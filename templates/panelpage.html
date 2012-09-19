@@ -2,6 +2,12 @@
 
 {% block content %}
 <h2>What have you done, Comrade {{username}}?</h2>
+<h3>Message</h3>
+<form method="post" action="/selfmessage">
+    tell your stalkers something <input type="text" name="message"><br>
+    <input type="submit">
+</form>
+<hr>
 <h3>Activity</h3>
 <form method="post" action="/activity">
     what did you do? <input type="text" name="act_name"><br>
