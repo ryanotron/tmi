@@ -35,11 +35,21 @@
     <p>Comrade {{username}} has not recorded anything. Perhaps Comrade {{username}} has done nothing with Comrade {{username}}'s life?</p>
 {% endif %}
 <hr>
+
+<h2>Latest message from visitor</h2>
+{% if visitor_message %}
+    <p>{{visitor_message.guestname}} said:</p>
+    <blockquote>{{visitor_message.message}}</blockquote>
+    on {{visitor_message.when.strftime('%A, %d-%b-%Y')}}
+{% else %}
+    <p>Nobody has told Comrade {{username}} anything yet. Be the first!</p>
+{% endif %}
+    
 Tell Comrade {{username}} something!
 <form action="/comment" method="post">
     Your name: <input type="text" name="name"><br>
-    <textarea name="comment" rows="4" cols="20"></textarea><br>
-    <input type="hidden" name="pagename" value="username">
+    <textarea name="message" rows="4" cols="20"></textarea><br>
+    <input type="hidden" name="pagename" value="{{username}}">
     <input type="submit">
 </form>
 {% endblock %}

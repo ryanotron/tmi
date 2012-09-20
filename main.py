@@ -52,10 +52,10 @@ class SelfMessageModel(db.Model):
     when = db.DateTimeProperty(auto_now_add = True)
     
 class VisitorMessageModel(db.Model):
-    userid = db.StringProperty(required = True)
-    username = db.StringProperty()
+    pagename = db.StringProperty(required = True)
+    guestname = db.StringProperty()
     message = db.StringProperty()
-    when = db.DateTimeProperty(auto_now_add = True)
+    when = db.DateTimeProperty()
 
 def render_str(template, **params):
     t = jinjaenv.get_template(template)
@@ -195,14 +195,14 @@ class ActivityHandler(SuperHandler):
         
         today = datetime.datetime.today()
         if act_start_h:
-            activity.start = datetime.datetime(today.year, today.month, today.day, int(act_start_h), int(act_start_m))
+            activity.start = datetime.datetime(today.year, today.month, today.day, int(act_start_h), int(act_start_m)) - datetime.timedelta(hours = float(user.timezone))
             if act_duration:
                 duration = datetime.timedelta(minutes = float(act_duration))
                 activity.end = activity.start + duration
             else:
-                activity.end = datetime.datetime(today.year, today.month, today.day, int(act_finish_h), int(act_finish_m))
+                activity.end = datetime.datetime(today.year, today.month, today.day, int(act_finish_h), int(act_finish_m)) - datetime.timedelta(hours = float(user.timezone))
         else:
-            activity.end = datetime.datetime(today.year, today.month, today.day, int(act_finish_h), int(act_finish_m))
+            activity.end = datetime.datetime(today.year, today.month, today.day, int(act_finish_h), int(act_finish_m)) - datetime.timedelta(hours = float(user.timezone))
             duration = datetime.timedelta(minutes = float(act_duration))
             activity.start = activity.end - duration
             
@@ -237,17 +237,17 @@ class CommuteHandler(SuperHandler):
         
         now = datetime.datetime.now()
         if com_start_h:
-            com_start = datetime.datetime(now.year, now.month, now.day, int(com_start_h), int(com_start_m))
+            com_start = datetime.datetime(now.year, now.month, now.day, int(com_start_h), int(com_start_m)) - datetime.timedelta(hours = float(user.timezone))
             if com_finish_h:
-                com_finish = datetime.datetime(now.year, now.month, now.day, int(com_finish_h), int(com_finish_m))
+                com_finish = datetime.datetime(now.year, now.month, now.day, int(com_finish_h), int(com_finish_m)) - datetime.timedelta(hours = float(user.timezone))
             elif com_duration:
                 com_finish = com_start + datetime.timedelta(minutes = float(com_duration))
             else:
                 error = True
         elif com_finish_h:
-            com_finish = datetime.datetime(now.year, now.month, now.day, int(com_finish_h), int(com_finish_m))
+            com_finish = datetime.datetime(now.year, now.month, now.day, int(com_finish_h), int(com_finish_m)) - datetime.timedelta(hours = float(user.timezone))
             if com_start_h:
-                com_start = datetime.datetime(now.year, now.month, now.day, int(com_start_h), int(com_start_m))
+                com_start = datetime.datetime(now.year, now.month, now.day, int(com_start_h), int(com_start_m)) - datetime.timedelta(hours = float(user.timezone))
             elif com_duration:
                 com_start = com_finish - datetime.timedelta(minutes = float(com_duration))
             else:
@@ -290,9 +290,9 @@ class EventHandler(SuperHandler):
                 user = db.get(user)
                 now = datetime.datetime.now()
                 if event_when_h and event_when_m:
-                    event_when = datetime.datetime(now.year, now.month, now.day, int(event_when_h), int(event_when_m))
+                    event_when = datetime.datetime(now.year, now.month, now.day, int(event_when_h), int(event_when_m)) - datetime.timedelta(hours = float(user.timezone))
                 else:
-                    event_when = now
+                    event_when = now - datetime.timedelta(hours = float(user.timezone))
                 new_event = EventModel(name = event_name,
                                        when = event_when,
                                        userid = userid)
@@ -376,7 +376,13 @@ class VisitorMessageHandler(SuperHandler):
         if not message:
             self.redirect('/comrade/' + pagename)
         else:
-            pass
+            new_message = VisitorMessageModel(pagename = pagename,
+                                              guestname = name,
+                                              message = message,
+                                              when = datetime.datetime.now())
+            new_message.put()
+            self.redirect('/comrade/' + pagename)
+            
 class UserpageHandler(SuperHandler):
     def get(self, username):
         users = db.GqlQuery('select * from UserModel where username = \'%s\' limit 1' % username)
@@ -402,11 +408,17 @@ class UserpageHandler(SuperHandler):
             events   = db.GqlQuery('select * from EventModel where userid = \'%s\' order by when desc limit 5' % userid)
             sleeps   = db.GqlQuery('select * from ActivityModel where userid = :1 and name = \'sleep\' order by end desc limit 1', userid)
             messages = db.GqlQuery('select * from SelfMessageModel where userid = :1 order by when desc limit 1', userid)
+            comments = db.GqlQuery('select * from VisitorMessageModel where pagename = :1 order by when desc limit 1', user.username)
             
             commutes = list(commutes)
             events   = list(events)
             sleeps   = list(sleeps)
             messages = list(messages)
+            comments = list(comments)
+            
+            visitor_message = ''
+            if len(comments) > 0:
+                visitor_message = comments[0]
             
             commute = ''
             if len(commutes) > 0:
@@ -434,6 +446,7 @@ class UserpageHandler(SuperHandler):
                                          event = event,
                                          alive_message = alive_message,
                                          latest_message = last_message,
+                                         visitor_message = visitor_message,
                                          last_sleep = last_sleep,
                                          last_coffee = last_coffee)
         else:
