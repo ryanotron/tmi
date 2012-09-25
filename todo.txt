@@ -15,7 +15,7 @@
       I want to fetch all activities within a time period!
   - as much as possible, pass objects to template, not raw strings
 
-REFACTOR EVERYTHING
+REWRITE EVERYTHING
 
 LOGS:
 20-September-2012
