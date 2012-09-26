@@ -18,6 +18,11 @@
 REWRITE EVERYTHING
 
 LOGS:
+26-September-2012
+On branch dev
+- began rewriting everything
+- signup, login, logout, and profile page are GO
+
 20-September-2012
 - made comment database work
 - store time input from panel in UTC (time_input - user.timezone)

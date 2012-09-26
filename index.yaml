@@ -35,6 +35,11 @@ indexes:
   - name: when
     direction: desc
 
+- kind: UserModel
+  properties:
+  - name: username
+  - name: all
+
 - kind: VisitorMessageModel
   properties:
   - name: pagename

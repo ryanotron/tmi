@@ -1,20 +1,9 @@
 import webapp2
+import handlers as h
 
-from models import *
-from handlers import *
-            
-userpage_re = r'([a-zA-Z_-]+)/?'
-app = webapp2.WSGIApplication([('/', MainPageHandler),
-                               ('/panel/?', PanelHandler),
-                               ('/activity/?', ActivityHandler),
-                               ('/commute/?', CommuteHandler),
-                               ('/expense/?', ExpenseHandler),
-                               ('/signup/?', SignupHandler),
-                               ('/login/?', LoginHandler),
-                               ('/logout/?', LogoutHandler),
-                               ('/event/?', EventHandler),
-                               ('/selfmessage/?', SelfMessageHandler),
-                               ('/comment/?', VisitorMessageHandler),
-                               ('/comrade/' + userpage_re + 'profile/?', ProfileHandler),
-                               ('/comrade/' + userpage_re, UserpageHandler)],
-                              debug = True)
+app = webapp2.WSGIApplication([('/', h.MainpageHandler),
+                               ('/signup/?', h.SignupHandler),
+                               ('/login/?', h.LoginHandler),
+                               ('/logout/?', h.LogoutHandler),
+                               ('/profile/?', h.ProfileHandler)],
+                               debug = True)

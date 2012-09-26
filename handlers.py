@@ -1,380 +1,35 @@
-from utils import *
-from models import *
+import utils, models, constants
 from google.appengine.ext import db
 import webapp2
-import os, re, random, datetime, hashlib, logging
+import datetime
 
 class SuperHandler(webapp2.RequestHandler):
     def write(self, *a, **kw):
         self.response.out.write(*a, **kw)
 
     def render_str(self, template, **params):
-        return render_str(template, **params)
+        return utils.render_str(template, **params)
 
     def render(self, template, **params):
         self.write(self.render_str(template, **params))
 
-class MainPageHandler(SuperHandler):
-    def get(self):
-        name = self.request.get('name')
-        if not name:
-            name = 'anon'
-        self.render('mainpage.html', name = name)
-        
-class PanelHandler(SuperHandler):
+class MainpageHandler(SuperHandler):
     def get(self):
         userid = self.request.cookies.get('userid')
+        username = 'Anon'
+        salutation = 'Comrade'
+        
         if userid:
-            userid = verify_cookie(userid)
+            userid = utils.verify_cookie(userid)
             if userid:
-                key = db.Key.from_path('UserModel', int(userid))
-                user = db.get(key)
-                self.render('panelpage.html', username = user.username)
-            else:
-                self.redirect('/login')
-        else:
-            self.redirect('/login')
-            
-class ProfileHandler(SuperHandler):
-    def get(self, username):
-        userid = self.request.cookies.get('userid')
-        if userid:
-            userid = verify_cookie(userid)
-            if userid:
-                key = db.Key.from_path('UserModel', int(userid))
-                user = db.get(key)
-                self.render('profilepage.html', username = user.username,
-                                                timezone = user.timezone,
-                                                currency = user.currency,
-                                                email    = user.email)
-            else:
-                self.redirect('/login')
-        else:
-            self.redirect('/login')
-            
-    def post(self, username):
-        userid = self.request.cookies.get('userid')
-        if userid:
-            userid = verify_cookie(userid)
-            if userid:
-                key = db.Key.from_path('UserModel', int(userid))
-                user = db.get(key)
-                new_timezone = self.request.get('new_timezone')
-                new_currency = self.request.get('new_currency')
-                new_email    = self.request.get('new_email')
-                
-                changed = False
-                
-                if new_timezone and new_timezone != str(user.timezone):
-                    user.timezone = float(new_timezone)
-                    changed = True
-                    
-                if new_currency and new_currency != user.currency:
-                    user.currency = new_currency
-                    changed = True
-                    
-                if new_email and new_email != user.email:
-                    user.email = new_email
-                    changed = True
-                    
-                if changed:
-                    user.put()
-                    
-                self.render('profilepage.html', username = user.username,
-                                                timezone = user.timezone,
-                                                currency = user.currency,
-                                                email    = user.email)
-            else:
-                self.redirect('/login')
-        else:
-            self.redirect('/login')
-        
-class ActivityHandler(SuperHandler):
-    def post(self):
-        act_name = self.request.get('act_name')
-        act_start_h = self.request.get('act_start_h')
-        act_start_m = self.request.get('act_start_m')
-        act_finish_h = self.request.get('act_finish_h')
-        act_finish_m = self.request.get('act_finish_m')
-        act_duration = self.request.get('act_duration')
-        
-        userid = self.request.cookies.get('userid')
-        if userid:
-            userid = verify_cookie(userid)
-            if not userid:
-                self.redirect('/login')
-        else:
-            self.redirect('/login')
-            
-        key = db.Key.from_path('UserModel', int(userid))
-        user = db.get(key)
-        if not user:
-            self.redirect('/login')
-        
-        activity = ActivityModel(name   = act_name,
-                                 start  = datetime.datetime.now(),
-                                 end    = datetime.datetime.now(),
-                                 userid = userid)
-        
-        today = datetime.datetime.today()
-        if act_start_h:
-            activity.start = datetime.datetime(today.year, today.month, today.day, int(act_start_h), int(act_start_m)) - datetime.timedelta(hours = float(user.timezone))
-            if act_duration:
-                duration = datetime.timedelta(minutes = float(act_duration))
-                activity.end = activity.start + duration
-            else:
-                activity.end = datetime.datetime(today.year, today.month, today.day, int(act_finish_h), int(act_finish_m)) - datetime.timedelta(hours = float(user.timezone))
-        else:
-            activity.end = datetime.datetime(today.year, today.month, today.day, int(act_finish_h), int(act_finish_m)) - datetime.timedelta(hours = float(user.timezone))
-            duration = datetime.timedelta(minutes = float(act_duration))
-            activity.start = activity.end - duration
-            
-        activity.put()
-        user.last_seen = datetime.datetime.now()
-        user.put()
-        self.redirect('/panel')
-        
-class CommuteHandler(SuperHandler):
-    def post(self):
-        userid = self.request.cookies.get('userid')
-        if userid:
-            userid = verify_cookie(userid)
-        else:
-            self.redirect('/login')
-            
-        user = db.Key.from_path('UserModel', int(userid))
-        user = db.get(user)
-        origin = self.request.get('origin')
-        destination = self.request.get('destination')
-        com_start_h = self.request.get('com_start_h')
-        com_start_m = self.request.get('com_start_m')
-        com_finish_h = self.request.get('com_finish_h')
-        com_finish_m = self.request.get('com_finish_m')
-        com_duration = self.request.get('com_duration')
-        
-        error = False
-        
-        if not origin or not destination:
-            error = True
-            self.redirect('/panel')
-        
-        now = datetime.datetime.now()
-        if com_start_h:
-            com_start = datetime.datetime(now.year, now.month, now.day, int(com_start_h), int(com_start_m)) - datetime.timedelta(hours = float(user.timezone))
-            if com_finish_h:
-                com_finish = datetime.datetime(now.year, now.month, now.day, int(com_finish_h), int(com_finish_m)) - datetime.timedelta(hours = float(user.timezone))
-            elif com_duration:
-                com_finish = com_start + datetime.timedelta(minutes = float(com_duration))
-            else:
-                error = True
-        elif com_finish_h:
-            com_finish = datetime.datetime(now.year, now.month, now.day, int(com_finish_h), int(com_finish_m)) - datetime.timedelta(hours = float(user.timezone))
-            if com_start_h:
-                com_start = datetime.datetime(now.year, now.month, now.day, int(com_start_h), int(com_start_m)) - datetime.timedelta(hours = float(user.timezone))
-            elif com_duration:
-                com_start = com_finish - datetime.timedelta(minutes = float(com_duration))
-            else:
-                error = True
-        else:
-            error = True
-            
-        if not error:
-            commute = CommuteModel(userid = userid,
-                                   origin = origin,
-                                   destination = destination,
-                                   start = com_start,
-                                   end = com_finish)
-            commute.put()
-            user.last_seen = datetime.datetime.now()
-            user.put()
-            self.redirect('/panel')
-        else:
-            self.redirect('/panel')
-            
-class EventHandler(SuperHandler):
-    def post(self):
-        userid = self.request.cookies.get('userid')
-        if userid:
-            userid = verify_cookie(userid)
-            if not userid:
-                self.redirect('/login')
-        else:
-            self.redirect('/login')
-            
-        event_name = self.request.get('event_name')
-        event_when_h = self.request.get('event_when_h')
-        event_when_m = self.request.get('event_when_m')
-        
-        if not event_name:
-            self.redirect('/panel')
-        else:
-            user = db.Key.from_path('UserModel', int(userid))
-            if user:
-                user = db.get(user)
-                now = datetime.datetime.now()
-                if event_when_h and event_when_m:
-                    event_when = datetime.datetime(now.year, now.month, now.day, int(event_when_h), int(event_when_m)) - datetime.timedelta(hours = float(user.timezone))
-                else:
-                    event_when = now - datetime.timedelta(hours = float(user.timezone))
-                new_event = EventModel(name = event_name,
-                                       when = event_when,
-                                       userid = userid)
-                new_event.put()
-                user.last_seen = datetime.datetime.now()
-                user.put()
-                self.redirect('/panel')
-            else:
-                self.redirect('/login')
-
-class ExpenseHandler(SuperHandler):
-    def post(self):
-        userid = self.request.cookies.get('userid')
-        if userid:
-            userid = verify_cookie(userid)
-            if userid:
-                key = db.Key.from_path('UserModel', int(userid))
-                if key:
-                    user = db.get(key)
-                    name = self.request.get('name')
-                    category = self.request.get('category')
-                    amount = self.request.get('amount')
-                    when = self.request.get('when')
-                    
-                    if not name or not amount:
-                        self.redirect('/panel')
-                        
-                    if not category:
-                        category = 'unclassified'
-                        
-                    if not when:
-                        when = datetime.datetime.today()
-                        
-                    expense = ExpenseModel(name = name,
-                                      category = category,
-                                      amount = float(amount),
-                                      when = when,
-                                      userid = userid)
-                                      
-                    expense.put()
-                    user.last_seen = datetime.datetime.now()
-                    user.put()
-                    self.redirect('/panel')
-                else:
-                    self.redirect('/login')
-            else:
-                self.redirect('/login')
-        else:
-            self.redirect('/login')
-
-class SelfMessageHandler(SuperHandler):
-    def post(self):
-        userid = self.request.cookies.get('userid')
-        if userid:
-            userid = verify_cookie(userid)
-            if userid:
-                user = db.get(db.Key.from_path('UserModel', int(userid)))
+                user = db.Key.from_path('UserModel', int(userid))
                 if user:
-                    message = self.request.get('message')
-                    if message:
-                        new_message = SelfMessageModel(userid = userid, message = message)
-                        new_message.put()
-                        user.last_seen = datetime.datetime.now()
-                    self.redirect('/panel')
-                else:
-                    self.redirect('/login')
-            else:
-                self.redirect('/login')
-        else:
-            self.redirect('/login')
+                    user = db.get(user)
+                    username = user.realname
+                    
+        self.render('mainpage.html', username = username,
+                                     salutation = salutation)
 
-class VisitorMessageHandler(SuperHandler):
-    def post(self):
-        name = self.request.get('name')
-        message = self.request.get('message')
-        pagename = self.request.get('pagename')
-        
-        if not name:
-            name = 'anon'
-        
-        if not message:
-            self.redirect('/comrade/' + pagename)
-        else:
-            new_message = VisitorMessageModel(pagename = pagename,
-                                              guestname = name,
-                                              message = message,
-                                              when = datetime.datetime.now())
-            new_message.put()
-            self.redirect('/comrade/' + pagename)
-            
-class UserpageHandler(SuperHandler):
-    def get(self, username):
-        users = db.GqlQuery('select * from UserModel where username = \'%s\' limit 1' % username)
-        if users:
-            user = list(users)[0]
-            inactivity = (datetime.datetime.now() - user.last_seen).seconds / 60
-            
-            alive_message = ''
-            if inactivity < 10: #ten minutes
-                alive_message = 'Most probably'
-            elif inactivity < 60: #one hour
-                alive_message = 'Assume yes'
-            elif inactivity < 60 * 24: #one day
-                alive_message = 'Little reason to think otherwise'
-            elif inactivity < 60 * 24 * 7: #one week
-                alive_message = 'Perhaps'
-            elif inactivity < 60 * 24 * 7 * 2: #two weeks
-                alive_message = 'Let\'s hope so'
-            else:
-                alive_message = 'Unknown. Did Comrade %s left a goodbye note to anyone?' % user.username
-            userid = str(user.key().id())
-            commutes = db.GqlQuery('select * from CommuteModel where userid = \'%s\' order by end desc limit 5' % userid)
-            events   = db.GqlQuery('select * from EventModel where userid = \'%s\' order by when desc limit 5' % userid)
-            sleeps   = db.GqlQuery('select * from ActivityModel where userid = :1 and name = \'sleep\' order by end desc limit 1', userid)
-            messages = db.GqlQuery('select * from SelfMessageModel where userid = :1 order by when desc limit 1', userid)
-            comments = db.GqlQuery('select * from VisitorMessageModel where pagename = :1 order by when desc limit 1', user.username)
-            
-            commutes = list(commutes)
-            events   = list(events)
-            sleeps   = list(sleeps)
-            messages = list(messages)
-            comments = list(comments)
-            
-            visitor_message = ''
-            if len(comments) > 0:
-                visitor_message = comments[0]
-            
-            commute = ''
-            if len(commutes) > 0:
-                commute = commutes[0]
-                
-            last_coffee = ''
-            event = ''
-            if len(events) > 0:
-                event = events[0]
-                for event in events:
-                    if event.name == 'coffee':
-                        last_coffee = event.when
-                        break
-                     
-            last_sleep = ''
-            if len(sleeps) > 0:
-                last_sleep = sleeps[0]
-                
-            last_message = ''
-            if len(messages) > 0:
-                last_message = messages[0]
-            
-            self.render('userpage.html', username = username,
-                                         commute = commute,
-                                         event = event,
-                                         alive_message = alive_message,
-                                         latest_message = last_message,
-                                         visitor_message = visitor_message,
-                                         last_sleep = last_sleep,
-                                         last_coffee = last_coffee)
-        else:
-            self.redirect('/signup')
-            
 class SignupHandler(SuperHandler):
     def get(self):
         self.render('signuppage.html')
@@ -391,19 +46,29 @@ class SignupHandler(SuperHandler):
         verification_error = ''
         email_error = ''
         
+        new_user = ''
+        
+        # Check mandatory stuffs
         if username:
-            valid = username_re.match(username)
+            valid = constants.username_re.match(username)
             if valid:
-                names = db.GqlQuery('select * from UserModel where username = \'%s\' limit 1' % username)
+                names = db.GqlQuery('select * from UserModel where username = :1 limit 1', username)
                 names = list(names)
-                if names:
+                if len(names) > 0:
                     username_error = 'This username is taken!'
                     error = True
                 else:
-                    valid_pw = password_re.match(password)
+                    valid_pw = constants.password_re.match(password)
                     if valid_pw:
                         if password == verify:
-                            new_user = UserModel(username = username, hashedpw = securify_password(username, password))
+                            new_user = models.UserModel(username   = username,
+                                                        hashedpw   = utils.securify_password(username, password),
+                                                        nameday    = datetime.datetime.now(),
+                                                        salutation = 'Comrade',
+                                                        realname   = username,
+                                                        last_seen  = datetime.datetime.now(),
+                                                        timezone   = 8.0,
+                                                        currency   = 'SGD')
                         else:
                             verification_error = 'Passwords do not match!'
                             error = True
@@ -413,19 +78,17 @@ class SignupHandler(SuperHandler):
             else:
                 username_error = 'This is an invalid username!'
                 error = True
-                
+            
+            # Check optional stuffs
             if not error and new_user:
                 if email:
-                    valid_email = email_re.match(email)
+                    valid_email = constants.email_re.match(email)
                     if valid_email:
                         new_user.email = email
-                        #new_user.put()
                     else:
                         email_error = 'This is an invalid email!'
                         error = True
-                else:
-                    #new_user.put()
-                    pass
+
         if error:
             self.render('signuppage.html', username = username,
                                            email = email,
@@ -434,13 +97,10 @@ class SignupHandler(SuperHandler):
                                            verification_error = verification_error,
                                            email_error = email_error)
         else:
-            new_user.timezone = 0.0
-            new_user.currency = 'SGD'
-            new_user.last_seen = datetime.datetime.now()
             new_user.put()
             userid = str(new_user.key().id())
-            self.response.headers.add_header('Set-Cookie', 'userid=%s; Path=/' % securify_cookie(userid))
-            self.redirect('/panel')
+            self.response.headers.add_header('Set-Cookie', 'userid=%s; Path=/' % utils.securify_cookie(userid))
+            self.redirect('/') ### move to profile (or panel)
             
 class LoginHandler(SuperHandler):
     def get(self):
@@ -450,21 +110,28 @@ class LoginHandler(SuperHandler):
         username = self.request.get('username')
         password = self.request.get('password')
         
-        error = False
-        error_message = 'Invalid login, try again!'
-        
-        if username:
-            users = db.GqlQuery('select * from UserModel where username = \'%s\' limit 1' % username)
-            user = list(users)[0]
-            
-            if verify_password(username, password, user.hashedpw):
-                userid = str(user.key().id())
-                self.response.headers.add_header('Set-Cookie', 'userid=%s; Path=/' % securify_cookie(userid))
-                self.redirect('/panel')
+        if username and password:
+            user = db.GqlQuery('select all from UserModel where username = :1 limit 1', username)
+            if user:
+                user = list(user)
+                if len(user) > 0:
+                    user = user[0]
+                    if utils.verify_password(password) == user.hashedpw:
+                        userid = uset.key().id()
+                        self.response.headers.add_header('Set-Cookie', 'userid=%s; Path=/' % utils.securify_cookie(userid))
+                        self.redirect('/') ###move to panel
+                    else:
+                        error = True
+                        error_message = 'Invalid username or password'
+                else:
+                    error = True
+                    error_message = 'No such user, create one?'
             else:
                 error = True
+                error_message = 'No such user, create one?'
         else:
             error = True
+            error_message = 'You must fill both fields!'
             
         if error:
             self.render('loginpage.html', error_message = error_message)
@@ -473,3 +140,59 @@ class LogoutHandler(SuperHandler):
     def get(self):
         self.response.headers.add_header('Set-Cookie', 'userid=; Path=/')
         self.redirect('/login')
+        
+class ProfileHandler(SuperHandler):
+    def get(self):
+        userid = self.request.cookies.get('userid')
+        if userid:
+            userid = utils.verify_cookie(userid)
+            user = utils.validate_user(userid)
+            if user:
+                self.render('profilepage.html', user = user)
+            else:
+                self.redirect('/login')
+        else:
+            self.redirect('/login')
+            
+    def post(self):
+        userid = self.request.cookies.get('userid')
+        if userid:
+            userid = utils.verify_cookie(userid)
+            user = utils.validate_user(userid)
+            if user:
+                new_salutation = self.request.get('salutation')
+                new_realname = self.request.get('realname')
+                new_timezone = self.request.get('timezone')
+                new_currency = self.request.get('currency')
+                new_email    = self.request.get('email')
+                
+                updated = False
+                
+                if new_salutation != user.salutation:
+                    user.salutation = new_salutation
+                    updated = True
+                if new_realname != user.realname:
+                    user.realname = new_realname
+                    updated = True
+                if new_timezone != user.timezone:
+                    user.timezone = float(new_timezone)
+                    updated = True
+                if new_currency != user.currency:
+                    user.currency = new_currency
+                    updated = True
+                if new_email != user.email and constants.email_re.match(new_email):
+                    user.email = new_email
+                    updated = True
+                    
+                if updated:
+                    user.last_seen = datetime.datetime.now()
+                    user.put()
+                    self.redirect('/') ### move to panel
+                else:
+                    self.redirect('/') ### move to panel
+            
+            else:
+                self.redirect('/login')
+        else:
+            self.redirect('/login')
+                    
