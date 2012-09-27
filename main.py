@@ -5,5 +5,6 @@ app = webapp2.WSGIApplication([('/', h.MainpageHandler),
                                ('/signup/?', h.SignupHandler),
                                ('/login/?', h.LoginHandler),
                                ('/logout/?', h.LogoutHandler),
-                               ('/profile/?', h.ProfileHandler)],
+                               ('/profile/?', h.ProfileHandler),
+                               ('/postactivity/?', h.PostActivityHandler)],
                                debug = True)

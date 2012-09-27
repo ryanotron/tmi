@@ -1,7 +1,7 @@
 import utils, models, constants
 from google.appengine.ext import db
 import webapp2
-import datetime
+import datetime, logging
 
 class SuperHandler(webapp2.RequestHandler):
     def write(self, *a, **kw):
@@ -22,10 +22,10 @@ class MainpageHandler(SuperHandler):
         if userid:
             userid = utils.verify_cookie(userid)
             if userid:
-                user = db.Key.from_path('UserModel', int(userid))
+                user = validate_user(userid)
                 if user:
-                    user = db.get(user)
                     username = user.realname
+                    salutation = user.salutation
                     
         self.render('mainpage.html', username = username,
                                      salutation = salutation)
@@ -109,23 +109,23 @@ class LoginHandler(SuperHandler):
     def post(self):
         username = self.request.get('username')
         password = self.request.get('password')
+
+        error = False
         
         if username and password:
-            user = db.GqlQuery('select all from UserModel where username = :1 limit 1', username)
-            if user:
-                user = list(user)
-                if len(user) > 0:
-                    user = user[0]
-                    if utils.verify_password(password) == user.hashedpw:
-                        userid = uset.key().id()
-                        self.response.headers.add_header('Set-Cookie', 'userid=%s; Path=/' % utils.securify_cookie(userid))
-                        self.redirect('/') ###move to panel
-                    else:
-                        error = True
-                        error_message = 'Invalid username or password'
+            user = db.GqlQuery('select * from UserModel where username = :1 limit 1', username)
+            user = list(user)
+            logging.error('hit database')
+            if len(user) > 0:
+                logging.error('user found')
+                user = user[0]
+                if utils.verify_password(username, password, user.hashedpw):
+                    userid = str(user.key().id())
+                    self.response.headers.add_header('Set-Cookie', 'userid=%s; Path=/' % utils.securify_cookie(userid))
+                    self.redirect('/')
                 else:
                     error = True
-                    error_message = 'No such user, create one?'
+                    error_message = 'Invalid username or password'
             else:
                 error = True
                 error_message = 'No such user, create one?'
@@ -195,4 +195,43 @@ class ProfileHandler(SuperHandler):
                 self.redirect('/login')
         else:
             self.redirect('/login')
-                    
+
+class PostActivityModel(SuperHandler):
+    def post(self):
+        userid = self.request.cookies.get('userid')
+        if userid:
+            userid = utils.verify_cookie(userid)
+            if userid:
+                user = utils.validate_user(userid)
+                if user:
+                    activity_name = self.request.get('activity_name')
+                    activity_day  = self.request.get('activity_date')
+                    activity_time = self.request.get('activity_time')
+
+                    if activity_name and activity_day and activity_name:
+                        try:
+                            h, m = activity_time.split(':')
+                            h = int(h)
+                            m = int(m)
+
+                            Y, M, D = activity_day.split('/')
+                            Y = int(Y)
+                            M = int(M)
+                            D = int(D)
+
+                            new_activity = models.ActivityModel(userid = userid,
+                                                                name   = activity_name,
+                                                                when   = datetime.datetime(Y, M, D, h, m) - datetime.timedelta(hours = user.timezone),
+                            user.last_seen = datetime.datetime.now()
+                            new_activity.put()
+                        except:
+                            self.redirect('/panel')
+
+                    else:
+                        self.redirect('/panel')
+                else:
+                    self.redirect('/login')
+            else:
+                self.redirect('/login')
+        else:
+            self.redirect('/login')

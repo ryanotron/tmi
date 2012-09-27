@@ -10,5 +10,42 @@ class UserModel(db.Model):
     realname   = db.StringProperty()
     salutation = db.StringProperty()
     last_seen  = db.DateTimeProperty(required = True)
+
+class ActivityModel(db.Model):
+    userid = db.StringProperty(required = True)
+    name   = db.StringProperty()
+    when   = db.DateTimeProperty()
+
+class ExpenseModel(db.Model):
+    userid   = db.StringProperty(required = True)
+    name     = db.StringProperty()
+    category = db.StringProperty()
+    amount   = db.FloatProperty()
+    currency = db.StringProperty() # stub. Defaults to user's currency. When we can check for currency conversion online, this'd more useful
+
+class TravelModel(db.Model):
+    userid      = db.StringProperty(required = True)
+    origin      = db.StringProperty()
+    destination = db.StringProperty()
+    whenstart   = db.DateTimeProperty()
+    whenfinish  = db.DateTimeProperty()
+
+class MealModel(db.Model):
+    userid   = db.StringProperty(required = True)
+    when     = db.DateTimeProperty()
+    menu     = db.StringProperty()
+    place    = db.StringProperty()
+    category = db.StringProperty() # breakfast, lunch, dinner, supper, snack
+
+class UserMessageModel(db.Model):
+    userid  = db.StringProperty(required = True)
+    message = db.TextProperty()
+    when    = db.DateTimeProperty()
+
+class GuestMessageModel(db.Model):
+    userid    = db.StringProperty(required = True)
+    guestname = db.StringProperty()
+    message   = db.TextProperty()
+    when      = db.DateTimeProperty()
     
     
