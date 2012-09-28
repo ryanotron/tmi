@@ -22,6 +22,7 @@ class ExpenseModel(db.Model):
     category = db.StringProperty()
     amount   = db.FloatProperty()
     currency = db.StringProperty() # stub. Defaults to user's currency. When we can check for currency conversion online, this'd more useful
+    when     = db.DateTimeProperty()
 
 class TravelModel(db.Model):
     userid      = db.StringProperty(required = True)

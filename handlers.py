@@ -196,7 +196,7 @@ class ProfileHandler(SuperHandler):
         else:
             self.redirect('/login')
 
-class PostActivityModel(SuperHandler):
+class PostActivityHandler(SuperHandler):
     def post(self):
         userid = self.request.cookies.get('userid')
         if userid:
@@ -205,7 +205,7 @@ class PostActivityModel(SuperHandler):
                 user = utils.validate_user(userid)
                 if user:
                     activity_name = self.request.get('activity_name')
-                    activity_day  = self.request.get('activity_date')
+                    activity_day  = self.request.get('activity_day')
                     activity_time = self.request.get('activity_time')
 
                     if activity_name and activity_day and activity_name:
@@ -227,6 +227,153 @@ class PostActivityModel(SuperHandler):
                         except:
                             self.redirect('/panel')
 
+                    else:
+                        self.redirect('/panel')
+                else:
+                    self.redirect('/login')
+            else:
+                self.redirect('/login')
+        else:
+            self.redirect('/login')
+            
+class PostExpenseHandler(SuperHandler):
+    def post(self):
+        userid = self.response.cookies.get('userid')
+        if userid:
+            userid = utils.verify_cookie(userid)
+            if userid:
+                user = utils.validate_user(userid)
+                if user:
+                    exp_name     = self.request.get('exp_name')
+                    exp_category = self.request.get('exp_category')
+                    exp_amount   = self.request.get('exp_amount')
+                    exp_currency = self.request.get('exp_currency')
+                    exp_when     = self.request.get('exp_when')
+                    
+                    if exp_name and exp_amount:
+                        try:
+                            if not exp_when:
+                                exp_when = datetime.datetime.today()
+                            D, M, Y = [int(elem) for elem in exp_when.split('/')]
+                            
+                            if not exp_currency:
+                                exp_currency = user.currency
+                                
+                            new_expense = models.ExpenseModel(userid = userid,
+                                                              name = exp_name,
+                                                              category = exp_category,
+                                                              amount = exp_amount,
+                                                              currency = exp_currency,
+                                                              when = datetime.datetime(Y, M, D))
+                                                              
+                            new_expense.put()
+                            user.last_seen = datetime.datetime.now()
+                            user.put()
+                        except:
+                            self.redirect('/panel')
+                    else:
+                        self.redirect('/panel')
+                else:
+                    self.redirect('/login')
+            else:
+                self.redirect('/login')
+        else:
+            self.redirect('/login')
+            
+class PostTravelHandler(SuperHandler):
+    def post(self):
+        userid = self.request.cookies.get('userid')
+        if userid:
+            userid = utils.verify_cookie(userid)
+            if userid:
+                user = utils.validate_user(userid)
+                if user:
+                    trv_origin      = self.request.get('trv_origin')
+                    trv_destination = self.request.get('trv_destination')
+                    trv_start_day   = self.request.get('trv_start_day')
+                    trv_start_time  = self.request.get('trv_start_time')
+                    trv_finish_day  = self.request.get('trv_finish_day')
+                    trv_finish_time = self.request.get('trv_finish_time')
+                    trv_duration    = self.request.get('trv_duration') # how granular should we be? I usually use minutes in my manual log
+                    
+                    if trv_origin and trv_destination:
+                        # two out of three are needed from trv_start_time, trv_finish_time, and trv_duration.
+                        # *_time will be left blank in the form, while *_day will default to today (user's timezone),
+                        # so it makes sense to check *_time instead of *_day
+                        if trv_start_time:
+                            D, M, Y = [int(elem) for elem in trv_start_day.split('/')]
+                            h, m    = [int(elem) for elem in trv_start_time.split(':')]
+                            trv_start_time = datetime.datetime(Y, M, D, h, m)
+                            
+                            if trv_finish_time:
+                                D, M, Y = [int(elem) for elem in trv_finish_day.split('/')]
+                                h, m    = [int(elem) for elem in trv_finish_time.split(':')]
+                                trv_finish_time = datetime.datetime(Y, M, D, h, m)
+                            elif trv_duration:
+                                trv_finish_time = trv_start_time + datetime.timedelta(minutes = float(trv_duration))
+                            else:
+                                self.redirect('/panel')
+                                
+                        elif trv_finish_time:
+                            D, M, Y = [int(elem) for elem in trv_finish_day.split('/')]
+                            h, m    = [int(elem) for elem in trv_finish_time.split(':')]
+                            trv_finish_time = datetime.datetime(Y, M, D, h, m)
+                            
+                            if trv_duration:
+                                trv_start_time = trc_finish_time - datetime.timedelta(minutes = float(trv_duration))
+                            else:
+                                self.redirect('/panel')
+                        else:
+                            self.redirect('/panel')
+                            
+                        new_travel = models.TravelModel(userid      = userid,
+                                                        origin      = trv_origin,
+                                                        destination = trv_destination,
+                                                        whenstart   = trv_start_time - datetime.timedelta(user.timezone),
+                                                        whenfinish  = trv_finish_time - datetime.timedelta(user.timezone))
+                                                        
+                        new_travel.put()
+                        user.last_seen = datetime.datetime.now()
+                        user.put()
+                    else:
+                        self.redirect('/panel')
+                else:
+                    self.redirect('/login')
+            else:
+                self.redirect('/login')
+        else:
+            self.redirect('/login')
+            
+class PostMealHandler(SuperHandler):
+    def post(self):
+        userid = self.request.cookies.get('userid')
+        if userid:
+            userid = utils.verify_cookie(userid)
+            if userid:
+                user = utils.validate_user(userid)
+                if user:
+                    meal_menu     = self.request.get('meal_menu')
+                    meal_day      = self.request.get('meal_day')
+                    meal_time     = self.request.get('meal_time')
+                    meal_place    = self.request.get('meal_place')
+                    meal_category = self.request.get('meal_category')
+                    
+                    if meal_menu and meal_time:
+                        try:
+                            D, M, Y = [int(elem) for elem in meal_day.split('/')]
+                            h, m    = [int(elem) for elem in meal_time.split(':')]
+                            meal_time = datetime.datetime(Y, M, D, h, m) - datetime.timedelta(user.timezone)
+                            
+                            new_meal = models.MealModel(userid   = userid,
+                                                        when     = meal_time,
+                                                        menu     = meal_menu,
+                                                        place    = meal_place,
+                                                        category = meal_category)
+                            new_meal.put()
+                            user.last_seen = datetime.datetime.now()
+                            user.put()
+                        except:
+                            self.redirect('/panel')
                     else:
                         self.redirect('/panel')
                 else:
