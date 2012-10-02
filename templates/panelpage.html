@@ -1,47 +1,27 @@
 ﻿{% extends 'basepage.html' %}
 
 {% block content %}
-<h2>What have you done, Comrade {{username}}?</h2>
-<h3>Message</h3>
-<form method="post" action="/selfmessage">
-    tell your stalkers something <input type="text" name="message"><br>
-    <input type="submit">
-</form>
-<hr>
-<h3>Activity</h3>
-<form method="post" action="/activity">
-    what did you do? <input type="text" name="act_name"><br>
-    Fill any two of the following:<br>
-    when did you start? <input type="text" size=2 maxlength=2 name="act_start_h">:<input type="text" name="act_start_m" size=2 maxlength=2><br>
-    when did you finish? <input type="text" size=2 maxlength=2 name="act_finish_h">:<input type="text" name="act_finish_m" size=2 maxlength=2><br>
-    how long did it take? <input type="text" size=5 name="act_duration"> minutes<br>
-    <input type="submit">
-</form>
-<hr>
-<h3>Event</h3>
-<form method="post" action="/posactivity">
-    what did you do? <input type="text" name="event_name"><br>
-    when was that? <input type="text" maxlength=2 size=2 name="event_when_h">:<input type="text" maxlength=2 size=2 name="event_when_m"><br>
-    <input type="submit">
-</form>
-<hr>
-<h3>Commute</h3>
-<form method="post" action="/commute">
-    where did you start? <input type="text" name="origin"><br>
-    where did you finish? <input type="text" name="destination"><br>
-    Fill any two of the following:<br>
-    when did you start? <input type="text" name="com_start_h" size=2 maxlength=2>:<input type="text" name="com_start_m" size=2 maxlength=2><br>
-    when did you finish? <input type="text" name="com_finish_h" size=2 maxlength=2>:<input type="text" name="com_finish_m" size=2 maxlength=2><br>
-    how long did it take? <input type="text" size=5 name="com_duration"> minutes<br>
-    <input type="submit">
-</form>
-<hr>
-<h3>Expense</h3>
-<form method="post" action="/expense">
-    what did you spend on? <input type="text" name="name"><br>
-    how much did you spend? <input type="text" name="amount"><br>
-    what would you classify it as? <input type="text" name="category"><br>
-    <input type="submit">
-</form>
-<hr>
+<h1 class="Header" id="PanelHeader">What have you done, {{user.salutation}} {{user.name}}?</h1>
+<div class="Wrapper" id="PanelOverWrapper">
+    <div class="PanelWrapper">
+        <h2 class="PanelCategory">General Activity</h2>
+        <form action="/postactivity" method="/post">
+            ###make prettier
+            Name <input type="text" name="activity_name"><br>
+            Day <input type="text" name="activity_day" value="{{datetime.datetime.today().strftime('%d/%m/%y')}}"><br>
+            Time <input type="text" name="activity_time" value="{{datetime.datetime.now().strftime('%H:%M')}}"><br>
+            <input type="submit">
+        </form>
+    </div>
+    <div class="PanelWrapper">
+        <h2 class="PanelCategory">Hygiene</h2>
+        <form action="/postactivity" method="post">
+            Shower 
+            <input type="text" name="activity_day" value="{{datetime.datetime.today().strftime('%d/%m/%y')}}"> 
+            <input type="text" name="activity_time" value="{{datetime.datetime.now().strftime('%H:%M')}}">
+            <input type="hidden" name="activity_name" value="shower">
+        </form>
+    </div>
+</div>
+
 {% endblock %}

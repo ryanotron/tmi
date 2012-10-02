@@ -22,7 +22,7 @@ class MainpageHandler(SuperHandler):
         if userid:
             userid = utils.verify_cookie(userid)
             if userid:
-                user = validate_user(userid)
+                user = utils.validate_user(userid)
                 if user:
                     username = user.realname
                     salutation = user.salutation
@@ -221,7 +221,7 @@ class PostActivityHandler(SuperHandler):
 
                             new_activity = models.ActivityModel(userid = userid,
                                                                 name   = activity_name,
-                                                                when   = datetime.datetime(Y, M, D, h, m) - datetime.timedelta(hours = user.timezone),
+                                                                when   = datetime.datetime(Y, M, D, h, m) - datetime.timedelta(hours = user.timezone))
                             user.last_seen = datetime.datetime.now()
                             new_activity.put()
                         except:
@@ -382,3 +382,63 @@ class PostMealHandler(SuperHandler):
                 self.redirect('/login')
         else:
             self.redirect('/login')
+            
+class PostUserMessageHandler(SuperHandler):
+    def post(self):
+        userid = self.request.cookies.get('userid')
+        if userid:
+            userid = utils.verify_cookie(userid)
+            if userid:
+                user = utils.validate_user(userid)
+                if user:
+                    message = self.request.get('user_message')
+                    if message:
+                        new_message = models.UserMessageModel(userid  = userid,
+                                                              message = message,
+                                                              when    = datetime.datetime.now())
+                        new_message.put()
+                        user.last_seen = datetime.datetime.now()
+                        user.put()
+                    else:
+                        self.redirect('/panel')
+                else:
+                    self.redirect('/login')
+            else:
+                self.redirect('/login')
+        else:
+            self.redirect('/login')
+            
+class PostGuestMessageHandler(SuperHandler):
+    def post(self):
+        guest_name = self.request.get('guest_name')
+        message    = self.request.get('guest_message')
+        userid     = self.request.get('userid')
+        
+        if not guest_name:
+            guest_name = 'anon'
+        
+        if guest_name and message and userid:
+            new_message = models.GuestMessageModel(userid    = userid,
+                                                   guestname = guest_name,
+                                                   message   = message,
+                                                   when      = datetime.datetime.now())
+            new_message.put()
+        else:
+            self.redirect(self.request.referer)
+            
+class PanelHandler(SuperHandler):
+    def get(self):
+        userid = self.request.cookies.get('userid')
+        if userid:
+            userid = utils.verify_cookie(userid)
+            if userid:
+                user = utils.validate_user(userid)
+                if user:
+                    self.render('panelpage.html', user = user)
+                else:
+                    self.redirect('/login')
+            else:
+                self.redirect('/login')
+        else:
+            self.redirect('/login')
+            
