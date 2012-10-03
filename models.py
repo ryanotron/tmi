@@ -15,6 +15,12 @@ class ActivityModel(db.Model):
     userid = db.StringProperty(required = True)
     name   = db.StringProperty()
     when   = db.DateTimeProperty()
+    
+class TimedActivityModel(db.Model):
+    userid = db.StringProperty(required = True)
+    name   = db.StringProperty()
+    start  = db.DateTimeProperty()
+    end    = db.DateTimeProperty()
 
 class ExpenseModel(db.Model):
     userid   = db.StringProperty(required = True)

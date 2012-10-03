@@ -14,12 +14,48 @@
         </form>
     </div>
     <div class="PanelWrapper">
+        <h2 class="PanelCategory">Energy</h2>
+        <form action="/postactivity" method="post">
+            <input type="hidden" name="activity_name" value="coffee">
+            <input type="hidden" name="activity_time" value="{{(datetime.datetime.now() + datetime.timedelta(hours = user.timezone)).stftime('%H:%M')}}">
+            <input type="hidden" name="activity_day" value="{{(datetime.datetime.today() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%y')}}">
+            <input type="submit" value="I just had coffee!">
+        </form>
+        <form action="/posttimedactivity" method="post">
+            <input type="hidden" name="act_name" value="sleep">
+            Slept at <input type="text" name="act_start_day" value="{{(datetime.datetime.now() + datetime.timedelta(hours = user.timezone - 6.0)).stftime('%d/%m/%y')}}">, 
+            <input type="text" name="act_start_time"><br>
+            Woke up at <input type="text" name="act_end_day" value="{{(datetime.datetime.now() + datetime.timedelta(hours = user.timezone)).stftime('%d/%m/%y')}}">, 
+            <input type="text" name="act_end_time" value="{{(datetime.datetime.now() + datetime.timedelta(hours = user.timezone)).stftime('%H:%M')}}"><br>
+            for <input type="text" name="act_duration"> hours<br>
+            <input type="submit">
+        </form>
+    </div>
+    <div class="PanelWrapper">
         <h2 class="PanelCategory">Hygiene</h2>
         <form action="/postactivity" method="post">
             Shower 
-            <input type="text" name="activity_day" value="{{datetime.datetime.today().strftime('%d/%m/%y')}}"> 
-            <input type="text" name="activity_time" value="{{datetime.datetime.now().strftime('%H:%M')}}">
+            <input type="text" name="activity_day" value="{{(datetime.datetime.today() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%y')}}"> 
+            <input type="text" name="activity_time" value="{{(datetime.datetime.now() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}">
             <input type="hidden" name="activity_name" value="shower">
+        </form><br>
+        <form action="/postactivity" method="post">
+            <input type="hidden" name="activity_name" value="shower">
+            <input type="hidden" name="activity_time" value="{{(datetime.datetime.now() + datetime.timedelta(hours = user.timezone)).stftime('%H:%M')}}">
+            <input type="hidden" name="activity_day" value="{{(datetime.datetime.today() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%y')}}">
+            <input type="submit" value="I just showered!">
+        </form>
+        <form action="/postactivity" method="post">
+            <input type="hidden" name="activity_name" value="shave">
+            <input type="hidden" name="activity_time" value="{{(datetime.datetime.now() + datetime.timedelta(hours = user.timezone)).stftime('%H:%M')}}">
+            <input type="hidden" name="activity_day" value="{{(datetime.datetime.today() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%y')}}">
+            <input type="submit" value="I just shaved!">
+        </form>
+        <form action="/postactivity" method="post">
+            <input type="hidden" name="activity_name" value="cut hair">
+            <input type="hidden" name="activity_time" value="{{(datetime.datetime.now() + datetime.timedelta(hours = user.timezone)).stftime('%H:%M')}}">
+            <input type="hidden" name="activity_day" value="{{(datetime.datetime.today() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%y')}}">
+            <input type="submit" value="I just got a haircut!">
         </form>
     </div>
 </div>

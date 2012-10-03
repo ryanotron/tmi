@@ -208,7 +208,7 @@ class PostActivityHandler(SuperHandler):
                     activity_day  = self.request.get('activity_day')
                     activity_time = self.request.get('activity_time')
 
-                    if activity_name and activity_day and activity_name:
+                    if activity_name and activity_day:
                         try:
                             h, m = activity_time.split(':')
                             h = int(h)
@@ -227,6 +227,80 @@ class PostActivityHandler(SuperHandler):
                         except:
                             self.redirect('/panel')
 
+                    else:
+                        self.redirect('/panel')
+                else:
+                    self.redirect('/login')
+            else:
+                self.redirect('/login')
+        else:
+            self.redirect('/login')
+
+class PostTimedActivityHandler(SuperHandler):
+    def post(self):
+        userid = self.request.cookies.get('userid')
+        if userid:
+            userid = utils.verify_cookie(userid)
+            if userid:
+                user = utils.validate_user(userid)
+                if user:
+                    act_name       = self.request.get('act_name')
+                    act_start_day  = self.request.get('act_start_day')
+                    act_start_time = self.request.get('act_start_time')
+                    act_end_day    = self.request.get('act_end_day')
+                    act_end_time   = self.request.get('act_end_time')
+                    act_duration   = self.request.get('act_duration')
+                    
+                    if act_name:
+                        if act_start_time:
+                            try:
+                                D, M, Y = [int(elem) for elem in act_start_day.split('/')]
+                                h, m    = [int(elem) for elem in act_start_time.split(':')]
+                                act_start_time = datetime.datetime(Y, M, D, h, m)                                
+                            except:
+                                self.redirect('/panel')
+                                
+                            if act_end_time:
+                                try:
+                                    D, M, Y = [int(elem) for elem in act_end_day.split('/')]
+                                    h, m    = [int(elem) for elem in act_end_time.split(':')]
+                                    act_end_time = datetime.datetime(Y, M, D, h, m)
+                                except:
+                                    self.redirect('/panel')
+                                
+                            elif act_duration:
+                                try:
+                                    act_end_time = act_start_time + datetime.timedelta(minutes = float(act_duration))
+                                except:
+                                    self.redirect('/panel')
+                                    
+                            else:
+                                self.redirect('/panel')
+                        elif act_end_time:
+                            try:
+                                D, M, Y = [int(elem) for elem in act_end_day.split('/')]
+                                h, m    = [int(elem) for elem in act_end_time.split(':')]
+                                act_end_time = datetime.datetime(Y, M, D, h, m)
+                            except:
+                                self.redirect('/panel')
+                            
+                            if act_duration:
+                                try:
+                                    act_start_time = act_end_time - datetime.timedelta(hours = float(act_duration))
+                                except:
+                                    self.redirect('/panel')
+                            else:
+                                self.redirect('/panel')
+                                
+                        new_timed_act = models.TimedActivityModel(userid = userid,
+                                                                  name   = act_name,
+                                                                  start  = act_start_time - datetime.timedelta(hours = user.timezone),
+                                                                  end    = act_end_time - datetime.timedelta(hours = user.timezone))
+                        new_timed_act.put()
+                        user.last_seen = datetime.datetime.now()
+                        user.put()
+                        else:
+                            self.redirect('/panel')
                     else:
                         self.redirect('/panel')
                 else:
@@ -301,23 +375,31 @@ class PostTravelHandler(SuperHandler):
                         # *_time will be left blank in the form, while *_day will default to today (user's timezone),
                         # so it makes sense to check *_time instead of *_day
                         if trv_start_time:
-                            D, M, Y = [int(elem) for elem in trv_start_day.split('/')]
-                            h, m    = [int(elem) for elem in trv_start_time.split(':')]
-                            trv_start_time = datetime.datetime(Y, M, D, h, m)
+                            try:
+                                D, M, Y = [int(elem) for elem in trv_start_day.split('/')]
+                                h, m    = [int(elem) for elem in trv_start_time.split(':')]
+                                trv_start_time = datetime.datetime(Y, M, D, h, m)
+                            except:
+                                self.redirect('/panel')
                             
                             if trv_finish_time:
-                                D, M, Y = [int(elem) for elem in trv_finish_day.split('/')]
-                                h, m    = [int(elem) for elem in trv_finish_time.split(':')]
-                                trv_finish_time = datetime.datetime(Y, M, D, h, m)
+                                try:
+                                    D, M, Y = [int(elem) for elem in trv_finish_day.split('/')]
+                                    h, m    = [int(elem) for elem in trv_finish_time.split(':')]
+                                    trv_finish_time = datetime.datetime(Y, M, D, h, m)
+                                except:
+                                    self.redirect('/panel')
                             elif trv_duration:
                                 trv_finish_time = trv_start_time + datetime.timedelta(minutes = float(trv_duration))
                             else:
                                 self.redirect('/panel')
-                                
                         elif trv_finish_time:
-                            D, M, Y = [int(elem) for elem in trv_finish_day.split('/')]
-                            h, m    = [int(elem) for elem in trv_finish_time.split(':')]
-                            trv_finish_time = datetime.datetime(Y, M, D, h, m)
+                            try:
+                                D, M, Y = [int(elem) for elem in trv_finish_day.split('/')]
+                                h, m    = [int(elem) for elem in trv_finish_time.split(':')]
+                                trv_finish_time = datetime.datetime(Y, M, D, h, m)
+                            except:
+                                self.redirect('/panel')
                             
                             if trv_duration:
                                 trv_start_time = trc_finish_time - datetime.timedelta(minutes = float(trv_duration))
