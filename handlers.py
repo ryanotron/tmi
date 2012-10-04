@@ -213,18 +213,24 @@ class PostActivityHandler(SuperHandler):
                             h, m = activity_time.split(':')
                             h = int(h)
                             m = int(m)
+                            logging.error('split hours')
 
-                            Y, M, D = activity_day.split('/')
+                            D, M, Y = activity_day.split('/')
                             Y = int(Y)
                             M = int(M)
                             D = int(D)
+                            logging.error('split day')
 
                             new_activity = models.ActivityModel(userid = userid,
                                                                 name   = activity_name,
                                                                 when   = datetime.datetime(Y, M, D, h, m) - datetime.timedelta(hours = user.timezone))
+                                                                
                             user.last_seen = datetime.datetime.now()
+                            user.put()
                             new_activity.put()
+                            self.redirect('/panel')
                         except:
+                            logging.error('exception occured')
                             self.redirect('/panel')
 
                     else:
@@ -292,6 +298,9 @@ class PostTimedActivityHandler(SuperHandler):
                             else:
                                 self.redirect('/panel')
                                 
+                        else:
+                            self.redirect('/panel')
+                            
                         new_timed_act = models.TimedActivityModel(userid = userid,
                                                                   name   = act_name,
                                                                   start  = act_start_time - datetime.timedelta(hours = user.timezone),
@@ -299,8 +308,6 @@ class PostTimedActivityHandler(SuperHandler):
                         new_timed_act.put()
                         user.last_seen = datetime.datetime.now()
                         user.put()
-                        else:
-                            self.redirect('/panel')
                     else:
                         self.redirect('/panel')
                 else:
