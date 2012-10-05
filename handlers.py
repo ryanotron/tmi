@@ -100,7 +100,7 @@ class SignupHandler(SuperHandler):
             new_user.put()
             userid = str(new_user.key().id())
             self.response.headers.add_header('Set-Cookie', 'userid=%s; Path=/' % utils.securify_cookie(userid))
-            self.redirect('/') ### move to profile (or panel)
+            self.redirect('/panel')
             
 class LoginHandler(SuperHandler):
     def get(self):
@@ -122,7 +122,7 @@ class LoginHandler(SuperHandler):
                 if utils.verify_password(username, password, user.hashedpw):
                     userid = str(user.key().id())
                     self.response.headers.add_header('Set-Cookie', 'userid=%s; Path=/' % utils.securify_cookie(userid))
-                    self.redirect('/')
+                    self.redirect('/panel')
                 else:
                     error = True
                     error_message = 'Invalid username or password'
@@ -187,9 +187,9 @@ class ProfileHandler(SuperHandler):
                 if updated:
                     user.last_seen = datetime.datetime.now()
                     user.put()
-                    self.redirect('/') ### move to panel
+                    self.redirect('/panel')
                 else:
-                    self.redirect('/') ### move to panel
+                    self.redirect('/panel')
             
             else:
                 self.redirect('/login')
@@ -308,6 +308,7 @@ class PostTimedActivityHandler(SuperHandler):
                         new_timed_act.put()
                         user.last_seen = datetime.datetime.now()
                         user.put()
+                        self.redirect('/panel')
                     else:
                         self.redirect('/panel')
                 else:
@@ -319,7 +320,7 @@ class PostTimedActivityHandler(SuperHandler):
             
 class PostExpenseHandler(SuperHandler):
     def post(self):
-        userid = self.response.cookies.get('userid')
+        userid = self.request.cookies.get('userid')
         if userid:
             userid = utils.verify_cookie(userid)
             if userid:
@@ -350,6 +351,7 @@ class PostExpenseHandler(SuperHandler):
                             new_expense.put()
                             user.last_seen = datetime.datetime.now()
                             user.put()
+                            self.redirect('/panel')
                         except:
                             self.redirect('/panel')
                     else:
@@ -424,6 +426,7 @@ class PostTravelHandler(SuperHandler):
                         new_travel.put()
                         user.last_seen = datetime.datetime.now()
                         user.put()
+                        self.redirect('/panel')
                     else:
                         self.redirect('/panel')
                 else:
@@ -461,6 +464,7 @@ class PostMealHandler(SuperHandler):
                             new_meal.put()
                             user.last_seen = datetime.datetime.now()
                             user.put()
+                            self.redirect('/panel')
                         except:
                             self.redirect('/panel')
                     else:
@@ -488,6 +492,7 @@ class PostUserMessageHandler(SuperHandler):
                         new_message.put()
                         user.last_seen = datetime.datetime.now()
                         user.put()
+                        self.redirect('/panel')
                     else:
                         self.redirect('/panel')
                 else:
@@ -512,6 +517,7 @@ class PostGuestMessageHandler(SuperHandler):
                                                    message   = message,
                                                    when      = datetime.datetime.now())
             new_message.put()
+            self.redirect(self.request.referer)
         else:
             self.redirect(self.request.referer)
             

@@ -2,6 +2,7 @@ import webapp2
 import handlers as h
 
 app = webapp2.WSGIApplication([('/', h.MainpageHandler),
+                               ('/tmi/?', h.MainpageHandler),
                                ('/signup/?', h.SignupHandler),
                                ('/login/?', h.LoginHandler),
                                ('/logout/?', h.LogoutHandler),

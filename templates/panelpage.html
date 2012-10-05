@@ -3,7 +3,7 @@
 {% block content %}
 <h1 class="Header" id="PanelHeader">What have you done, {{user.salutation}} {{user.username}}?</h1>
 <div class="Wrapper" id="PanelOverWrapper">
-    <div class="PanelWrapper">
+    <div class="PanelWrapper" id="GeneralActivity">
         <h2 class="PanelCategory">General Activity</h2>
         <form action="/postactivity" method="/post">
             Name <input type="text" name="activity_name"><br>
@@ -13,7 +13,7 @@
         </form>
     </div>
     
-    <div class="PanelWrapper">
+    <div class="PanelWrapper" id="Energy">
         <h2 class="PanelCategory">Energy</h2>
         <form action="/postactivity" method="post">
             <input type="hidden" name="activity_name" value="coffee">
@@ -45,7 +45,7 @@
         </form>
     </div>
     
-    <div class="PanelWrapper">
+    <div class="PanelWrapper" id="Hygiene">
         <h2 class="PanelCategory">Hygiene</h2>
         <form action="/postactivity" method="post">
             Shower 
@@ -70,6 +70,18 @@
             <input type="hidden" name="activity_time" value="{{(datetime.datetime.now() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}">
             <input type="hidden" name="activity_day" value="{{(datetime.datetime.today() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">
             <input type="submit" value="I just got a haircut!">
+        </form>
+    </div>
+    
+    <div class="PanelWrapper" id="Expense">
+        <h2 class="PanelCategory">Expense</h2>
+        <form action="/postexpense" method="post">
+            I bought <input type="text" name="exp_name">
+            for <input type="text" name="exp_amount">
+            <input type="text" name="exp_currency" value="{{user.currency}}">
+            file under <input type="text" name="exp_category">
+            <input type="text" name="exp_when" value="{{(datetime.datetime.now() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">
+            <input type="submit">
         </form>
     </div>
 </div>
