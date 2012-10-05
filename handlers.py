@@ -242,6 +242,29 @@ class PostActivityHandler(SuperHandler):
         else:
             self.redirect('/login')
 
+class InsPostActivityHandler(SuperHandler):
+    def post(self):
+        userid = self.request.cookies.get('userid')
+        if userid:
+            userid = utils.verify_cookie(userid)
+            if userid:
+                user = utils.validate_user(userid)
+                if user:
+                    act_name = self.request.get('activity_name')
+                    new_act = models.ActivityModel(userid = userid,
+                                                   name   = act_name,
+                                                   when   = datetime.datetime.now())
+                    new_act.put()
+                    user.last_seen = datetime.datetime.now()
+                    user.put()
+                    self.redirect('/panel')
+                else:
+                    self.redirect('login')
+            else:
+                self.redirect('login')
+        else:
+            self.redirect('login')
+            
 class PostTimedActivityHandler(SuperHandler):
     def post(self):
         userid = self.request.cookies.get('userid')
@@ -341,20 +364,23 @@ class PostExpenseHandler(SuperHandler):
                             if not exp_currency:
                                 exp_currency = user.currency
                                 
+                            #logging.error('making new expense object')
                             new_expense = models.ExpenseModel(userid = userid,
                                                               name = exp_name,
                                                               category = exp_category,
-                                                              amount = exp_amount,
+                                                              amount = float(exp_amount),
                                                               currency = exp_currency,
                                                               when = datetime.datetime(Y, M, D))
-                                                              
+                            #logging.error('new expense object created')
                             new_expense.put()
                             user.last_seen = datetime.datetime.now()
                             user.put()
                             self.redirect('/panel')
                         except:
+                            #logging.error('failed date conversion')
                             self.redirect('/panel')
                     else:
+                        #logging.error('amount or name missing')
                         self.redirect('/panel')
                 else:
                     self.redirect('/login')
@@ -449,6 +475,8 @@ class PostMealHandler(SuperHandler):
                     meal_time     = self.request.get('meal_time')
                     meal_place    = self.request.get('meal_place')
                     meal_category = self.request.get('meal_category')
+                    meal_cost     = self.request.get('meal_cost')
+                    meal_currency = self.request.get('meal_currency')
                     
                     if meal_menu and meal_time:
                         try:
@@ -462,6 +490,21 @@ class PostMealHandler(SuperHandler):
                                                         place    = meal_place,
                                                         category = meal_category)
                             new_meal.put()
+                            if meal_cost:
+                                if not meal_currency:
+                                    meal_currency = user.currency
+                                try:
+                                    meal_cost = float(meal_cost)
+                                    new_expense = models.ExpenseModel(userid = userid,
+                                                                      name = meal_category,
+                                                                      category = 'meal',
+                                                                      currency = meal_currency,
+                                                                      amount = meal_cost,
+                                                                      when = meal_time)
+                                    new_expense.put()
+                                except:
+                                    pass
+                            
                             user.last_seen = datetime.datetime.now()
                             user.put()
                             self.redirect('/panel')
