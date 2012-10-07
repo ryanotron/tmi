@@ -437,7 +437,7 @@ class PostTravelHandler(SuperHandler):
                                 self.redirect('/panel')
                             
                             if trv_duration:
-                                trv_start_time = trc_finish_time - datetime.timedelta(minutes = float(trv_duration))
+                                trv_start_time = trv_finish_time - datetime.timedelta(minutes = float(trv_duration))
                             else:
                                 self.redirect('/panel')
                         else:

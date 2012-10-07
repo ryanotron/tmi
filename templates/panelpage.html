@@ -87,6 +87,20 @@
             <input type="submit">
         </form>
     </div>
+
+    <div class="PanelWrapper" id="Travel">
+        <h2 class="PanelCategory">Travel</h2>
+        <form method="post" action="/posttravel">
+            I traveled from <input type="text" name="trv_origin">
+            to <input type="text" name="trv_destination"><br>
+            I departed at <input type="text" name="trv_start_day" value="{{(datetime.datetime.now() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">
+            <input type="text" name="trv_start_time"><br>
+            and arrived at <input type="text" name="trv_finish_day" value="{{(datetime.datetime.now() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">
+            <input type="text" name="trv_finish_time" value="{{(datetime.datetime.now() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}"><br>
+            (it took me <input type="text" name="trv_duration"> minutes)<br>
+            <input type="submit">
+        </form>
+    </div>                
 </div>
 
 {% endblock %}
