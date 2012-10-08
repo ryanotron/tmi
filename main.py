@@ -1,5 +1,6 @@
 import webapp2
 import handlers as h
+import constants
 
 app = webapp2.WSGIApplication([('/', h.MainpageHandler),
                                ('/tmi/?', h.MainpageHandler),
@@ -15,5 +16,6 @@ app = webapp2.WSGIApplication([('/', h.MainpageHandler),
                                ('/postmeal/?', h.PostMealHandler),
                                ('/postmessage/?', h.PostUserMessageHandler),
                                ('/postguestmessage/?', h.PostGuestMessageHandler),
-                               ('/panel/?', h.PanelHandler),],
+                               ('/panel/?', h.PanelHandler),
+                               ('/u/' + constants.username_re + '/?', h.UserpageHandler),],
                                debug = True)

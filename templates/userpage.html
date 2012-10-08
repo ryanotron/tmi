@@ -1,55 +1,18 @@
 ﻿{% extends 'basepage.html' %}
+
 {% block content %}
-<h1>Information on Comrade {{username}}</h1>
-<p>Is comrade {{username}} alive? {{alive_message}}</p>
-<p>Latest message from Comrade {{username}}:</p>
-{% if latest_message %}
-    <blockquote>{{latest_message.message}}</blockquote>
-    <p>On {{latest_message.when.strftime('%A, %d %B %Y')}}</p>
-{% else %}
-    <p>Comrade {{username}} has not left any message yet.</p>
-{% endif %}
-<hr>
-{% if last_coffee %}
-    <p>Latest cup of coffee was had at {{last_coffee}}. {{coffee_message}}</p>
-{% else %}
-    <p>Comrade {{username}} has no recorded coffee time. How does Comrade {{username}} stay awake?</p>
-{% endif %}
-{% if last_sleep %}
-    <p>Comrade {{username}} woke up at {{last_sleep.end}} after sleeping for {{ (last_sleep.end - last_sleep.start).total_seconds()/3600 }} hours. {{sleep_message}}</p>
-{% else %}
-    <p>Comrade {{username}} has no recorded sleep time. Perhaps Comrade {{username}} never sleeps?</p>
-{% endif %}
+<div class="BlockWrapper" id="PersonalInfo">
+    <h2>Too much information on</h2>
+    <h1>{{user.salutation}} {{user.realname}}</h1>
+    <p>Last seen on {{(user.last_seen + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y, %H:%M')}} UTC {{'%+2.1f' % user.timezone}}</p>
+</div>
 
-<h2>Comrade {{username}}'s latest travel</h2>
-{% if commute %}
-    <p>Left {{commute.origin}} at {{commute.start}} for {{commute.destination}}. Arrived at {{commute.end}}. It took {{ (commute.end - commute.start).total_seconds() / 60 }} minutes</p>
-{% else %}
-    <p>Comrade {{username}} has no recorded travel. Does Comrade {{username}} ever go out?</p>
-{% endif %}
-
-<h2>Latest event</h2>
-{% if event %}
-    <p>Did {{event.name}} at {{event.when}}</p>
-{% else %}
-    <p>Comrade {{username}} has not recorded anything. Perhaps Comrade {{username}} has done nothing with Comrade {{username}}'s life?</p>
-{% endif %}
-<hr>
-
-<h2>Latest message from visitor</h2>
-{% if visitor_message %}
-    <p>{{visitor_message.guestname}} said:</p>
-    <blockquote>{{visitor_message.message}}</blockquote>
-    on {{visitor_message.when.strftime('%A, %d-%b-%Y')}}
-{% else %}
-    <p>Nobody has told Comrade {{username}} anything yet. Be the first!</p>
-{% endif %}
-    
-Tell Comrade {{username}} something!
-<form action="/comment" method="post">
-    Your name: <input type="text" name="name"><br>
-    <textarea name="message" rows="4" cols="20"></textarea><br>
-    <input type="hidden" name="pagename" value="{{username}}">
-    <input type="submit">
-</form>
+<div class="BlockWrapper" id="Energy">
+    {% set sleep_status = stats.sleep_status(user) -%}
+    {% set coffee_status = stats.coffee_status(user) -%}
+    {% set meal_status = stats.meal_status(user) -%}
+    <p>Woke up at {{sleep_status['wake_time'].strftime('%H:%M')}} after {{'%1.2f' % sleep_status['sleep_hours']}} hours of sleep.</p>
+    <p>Most recently had coffee {{'%1.2f' % coffee_status['latest_cup']}} hours ago</p>
+    <p>Latest meal was a {{meal_status['latest_category']}} at {{meal_status['meal_time'].strftime('%d/%m/%Y %H:%M')}}, with menu {{meal_status['latest_menu']}}</p>
+</div>
 {% endblock %}
