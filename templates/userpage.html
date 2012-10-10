@@ -8,11 +8,47 @@
 </div>
 
 <div class="BlockWrapper" id="Energy">
+    <h2>Energy</h2>
     {% set sleep_status = stats.sleep_status(user) -%}
     {% set coffee_status = stats.coffee_status(user) -%}
     {% set meal_status = stats.meal_status(user) -%}
-    <p>Woke up at {{sleep_status['wake_time'].strftime('%H:%M')}} after {{'%1.2f' % sleep_status['sleep_hours']}} hours of sleep.</p>
-    <p>Most recently had coffee {{'%1.2f' % coffee_status['latest_cup']}} hours ago</p>
-    <p>Latest meal was a {{meal_status['latest_category']}} at {{meal_status['meal_time'].strftime('%d/%m/%Y %H:%M')}}, with menu {{meal_status['latest_menu']}}</p>
+    {% if sleep_status['wake_time'] %}
+        <p>Woke up at {{sleep_status['wake_time'].strftime('%H:%M')}} after {{'%1.2f' % sleep_status['sleep_hours']}} hours of sleep.</p>
+    {% else %}
+        <p>{{user.salutation}} {{user.realname}} has not recorded any sleep time yet. We cannot know if {{user.salutation}} {{user.realname}} is well rested or not.</p>
+    {% endif %}
+    {% if coffee_status['latest_cup'] %}
+        <p>Most recently had coffee {{'%1.2f' % coffee_status['latest_cup']}} hours ago</p>
+    {% else %}
+        <p>{{user.salutation}} {{user.realname}} has not recorded drinking a cup of coffee yet. We cannot know if {{user.salutation}} {{user.realname}} is well caffeinated or not</p>
+    {% endif %}
+    {% if meal_status['meal_time'] %}
+        <p>Latest meal was a {{meal_status['latest_category']}} at {{meal_status['meal_time'].strftime('%d/%m/%Y %H:%M')}}, with menu {{meal_status['latest_menu']}}</p>
+    {% else %}
+        <p>{{user.salutation}} {{user.realname}} has not recorded any meal yet. We cannot know if {{user.salutation}} {{user.realname}} is well fed or not</p>
+    {% endif %}
+</div>
+
+<div class="BlockWrapper" id="Hygiene">
+    <h2>Hygiene</h2>
+    {% set shower_status = stats.activity_status(user, 'shower', 1) %}
+    {% set shave_status = stats.activity_status(user, 'shave', 1) %}
+    {% set haircut_status = stats.activity_status(user, 'cut hair', 1) %}
+    
+    {% if shower_status['timelatest'] %}
+        <p>{{user.salutation}} {{user.realname}} last showered {{'%2.2f' % (shower_status['timesince'] / (60.0 * 60.0))}} hours ago.</p>
+    {% else %}
+        <p>{{user.salutation}} {{user.realname}} has not recorded to have showered yet. We can only hope that {{user.salutation}} {{user.realname}} is not stinky</p>
+    {% endif %}
+    {% if shave_status['timelatest'] %}
+        <p>{{user.salutation}} {{user.realname}} last shaved {{'%2.2f' % (shave_status['timesince'] / (60.0 * 60.0 * 24.0))}} day(s) ago.</p>
+    {% else %}
+        <p>{{user.salutation}} {{user.realname}} has not recorded to have shaved yet. Perhaps {{user.salutation}} {{user.realname}} is trying to grow a manscape?</p>
+    {% endif %}
+    {% if haircut_status['timelatest'] %}
+        <p>{{user.salutation}} {{user.realname}} last got a haircut {{'%2.2f' % (haircut_status['timesince'] / (60.0 * 60.0 * 24.0))}} day(s) ago.</p>
+    {% else %}
+        <p>{{user.salutation}} {{user.realname}} has not recorded any haircut yet. Perhaps {{user.salutation}} {{user.realname}} is trying to grow beautiful long locks?</p>
+    {% endif %}
 </div>
 {% endblock %}

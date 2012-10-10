@@ -23,7 +23,7 @@ def sleep_status(user):
     sleeps = list(sleeps)
     if len(sleeps) > 0:
         latest_sleep = sleeps[0]
-        wake_time = latest_sleep.end + user.timezone
+        wake_time = latest_sleep.end + datetime.timedelta(hours = user.timezone)
         sleep_hours = (latest_sleep.end - latest_sleep.start).seconds / (60.0 * 60.0)
         return {'wake_time': wake_time, 'sleep_hours': sleep_hours}
     else:
@@ -41,5 +41,33 @@ def coffee_status(user):
         pass
     
 def meal_status(user):
-    pass
-    
+    userid = str(user.key().id())
+    meals = db.GqlQuery('select * from MealModel where userid = :1 order by when desc', userid)
+    meals = list(meals)
+    if len(meals) > 0:
+        latest_meal = meals[0]
+        latest_category = latest_meal.category
+        meal_time = latest_meal.when + datetime.timedelta(user.timezone)
+        latest_menu = latest_meal.menu
+        return {'latest_category': latest_category,
+                'meal_time': meal_time,
+                'latest_menu': latest_menu}
+    else:
+        pass
+
+def activity_status(user, act_name, number):
+    userid = str(user.key().id())
+    query = 'select * from ActivityModel where userid = \'%s\' and name = \'%s\' order by when desc' % (userid, act_name)
+    if number > 0:
+        query += ' limit %d' % number
+        
+    acts = db.GqlQuery(query)
+    acts = list(acts)
+    if len(acts) > 0:
+        latest = acts[0]
+        timelatest = latest.when + datetime.timedelta(hours = user.timezone)
+        timesince  = (datetime.datetime.now() - latest.when).seconds
+        return {'timelatest': timelatest, 'timesince': timesince}
+    else:
+        pass
+        

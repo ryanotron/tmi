@@ -1,21 +1,5 @@
 ﻿TODO:
-- make timezones consistent for the user
-- format time properly in userpage
-- mockup a good userpage
-- store all time in UTC
-- specify date for events/activity, give shortcut to today and yesterday
-- rewrite everything nicely:
-  - handlers which are _writing_ to the database should be called receptor
-  - handlers which are only _reading_ the database should be called fetcher
-  - accept forms in user's timezone, but store in UTC
-  - serve things in user's timezone
-  - make general fetchers for all the tables
-    - how to handle filters? userid is mandatory as a user isn't allowed to fetch another user's data,
-      but suppose sometimes I want to fetch specific activities within a time period, and other times
-      I want to fetch all activities within a time period!
-  - as much as possible, pass objects to template, not raw strings
-
-REWRITE EVERYTHING
+- fix greeting in panel page
 
 LOGS:
 26-September-2012

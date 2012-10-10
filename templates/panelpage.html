@@ -1,11 +1,11 @@
 ﻿{% extends 'basepage.html' %}
 
 {% block content %}
-<h1 class="Header" id="PanelHeader">What have you done, {{user.salutation}} {{user.username}}?</h1>
+<h1 class="Header" id="PanelHeader">What have you done, {{user.salutation}} {{user.realname}}?</h1>
 <div class="Wrapper" id="PanelOverWrapper">
     <div class="PanelWrapper" id="GeneralActivity">
         <h2 class="PanelCategory">General Activity</h2>
-        <form action="/postactivity" method="/post">
+        <form action="/postactivity" method="post">
             Name <input type="text" name="activity_name"><br>
             Day <input type="text" name="activity_day" value="{{datetime.datetime.today().strftime('%d/%m/%Y')}}"><br>
             Time <input type="text" name="activity_time" value="{{datetime.datetime.now().strftime('%H:%M')}}"><br>

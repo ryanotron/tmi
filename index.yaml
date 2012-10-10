@@ -17,6 +17,13 @@ indexes:
   - name: end
     direction: desc
 
+- kind: ActivityModel
+  properties:
+  - name: name
+  - name: userid
+  - name: when
+    direction: desc
+
 - kind: CommuteModel
   properties:
   - name: userid
@@ -29,10 +36,23 @@ indexes:
   - name: when
     direction: desc
 
+- kind: MealModel
+  properties:
+  - name: userid
+  - name: when
+    direction: desc
+
 - kind: SelfMessageModel
   properties:
   - name: userid
   - name: when
+    direction: desc
+
+- kind: TimedActivityModel
+  properties:
+  - name: name
+  - name: userid
+  - name: end
     direction: desc
 
 - kind: UserModel

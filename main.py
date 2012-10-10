@@ -17,5 +17,5 @@ app = webapp2.WSGIApplication([('/', h.MainpageHandler),
                                ('/postmessage/?', h.PostUserMessageHandler),
                                ('/postguestmessage/?', h.PostGuestMessageHandler),
                                ('/panel/?', h.PanelHandler),
-                               ('/u/' + constants.username_re + '/?', h.UserpageHandler),],
+                               ('/u/' + r'([a-zA-Z0-9_-]{4,20})/?', h.UserpageHandler),],
                                debug = True)
