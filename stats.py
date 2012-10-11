@@ -1,4 +1,4 @@
-﻿import datetime
+﻿import datetime, logging
 from google.appengine.ext import db
 
 def get_average_sleep(user):
@@ -35,7 +35,7 @@ def coffee_status(user):
     coffees = list(coffees)
     if len(coffees) > 0:
         latest_coffee = coffees[0]
-        latest_cup = (datetime.datetime.now() - latest_coffee.when).seconds / (60.0 * 60.0)
+        latest_cup = (datetime.datetime.utcnow() - latest_coffee.when).seconds / (60.0 * 60.0)
         return {'latest_cup': latest_cup}
     else:
         pass
@@ -66,8 +66,35 @@ def activity_status(user, act_name, number):
     if len(acts) > 0:
         latest = acts[0]
         timelatest = latest.when + datetime.timedelta(hours = user.timezone)
-        timesince  = (datetime.datetime.now() - latest.when).seconds
+        timesince  = (datetime.datetime.utcnow() - latest.when).seconds
+        logging.error(str(timesince))
         return {'timelatest': timelatest, 'timesince': timesince}
+    else:
+        pass
+        
+def user_messages(user, number):
+    userid = str(user.key().id())
+    query = 'select * from UserMessageModel where userid = \'%s\' order by when desc' % userid
+    if number > 0:
+        query += ' limit %d' % number
+        
+    messages = db.GqlQuery(query)
+    messages = list(messages)
+    if len(messages) > 0:
+        return messages
+    else:
+        pass
+        
+def guest_messages(user, number):
+    userid = str(user.key().id())
+    query = 'select * from GuestMessageModel where userid = \'%s\' order by when desc' % userid
+    if number > 0:
+        query += ' limit %d' % number
+        
+    messages = db.GqlQuery(query)
+    messages = list(messages)
+    if len(messages) > 0:
+        return messages
     else:
         pass
         

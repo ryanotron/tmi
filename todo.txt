@@ -1,12 +1,14 @@
 ﻿TODO:
-- fix greeting in panel page
+- make pages prettier
+- put travel in userpage
+- more sleep statistics
+  (7 day's average, last week's average, estimated sleep debt)
+- more coffee statistics
+  (average cup per day, min time between cups)
+- more meal statistics
+  (usual lunch, dinner time?)
+- more hygiene statistics
+  (average time between showers)
 
-LOGS:
-26-September-2012
-On branch dev
-- began rewriting everything
-- signup, login, logout, and profile page are GO
-
-20-September-2012
-- made comment database work
-- store time input from panel in UTC (time_input - user.timezone)
+DONE:
+- fix greeting in panel page (10-Oct-2012)

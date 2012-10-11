@@ -63,10 +63,10 @@ class SignupHandler(SuperHandler):
                         if password == verify:
                             new_user = models.UserModel(username   = username,
                                                         hashedpw   = utils.securify_password(username, password),
-                                                        nameday    = datetime.datetime.now(),
+                                                        nameday    = datetime.datetime.utcnow(),
                                                         salutation = 'Comrade',
                                                         realname   = username,
-                                                        last_seen  = datetime.datetime.now(),
+                                                        last_seen  = datetime.datetime.utcnow(),
                                                         timezone   = 8.0,
                                                         currency   = 'SGD')
                         else:
@@ -185,7 +185,7 @@ class ProfileHandler(SuperHandler):
                     updated = True
                     
                 if updated:
-                    user.last_seen = datetime.datetime.now()
+                    user.last_seen = datetime.datetime.utcnow()
                     user.put()
                     self.redirect('/panel')
                 else:
@@ -225,7 +225,7 @@ class PostActivityHandler(SuperHandler):
                                                                 name   = activity_name,
                                                                 when   = datetime.datetime(Y, M, D, h, m) - datetime.timedelta(hours = user.timezone))
                                                                 
-                            user.last_seen = datetime.datetime.now()
+                            user.last_seen = datetime.datetime.utcnow()
                             user.put()
                             new_activity.put()
                             self.redirect('/panel')
@@ -253,9 +253,9 @@ class InsPostActivityHandler(SuperHandler):
                     act_name = self.request.get('activity_name')
                     new_act = models.ActivityModel(userid = userid,
                                                    name   = act_name,
-                                                   when   = datetime.datetime.now())
+                                                   when   = datetime.datetime.utcnow())
                     new_act.put()
-                    user.last_seen = datetime.datetime.now()
+                    user.last_seen = datetime.datetime.utcnow()
                     user.put()
                     self.redirect('/panel')
                 else:
@@ -329,7 +329,7 @@ class PostTimedActivityHandler(SuperHandler):
                                                                   start  = act_start_time - datetime.timedelta(hours = user.timezone),
                                                                   end    = act_end_time - datetime.timedelta(hours = user.timezone))
                         new_timed_act.put()
-                        user.last_seen = datetime.datetime.now()
+                        user.last_seen = datetime.datetime.utcnow()
                         user.put()
                         self.redirect('/panel')
                     else:
@@ -373,7 +373,7 @@ class PostExpenseHandler(SuperHandler):
                                                               when = datetime.datetime(Y, M, D))
                             #logging.error('new expense object created')
                             new_expense.put()
-                            user.last_seen = datetime.datetime.now()
+                            user.last_seen = datetime.datetime.utcnow()
                             user.put()
                             self.redirect('/panel')
                         except:
@@ -450,7 +450,7 @@ class PostTravelHandler(SuperHandler):
                                                         whenfinish  = trv_finish_time - datetime.timedelta(user.timezone))
                                                         
                         new_travel.put()
-                        user.last_seen = datetime.datetime.now()
+                        user.last_seen = datetime.datetime.utcnow()
                         user.put()
                         self.redirect('/panel')
                     else:
@@ -505,7 +505,7 @@ class PostMealHandler(SuperHandler):
                                 except:
                                     pass
                             
-                            user.last_seen = datetime.datetime.now()
+                            user.last_seen = datetime.datetime.utcnow()
                             user.put()
                             self.redirect('/panel')
                         except:
@@ -531,9 +531,9 @@ class PostUserMessageHandler(SuperHandler):
                     if message:
                         new_message = models.UserMessageModel(userid  = userid,
                                                               message = message,
-                                                              when    = datetime.datetime.now())
+                                                              when    = datetime.datetime.utcnow())
                         new_message.put()
-                        user.last_seen = datetime.datetime.now()
+                        user.last_seen = datetime.datetime.utcnow()
                         user.put()
                         self.redirect('/panel')
                     else:
@@ -558,7 +558,7 @@ class PostGuestMessageHandler(SuperHandler):
             new_message = models.GuestMessageModel(userid    = userid,
                                                    guestname = guest_name,
                                                    message   = message,
-                                                   when      = datetime.datetime.now())
+                                                   when      = datetime.datetime.utcnow())
             new_message.put()
             self.redirect(self.request.referer)
         else:

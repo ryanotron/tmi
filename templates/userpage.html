@@ -5,6 +5,11 @@
     <h2>Too much information on</h2>
     <h1>{{user.salutation}} {{user.realname}}</h1>
     <p>Last seen on {{(user.last_seen + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y, %H:%M')}} UTC {{'%+2.1f' % user.timezone}}</p>
+    {% set user_messages = stats.user_messages(user, 1) -%}
+    {% if user_messages -%}
+        <h3>Latest message from {{user.salutation}} {{user.realname}}</h3>
+        <p class="UserMessage">{{user_messages[0].message}}</p>
+    {% endif -%}
 </div>
 
 <div class="BlockWrapper" id="Energy">
@@ -41,14 +46,37 @@
         <p>{{user.salutation}} {{user.realname}} has not recorded to have showered yet. We can only hope that {{user.salutation}} {{user.realname}} is not stinky</p>
     {% endif %}
     {% if shave_status['timelatest'] %}
-        <p>{{user.salutation}} {{user.realname}} last shaved {{'%2.2f' % (shave_status['timesince'] / (60.0 * 60.0 * 24.0))}} day(s) ago.</p>
+        <p>{{user.salutation}} {{user.realname}} last shaved {{'%2.2f' % (shave_status['timesince'] / (60.0 * 60.0 * 24))}} day(s) ago.</p>
     {% else %}
         <p>{{user.salutation}} {{user.realname}} has not recorded to have shaved yet. Perhaps {{user.salutation}} {{user.realname}} is trying to grow a manscape?</p>
     {% endif %}
     {% if haircut_status['timelatest'] %}
-        <p>{{user.salutation}} {{user.realname}} last got a haircut {{'%2.2f' % (haircut_status['timesince'] / (60.0 * 60.0 * 24.0))}} day(s) ago.</p>
+        <p>{{user.salutation}} {{user.realname}} last got a haircut {{'%2.2f' % (haircut_status['timesince'] / (60.0 * 60.0 * 24))}} day(s) ago.</p>
     {% else %}
         <p>{{user.salutation}} {{user.realname}} has not recorded any haircut yet. Perhaps {{user.salutation}} {{user.realname}} is trying to grow beautiful long locks?</p>
     {% endif %}
 </div>
+
+<div class="BlockWrapper" id="GuestComment">
+    <h2>Tell {{user.salutation}} {{user.realname}} something</h2>
+    <form method="post" action="/postguestmessage">
+        Your name: <input type="text" name="guest_name"><br>
+        Your message:<br>
+        <textarea col="10" row="4" name="guest_message"></textarea>
+        <input type="hidden" name="userid" value="{{user.key().id()}}"><br>
+        <input type="submit">
+    </form>
+</div>
+
+<div class="BlockWrapper" id="PrevComments">
+    {% set messages = stats.guest_messages(user, 3) -%}
+    <h2>What people has told {{user.salutation}} {{user.realname}}</h2>
+    {% if messages -%}
+        {% for message in messages -%}
+            {{message.guestname}} said on {{(message.when + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y %H:%M')}}:<br>
+            {{message.message}}<br><hr>
+        {% endfor -%}
+    {% else %}
+        Nobody has told {{user.salutation}} {{user.realname}} anything yet. Be the first!
+    {% endif %}
 {% endblock %}

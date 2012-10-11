@@ -36,6 +36,12 @@ indexes:
   - name: when
     direction: desc
 
+- kind: GuestMessageModel
+  properties:
+  - name: userid
+  - name: when
+    direction: desc
+
 - kind: MealModel
   properties:
   - name: userid
@@ -53,6 +59,12 @@ indexes:
   - name: name
   - name: userid
   - name: end
+    direction: desc
+
+- kind: UserMessageModel
+  properties:
+  - name: userid
+  - name: when
     direction: desc
 
 - kind: UserModel
