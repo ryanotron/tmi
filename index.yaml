@@ -22,6 +22,12 @@ indexes:
   - name: name
   - name: userid
   - name: when
+
+- kind: ActivityModel
+  properties:
+  - name: name
+  - name: userid
+  - name: when
     direction: desc
 
 - kind: CommuteModel
@@ -53,6 +59,12 @@ indexes:
   - name: userid
   - name: when
     direction: desc
+
+- kind: TimedActivityModel
+  properties:
+  - name: name
+  - name: userid
+  - name: end
 
 - kind: TimedActivityModel
   properties:

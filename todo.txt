@@ -2,13 +2,18 @@
 - make pages prettier
 - put travel in userpage
 - more sleep statistics
-  (7 day's average, last week's average, estimated sleep debt)
 - more coffee statistics
-  (average cup per day, min time between cups)
+  (min time between cups)
 - more meal statistics
   (usual lunch, dinner time?)
 - more hygiene statistics
-  (average time between showers)
+- sleep charts
+- record more things on user table to minimize database hits
 
 DONE:
+- wrote generic time between activities calculator (12-Oct-2012)
+- wrote average coffee per day calculator(12-Oct-2012)
+- wrote sleep debt calculator (12-Oct-2012)
+- wrote sleep average calculator (12-Oct-2012)
+- fix timedelta problem (12-Oct-2012)
 - fix greeting in panel page (10-Oct-2012)

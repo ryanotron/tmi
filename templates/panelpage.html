@@ -24,8 +24,6 @@
         <h2 class="PanelCategory">Energy</h2>
         <form action="/inspostactivity" method="post">
             <input type="hidden" name="activity_name" value="coffee">
-            <!-- <input type="hidden" name="activity_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}">
-            <input type="hidden" name="activity_day" value="{{(datetime.datetime.today() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}"> -->
             <input type="submit" value="I just had coffee!">
         </form>
         <form action="/posttimedactivity" method="post">

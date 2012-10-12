@@ -15,15 +15,25 @@
 <div class="BlockWrapper" id="Energy">
     <h2>Energy</h2>
     {% set sleep_status = stats.sleep_status(user) -%}
+    
+    {% set sleep_average = stats.last_week_average_sleep(user) -%}
+    {% set sleep_debt = stats.sleep_debt(user) -%}
+    {% set sleep_average_alltime = stats.all_time_average_sleep(user) -%}
+    
     {% set coffee_status = stats.coffee_status(user) -%}
+    {% set coffee_daily_average = stats.average_coffee_per_day(user) -%}
+    
     {% set meal_status = stats.meal_status(user) -%}
     {% if sleep_status['wake_time'] %}
         <p>Woke up at {{sleep_status['wake_time'].strftime('%H:%M')}} after {{'%1.2f' % sleep_status['sleep_hours']}} hours of sleep.</p>
+        <p>Last week's average sleep per day was {{'%1.2f' % sleep_average}} hours. To maintain this average, {{user.salutation}} {{user.realname}} has a sleep debt of {{'%1.2f' % sleep_debt}} hours</p>
+        <p>All time average sleep per day is {{'%1.2f' % sleep_average_alltime}} hours.</p>
     {% else %}
         <p>{{user.salutation}} {{user.realname}} has not recorded any sleep time yet. We cannot know if {{user.salutation}} {{user.realname}} is well rested or not.</p>
     {% endif %}
     {% if coffee_status['latest_cup'] %}
         <p>Most recently had coffee {{'%1.2f' % coffee_status['latest_cup']}} hours ago</p>
+        <p>{{user.salutation}} {{user.realname}} drinks on average {{'%1.2f' % coffee_daily_average}} cups of coffee per day</p>
     {% else %}
         <p>{{user.salutation}} {{user.realname}} has not recorded drinking a cup of coffee yet. We cannot know if {{user.salutation}} {{user.realname}} is well caffeinated or not</p>
     {% endif %}
@@ -39,19 +49,25 @@
     {% set shower_status = stats.activity_status(user, 'shower', 1) %}
     {% set shave_status = stats.activity_status(user, 'shave', 1) %}
     {% set haircut_status = stats.activity_status(user, 'cut hair', 1) %}
+    {% set shower_interval = stats.average_time_between_activities(user, 'shower') / (60.0 * 60.0) %}
+    {% set shave_interval = stats.average_time_between_activities(user, 'shave') / (60.0 * 60.0 * 24.0) %}
+    {% set haircut_interval = stats.average_time_between_activities(user, 'cut hair') / (60.0 * 60.0 * 24.0) %}
     
     {% if shower_status['timelatest'] %}
         <p>{{user.salutation}} {{user.realname}} last showered {{'%2.2f' % (shower_status['timesince'] / (60.0 * 60.0))}} hours ago.</p>
+        <p>{{user.salutation}} {{user.realname}} usually showers every {{'%2.2f' % shower_interval}} hours</p>
     {% else %}
         <p>{{user.salutation}} {{user.realname}} has not recorded to have showered yet. We can only hope that {{user.salutation}} {{user.realname}} is not stinky</p>
     {% endif %}
     {% if shave_status['timelatest'] %}
         <p>{{user.salutation}} {{user.realname}} last shaved {{'%2.2f' % (shave_status['timesince'] / (60.0 * 60.0 * 24))}} day(s) ago.</p>
+        <p>{{user.salutation}} {{user.realname}} usually shaves every {{'%1.2f' % shave_interval}} days</p>
     {% else %}
         <p>{{user.salutation}} {{user.realname}} has not recorded to have shaved yet. Perhaps {{user.salutation}} {{user.realname}} is trying to grow a manscape?</p>
     {% endif %}
     {% if haircut_status['timelatest'] %}
         <p>{{user.salutation}} {{user.realname}} last got a haircut {{'%2.2f' % (haircut_status['timesince'] / (60.0 * 60.0 * 24))}} day(s) ago.</p>
+        <p>{{user.salutation}} {{user.realname}} usually gets a haircut every {{'%1.2f' % haircut_interval}} days</p>
     {% else %}
         <p>{{user.salutation}} {{user.realname}} has not recorded any haircut yet. Perhaps {{user.salutation}} {{user.realname}} is trying to grow beautiful long locks?</p>
     {% endif %}
@@ -79,4 +95,5 @@
     {% else %}
         Nobody has told {{user.salutation}} {{user.realname}} anything yet. Be the first!
     {% endif %}
+    
 {% endblock %}
