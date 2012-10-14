@@ -10,6 +10,10 @@ class UserModel(db.Model):
     realname   = db.StringProperty()
     salutation = db.StringProperty()
     last_seen  = db.DateTimeProperty(required = True)
+    gender     = db.StringProperty()
+    pos_pronoun = db.StringProperty() # possessive pronoun
+    nom_pronoun = db.StringProperty() # nominative pronoun
+    pos_determi = db.StringProperty() # possessive determinant
 
 class ActivityModel(db.Model):
     userid = db.StringProperty(required = True)

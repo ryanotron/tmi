@@ -11,6 +11,12 @@
             <td>Real name
             <td><input type="text" name="realname" value="{{user.realname}}">
         <tr>
+            <td>Gender
+            <td>
+                <input type="radio" name="gender" value="male">male
+                <input type="radio" name="gender" value="female">female
+                <input type="radio" name="gender" value="unspecified" checked>unspecified
+        <tr>
             <td>email
             <td><input type="text" name="email" value="{{user.email}}">
         <tr>
@@ -24,6 +30,6 @@
     </table>
 </form>
 
-<a href="/comrade/{{user.username}}">Back to your page</a>
+<a href="/u/{{user.username}}">Back to your page</a>
             
 {% endblock %}

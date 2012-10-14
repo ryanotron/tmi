@@ -6,10 +6,11 @@
     <div class="PanelWrapper" id="UserMessage">
         <form method="post" action="/postmessage">
             <h2 class="PanelCategory">Tell your stalkers something!</h2>
-            <textarea name="user_message" row="4" col="20"></textarea><br>
+            <textarea name="user_message" rows="4" cols="20"></textarea><br>
             <input type="submit">
         </form>
     </div>
+    
     <div class="PanelWrapper" id="GeneralActivity">
         <h2 class="PanelCategory">General Activity</h2>
         <form action="/postactivity" method="post">
@@ -19,6 +20,20 @@
             <input type="submit">
         </form>
     </div>
+
+    <div class="PanelWrapper" id="GeneralTimedActivity">
+        <h2 class="PanelCategory">General Timed Activity</h2>
+        <form action="/posttimedactivity" method="post">
+            Name <input type="text" name="act_name"><br>
+            Start time <input type="text" name="act_start_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">
+            <input type="text" name="act_start_time"><br>
+            End time <input type="text" name="act_end_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">
+            <input type="text" name="act_end_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}"><br>
+            (duration) <input type="text" name="act_duration"><br> hours
+            <input type="submit">
+        </form>
+    </div>
+            
     
     <div class="PanelWrapper" id="Energy">
         <h2 class="PanelCategory">Energy</h2>
@@ -105,7 +120,15 @@
             (it took me <input type="text" name="trv_duration"> minutes)<br>
             <input type="submit">
         </form>
-    </div>                
+    </div>
+
+    <div class="PanelWrapper" id="BatchExpense">
+        <h2 class="PanelCategory">Batch Expense</h2>
+        <form method="post" action="/postbatchexpense">
+            <textarea name="batchexpense" cols="100" rows="10"></textarea><br>
+            <input type="submit">
+        </form>
+    </div>
 </div>
 
 {% endblock %}

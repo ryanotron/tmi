@@ -165,6 +165,7 @@ class ProfileHandler(SuperHandler):
                 new_timezone = self.request.get('timezone')
                 new_currency = self.request.get('currency')
                 new_email    = self.request.get('email')
+                new_gender   = self.request.get('gender')
                 
                 updated = False
                 
@@ -182,6 +183,21 @@ class ProfileHandler(SuperHandler):
                     updated = True
                 if new_email != user.email and constants.email_re.match(new_email):
                     user.email = new_email
+                    updated = True
+                if new_gender != user.gender:
+                    user.gender = new_gender
+                    if new_gender == 'male':
+                        user.pos_pronoun = 'his'
+                        user.pos_determi = 'his'
+                        user.nom_pronoun = 'he'
+                    elif new_gender == 'female':
+                        user.pos_pronoun = 'her'
+                        user.pos_determi = 'hers'
+                        user.nom_pronoun = 'she'
+                    else:
+                        user.pos_pronoun = 'its'
+                        user.pos_determi = 'its'
+                        user.nom_pronoun = 'it'
                     updated = True
                     
                 if updated:
@@ -388,6 +404,30 @@ class PostExpenseHandler(SuperHandler):
                 self.redirect('/login')
         else:
             self.redirect('/login')
+
+class PostBatchExpenseHandler(SuperHandler):
+    def post(self):
+        userid = self.request.cookies.get('userid')
+        if userid:
+            userid = utils.verify_cookie(userid)
+            if userid:
+                user = utils.validate_user(userid)
+                if user:
+                    expenses = self.request.get('batchexpense')
+                    if expenses:
+                        expenses = expenses.split('\n')
+                        expenses = [elem.split('\t') for elem in expenses]
+                        for elem in expenses:
+                            logging.error(elem)
+                        self.redirect('/panel')
+                    else:
+                        self.redirect('/panel')
+                else:
+                    self.redirect('login')
+            else:
+                self.redirect('login')
+        else:
+            self.redirect('login')
             
 class PostTravelHandler(SuperHandler):
     def post(self):
