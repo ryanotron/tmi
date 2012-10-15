@@ -3,10 +3,34 @@
 {% block content %}
 <h1 class="Header" id="PanelHeader">What have you done, {{user.salutation}} {{user.realname}}?</h1>
 <div class="Wrapper" id="PanelOverWrapper">
+    <div class="PanelWrapper" id="Shortcuts">
+        <h2 class="PanelCategory">Quick updates</h2>
+        <!--coffee-->
+        <form action="/inspostactivity" method="post">
+            <input type="hidden" name="activity_name" value="coffee">
+            <input type="submit" value="I just had coffee!">
+        </form>
+        <!--shower-->
+        <form action="/inspostactivity" method="post">
+            <input type="hidden" name="activity_name" value="shower">
+            <input type="submit" value="I just showered!">
+        </form>
+        <!--shave-->
+        <form action="/inspostactivity" method="post">
+            <input type="hidden" name="activity_name" value="shave">
+            <input type="submit" value="I just shaved!">
+        </form>
+        <!--haircut-->
+        <form action="/inspostactivity" method="post">
+            <input type="hidden" name="activity_name" value="cut hair">
+            <input type="submit" value="I just got a haircut!">
+        </form>
+    </div>
+    
     <div class="PanelWrapper" id="UserMessage">
+        <h2 class="PanelCategory">Tell your stalkers something!</h2>
         <form method="post" action="/postmessage">
-            <h2 class="PanelCategory">Tell your stalkers something!</h2>
-            <textarea name="user_message" rows="4" cols="20"></textarea><br>
+            <textarea name="user_message" rows="2" cols="100"></textarea><br>
             <input type="submit">
         </form>
     </div>
@@ -33,8 +57,7 @@
             <input type="submit">
         </form>
     </div>
-            
-    
+
     <div class="PanelWrapper" id="Energy">
         <h2 class="PanelCategory">Energy</h2>
         <form action="/inspostactivity" method="post">
@@ -78,20 +101,14 @@
         </form><br>
         <form action="/inspostactivity" method="post">
             <input type="hidden" name="activity_name" value="shower">
-            <!-- <input type="hidden" name="activity_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}">
-            <input type="hidden" name="activity_day" value="{{(datetime.datetime.today() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}"> -->
             <input type="submit" value="I just showered!">
         </form>
         <form action="/inspostactivity" method="post">
             <input type="hidden" name="activity_name" value="shave">
-            <!-- <input type="hidden" name="activity_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}">
-            <input type="hidden" name="activity_day" value="{{(datetime.datetime.today() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}"> -->
             <input type="submit" value="I just shaved!">
         </form>
         <form action="/inspostactivity" method="post">
             <input type="hidden" name="activity_name" value="cut hair">
-            <!-- <input type="hidden" name="activity_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}">
-            <input type="hidden" name="activity_day" value="{{(datetime.datetime.today() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}"> -->
             <input type="submit" value="I just got a haircut!">
         </form>
     </div>

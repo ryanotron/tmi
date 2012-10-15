@@ -1,0 +1,13 @@
+﻿{% extends 'basepage.html' %}
+
+{% block content %}
+<h2>Activity list for {{user.salutation}} {{user.realname}}</h2>
+<table class="Presentation">
+    <tr>
+        <th>name <th>when <th>hours ago
+    {% for act in activities %}
+    <tr>
+        <td>{{act.name}} <td>{{(act.when + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y - %H:%M')}} <td class="Numeric">{{'%2.2f' % ((datetime.datetime.utcnow() - act.when).total_seconds()/(3600.0))}}
+    {% endfor %}
+</table>
+{% endblock %}

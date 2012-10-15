@@ -1,7 +1,19 @@
 ﻿TODO:
+- MOAR CSS
+- put latest submission to panel page (it's important to cache data into UserModel or w/e)
+- arrange panel more logically
+- think of a better way to do stats (minimize database hits!)
+  - do stats in batch, store in UserModel?
 - make batch expense uploader more flexible
-- data presentation for quick inspection (user only!)
+  - insensitivity to decimals
+  - optional currency parameter
+  - am I abusing regex now?
+- data presentation for quick inspection + quick editing(user only!)
 - photo uploading capability
+  - for self portrait
+  - for meal menus
+  - for travel origin/destinations
+  - think of a way to add photos to everything!
 - make pages prettier
 - put travel in userpage
 - more sleep statistics
@@ -14,6 +26,11 @@
 - record more things on user table to minimize database hits
 
 DONE:
+- begin css file for simple things (get sans-serif typeface, for starter)
+- moved shortcuts to the top
+- timed activities presentation page
+- activities presentation page
+- check weekly sleep average calculator (time zoning)
 - make batch expense uploader. Raw data must be copyable from libreoffice
 - make general timed activity record submission form (14-Oct-2012)
 - wrote generic time between activities calculator (12-Oct-2012)

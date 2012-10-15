@@ -48,7 +48,8 @@ def last_week_average_sleep(user):
         endday   = now - datetime.timedelta(days = now.weekday())
         total_sleep = 0.0
         for sleep in sleeps:
-            if sleep.end > startday and sleep.end < endday:
+            endtime = sleep.end + datetime.timedelta(hours = user.timezone)
+            if endtime > startday and endtime < endday:
                 duration = (sleep.end - sleep.start).total_seconds() / (60.0 * 60.0)
                 total_sleep = total_sleep + duration
         #logging.error('calculated average sleep!')

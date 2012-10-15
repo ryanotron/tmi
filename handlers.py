@@ -615,6 +615,42 @@ class PostGuestMessageHandler(SuperHandler):
         else:
             self.redirect(self.request.referer)
             
+class PresentActivityHandler(SuperHandler):
+    def get(self):
+        userid = self.request.cookies.get('userid')
+        if userid:
+            userid = utils.verify_cookie(userid)
+            if userid:
+                user = utils.validate_user(userid)
+                if user:
+                    activities = db.GqlQuery('select * from ActivityModel order by when desc')
+                    activities = list(activities)
+                    self.render('activitylistpage.html', user = user, activities = activities)
+                else:
+                    self.redirect('/login')
+            else:
+                self.redirect('/login')
+        else:
+            self.redirect('/login')
+            
+class PresentTimedActivityHandler(SuperHandler):
+    def get(self):
+        userid = self.request.cookies.get('userid')
+        if userid:
+            userid = utils.verify_cookie(userid)
+            if userid:
+                user = utils.validate_user(userid)
+                if user:
+                    activities = db.GqlQuery('select * from TimedActivityModel order by end desc')
+                    activities = list(activities)
+                    self.render('timedactivitylistpage.html', user = user, activities = activities)
+                else:
+                    self.redirect('/login')
+            else:
+                self.redirect('/login')
+        else:
+            self.redirect('/login')
+            
 class PanelHandler(SuperHandler):
     def get(self):
         userid = self.request.cookies.get('userid')

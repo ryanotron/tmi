@@ -1,0 +1,42 @@
+﻿body {
+    font-family: Helvetica, Verdana, Arial, sans-serif;
+}
+
+div.PanelWrapper {
+    float: left;
+    width: 50%;
+    border: 1px solid black;
+    padding: 5px;
+    margin: 2px;
+}
+
+h2 {
+    font-size: 14pt;
+}
+
+form {
+    float: left;
+    margin: 10px;
+}
+
+table, th, td {
+    border: 1px solid black;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+td, th {
+    padding: 5px;
+}
+
+th {
+    background-color: green;
+    color: white;
+}
+
+td.Numeric {
+    text-align: right;
+}
+

@@ -18,5 +18,7 @@ app = webapp2.WSGIApplication([('/', h.MainpageHandler),
                                ('/postmessage/?', h.PostUserMessageHandler),
                                ('/postguestmessage/?', h.PostGuestMessageHandler),
                                ('/panel/?', h.PanelHandler),
+                               ('/activities/?', h.PresentActivityHandler),
+                               ('/timedactivities/?', h.PresentTimedActivityHandler),
                                ('/u/' + r'([a-zA-Z0-9_-]{4,20})/?', h.UserpageHandler),],
                                debug = True)
