@@ -1,55 +1,99 @@
 ﻿{% extends 'basepage.html' %}
+
 {% block content %}
-<h1>Information on Comrade {{username}}</h1>
-<p>Is comrade {{username}} alive? {{alive_message}}</p>
-<p>Latest message from Comrade {{username}}:</p>
-{% if latest_message %}
-    <blockquote>{{latest_message.message}}</blockquote>
-    <p>On {{latest_message.when.strftime('%A, %d %B %Y')}}</p>
-{% else %}
-    <p>Comrade {{username}} has not left any message yet.</p>
-{% endif %}
-<hr>
-{% if last_coffee %}
-    <p>Latest cup of coffee was had at {{last_coffee}}. {{coffee_message}}</p>
-{% else %}
-    <p>Comrade {{username}} has no recorded coffee time. How does Comrade {{username}} stay awake?</p>
-{% endif %}
-{% if last_sleep %}
-    <p>Comrade {{username}} woke up at {{last_sleep.end}} after sleeping for {{ (last_sleep.end - last_sleep.start).total_seconds()/3600 }} hours. {{sleep_message}}</p>
-{% else %}
-    <p>Comrade {{username}} has no recorded sleep time. Perhaps Comrade {{username}} never sleeps?</p>
-{% endif %}
+<div class="BlockWrapper" id="PersonalInfo">
+    <h2>Too much information on</h2>
+    <h1>{{user.salutation}} {{user.realname}}</h1>
+    <p>Last seen on {{(user.last_seen + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y, %H:%M')}} UTC {{'%+2.1f' % user.timezone}}</p>
+    {% set user_messages = stats.user_messages(user, 1) -%}
+    {% if user_messages -%}
+        <h3>Latest message from {{user.salutation}} {{user.realname}}</h3>
+        <p class="UserMessage">{{user_messages[0].message}}</p>
+    {% endif -%}
+</div>
 
-<h2>Comrade {{username}}'s latest travel</h2>
-{% if commute %}
-    <p>Left {{commute.origin}} at {{commute.start}} for {{commute.destination}}. Arrived at {{commute.end}}. It took {{ (commute.end - commute.start).total_seconds() / 60 }} minutes</p>
-{% else %}
-    <p>Comrade {{username}} has no recorded travel. Does Comrade {{username}} ever go out?</p>
-{% endif %}
-
-<h2>Latest event</h2>
-{% if event %}
-    <p>Did {{event.name}} at {{event.when}}</p>
-{% else %}
-    <p>Comrade {{username}} has not recorded anything. Perhaps Comrade {{username}} has done nothing with Comrade {{username}}'s life?</p>
-{% endif %}
-<hr>
-
-<h2>Latest message from visitor</h2>
-{% if visitor_message %}
-    <p>{{visitor_message.guestname}} said:</p>
-    <blockquote>{{visitor_message.message}}</blockquote>
-    on {{visitor_message.when.strftime('%A, %d-%b-%Y')}}
-{% else %}
-    <p>Nobody has told Comrade {{username}} anything yet. Be the first!</p>
-{% endif %}
+<div class="BlockWrapper" id="Energy">
+    <h2>Energy</h2>
+    {% set sleep_status = stats.sleep_status(user) -%}
     
-Tell Comrade {{username}} something!
-<form action="/comment" method="post">
-    Your name: <input type="text" name="name"><br>
-    <textarea name="message" rows="4" cols="20"></textarea><br>
-    <input type="hidden" name="pagename" value="{{username}}">
-    <input type="submit">
-</form>
+    {% set sleep_average = stats.last_week_average_sleep(user) -%}
+    {% set sleep_debt = stats.sleep_debt(user) -%}
+    {% set sleep_average_alltime = stats.all_time_average_sleep(user) -%}
+    
+    {% set coffee_status = stats.coffee_status(user) -%}
+    {% set coffee_daily_average = stats.average_coffee_per_day(user) -%}
+    
+    {% set meal_status = stats.meal_status(user) -%}
+    {% if sleep_status['wake_time'] %}
+        <p>Woke up at {{sleep_status['wake_time'].strftime('%H:%M')}} after {{'%1.2f' % sleep_status['sleep_hours']}} hours of sleep.</p>
+        <p>Last week's average sleep per day was {{'%1.2f' % sleep_average}} hours. To maintain this average, {{user.salutation}} {{user.realname}} has a sleep debt of {{'%1.2f' % sleep_debt}} hours</p>
+        <p>All time average sleep per day is {{'%1.2f' % sleep_average_alltime}} hours.</p>
+    {% else %}
+        <p>{{user.salutation}} {{user.realname}} has not recorded any sleep time yet. We cannot know if {{user.salutation}} {{user.realname}} is well rested or not.</p>
+    {% endif %}
+    {% if coffee_status['latest_cup'] %}
+        <p>Most recently had coffee {{'%1.2f' % coffee_status['latest_cup']}} hours ago</p>
+        <p>{{user.salutation}} {{user.realname}} drinks on average {{'%1.2f' % coffee_daily_average}} cups of coffee per day</p>
+    {% else %}
+        <p>{{user.salutation}} {{user.realname}} has not recorded drinking a cup of coffee yet. We cannot know if {{user.salutation}} {{user.realname}} is well caffeinated or not</p>
+    {% endif %}
+    {% if meal_status['meal_time'] %}
+        <p>Latest meal was a {{meal_status['latest_category']}} at {{meal_status['meal_time'].strftime('%d/%m/%Y %H:%M')}}, with menu {{meal_status['latest_menu']}}</p>
+    {% else %}
+        <p>{{user.salutation}} {{user.realname}} has not recorded any meal yet. We cannot know if {{user.salutation}} {{user.realname}} is well fed or not</p>
+    {% endif %}
+</div>
+
+<div class="BlockWrapper" id="Hygiene">
+    <h2>Hygiene</h2>
+    {% set shower_status = stats.activity_status(user, 'shower', 1) %}
+    {% set shave_status = stats.activity_status(user, 'shave', 1) %}
+    {% set haircut_status = stats.activity_status(user, 'cut hair', 1) %}
+    {% set shower_interval = stats.average_time_between_activities(user, 'shower') / (60.0 * 60.0) %}
+    {% set shave_interval = stats.average_time_between_activities(user, 'shave') / (60.0 * 60.0 * 24.0) %}
+    {% set haircut_interval = stats.average_time_between_activities(user, 'cut hair') / (60.0 * 60.0 * 24.0) %}
+    
+    {% if shower_status['timelatest'] %}
+        <p>{{user.salutation}} {{user.realname}} last showered {{'%2.2f' % (shower_status['timesince'] / (60.0 * 60.0))}} hours ago.</p>
+        <p>{{user.salutation}} {{user.realname}} usually showers every {{'%2.2f' % shower_interval}} hours</p>
+    {% else %}
+        <p>{{user.salutation}} {{user.realname}} has not recorded to have showered yet. We can only hope that {{user.salutation}} {{user.realname}} is not stinky</p>
+    {% endif %}
+    {% if shave_status['timelatest'] %}
+        <p>{{user.salutation}} {{user.realname}} last shaved {{'%2.2f' % (shave_status['timesince'] / (60.0 * 60.0 * 24))}} day(s) ago.</p>
+        <p>{{user.salutation}} {{user.realname}} usually shaves every {{'%1.2f' % shave_interval}} days</p>
+    {% else %}
+        <p>{{user.salutation}} {{user.realname}} has not recorded to have shaved yet. Perhaps {{user.salutation}} {{user.realname}} is trying to grow a manscape?</p>
+    {% endif %}
+    {% if haircut_status['timelatest'] %}
+        <p>{{user.salutation}} {{user.realname}} last got a haircut {{'%2.2f' % (haircut_status['timesince'] / (60.0 * 60.0 * 24))}} day(s) ago.</p>
+        <p>{{user.salutation}} {{user.realname}} usually gets a haircut every {{'%1.2f' % haircut_interval}} days</p>
+    {% else %}
+        <p>{{user.salutation}} {{user.realname}} has not recorded any haircut yet. Perhaps {{user.salutation}} {{user.realname}} is trying to grow beautiful long locks?</p>
+    {% endif %}
+</div>
+
+<div class="BlockWrapper" id="GuestComment">
+    <h2>Tell {{user.salutation}} {{user.realname}} something</h2>
+    <form method="post" action="/postguestmessage">
+        Your name: <input type="text" name="guest_name"><br>
+        Your message:<br>
+        <textarea col="10" row="4" name="guest_message"></textarea>
+        <input type="hidden" name="userid" value="{{user.key().id()}}"><br>
+        <input type="submit">
+    </form>
+</div>
+
+<div class="BlockWrapper" id="PrevComments">
+    {% set messages = stats.guest_messages(user, 3) -%}
+    <h2>What people has told {{user.salutation}} {{user.realname}}</h2>
+    {% if messages -%}
+        {% for message in messages -%}
+            {{message.guestname}} said on {{(message.when + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y %H:%M')}}:<br>
+            {{message.message}}<br><hr>
+        {% endfor -%}
+    {% else %}
+        Nobody has told {{user.salutation}} {{user.realname}} anything yet. Be the first!
+    {% endif %}
+    
 {% endblock %}

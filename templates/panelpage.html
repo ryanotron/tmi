@@ -1,47 +1,134 @@
 ﻿{% extends 'basepage.html' %}
 
 {% block content %}
-<h2>What have you done, Comrade {{username}}?</h2>
-<h3>Message</h3>
-<form method="post" action="/selfmessage">
-    tell your stalkers something <input type="text" name="message"><br>
-    <input type="submit">
-</form>
-<hr>
-<h3>Activity</h3>
-<form method="post" action="/activity">
-    what did you do? <input type="text" name="act_name"><br>
-    Fill any two of the following:<br>
-    when did you start? <input type="text" size=2 maxlength=2 name="act_start_h">:<input type="text" name="act_start_m" size=2 maxlength=2><br>
-    when did you finish? <input type="text" size=2 maxlength=2 name="act_finish_h">:<input type="text" name="act_finish_m" size=2 maxlength=2><br>
-    how long did it take? <input type="text" size=5 name="act_duration"> minutes<br>
-    <input type="submit">
-</form>
-<hr>
-<h3>Event</h3>
-<form method="post" action="/event">
-    what did you do? <input type="text" name="event_name"><br>
-    when was that? <input type="text" maxlength=2 size=2 name="event_when_h">:<input type="text" maxlength=2 size=2 name="event_when_m"><br>
-    <input type="submit">
-</form>
-<hr>
-<h3>Commute</h3>
-<form method="post" action="/commute">
-    where did you start? <input type="text" name="origin"><br>
-    where did you finish? <input type="text" name="destination"><br>
-    Fill any two of the following:<br>
-    when did you start? <input type="text" name="com_start_h" size=2 maxlength=2>:<input type="text" name="com_start_m" size=2 maxlength=2><br>
-    when did you finish? <input type="text" name="com_finish_h" size=2 maxlength=2>:<input type="text" name="com_finish_m" size=2 maxlength=2><br>
-    how long did it take? <input type="text" size=5 name="com_duration"> minutes<br>
-    <input type="submit">
-</form>
-<hr>
-<h3>Expense</h3>
-<form method="post" action="/expense">
-    what did you spend on? <input type="text" name="name"><br>
-    how much did you spend? <input type="text" name="amount"><br>
-    what would you classify it as? <input type="text" name="category"><br>
-    <input type="submit">
-</form>
-<hr>
+<h1 class="Header" id="PanelHeader">What have you done, {{user.salutation}} {{user.realname}}?</h1>
+<div class="Wrapper" id="PanelOverWrapper">
+    <div class="PanelWrapper" id="UserMessage">
+        <form method="post" action="/postmessage">
+            <h2 class="PanelCategory">Tell your stalkers something!</h2>
+            <textarea name="user_message" rows="4" cols="20"></textarea><br>
+            <input type="submit">
+        </form>
+    </div>
+    
+    <div class="PanelWrapper" id="GeneralActivity">
+        <h2 class="PanelCategory">General Activity</h2>
+        <form action="/postactivity" method="post">
+            Name <input type="text" name="activity_name"><br>
+            Day <input type="text" name="activity_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}"><br>
+            Time <input type="text" name="activity_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}"><br>
+            <input type="submit">
+        </form>
+    </div>
+
+    <div class="PanelWrapper" id="GeneralTimedActivity">
+        <h2 class="PanelCategory">General Timed Activity</h2>
+        <form action="/posttimedactivity" method="post">
+            Name <input type="text" name="act_name"><br>
+            Start time <input type="text" name="act_start_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">
+            <input type="text" name="act_start_time"><br>
+            End time <input type="text" name="act_end_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">
+            <input type="text" name="act_end_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}"><br>
+            (duration) <input type="text" name="act_duration"><br> hours
+            <input type="submit">
+        </form>
+    </div>
+            
+    
+    <div class="PanelWrapper" id="Energy">
+        <h2 class="PanelCategory">Energy</h2>
+        <form action="/inspostactivity" method="post">
+            <input type="hidden" name="activity_name" value="coffee">
+            <input type="submit" value="I just had coffee!">
+        </form>
+        <form action="/posttimedactivity" method="post">
+            <input type="hidden" name="act_name" value="sleep">
+            Slept at <input type="text" name="act_start_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone - 6.0)).strftime('%d/%m/%Y')}}">, 
+            <input type="text" name="act_start_time"><br>
+            Woke up at <input type="text" name="act_end_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">, 
+            <input type="text" name="act_end_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}"><br>
+            for <input type="text" name="act_duration"> hours<br>
+            <input type="submit">
+        </form>
+        <form action="/postmeal" method="post">
+            I had <select name="meal_category">
+                <option value="breakfast">Breakfast</option>
+                <option value="lunch">Lunch</option>
+                <option value="dinner">Dinner</option>
+                <option value="supper">Supper</option>
+                <option value="snack">Snack</option>
+            </select>
+            of <input type="text" name="meal_menu"><br>
+            at <input type="text" name="meal_place"><br>
+            at this time <input type="text" name="meal_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">
+            <input type="text" name="meal_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}"><br>
+            and it costed me <input type="text" name="meal_cost">
+            <input type="text" name="meal_currency" value="{{user.currency}}"><br>
+            <input type="submit">
+        </form>
+    </div>
+    
+    <div class="PanelWrapper" id="Hygiene">
+        <h2 class="PanelCategory">Hygiene</h2>
+        <form action="/postactivity" method="post">
+            Shower 
+            <input type="text" name="activity_day" value="{{(datetime.datetime.today() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}"> 
+            <input type="text" name="activity_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}">
+            <input type="hidden" name="activity_name" value="shower">
+        </form><br>
+        <form action="/inspostactivity" method="post">
+            <input type="hidden" name="activity_name" value="shower">
+            <!-- <input type="hidden" name="activity_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}">
+            <input type="hidden" name="activity_day" value="{{(datetime.datetime.today() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}"> -->
+            <input type="submit" value="I just showered!">
+        </form>
+        <form action="/inspostactivity" method="post">
+            <input type="hidden" name="activity_name" value="shave">
+            <!-- <input type="hidden" name="activity_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}">
+            <input type="hidden" name="activity_day" value="{{(datetime.datetime.today() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}"> -->
+            <input type="submit" value="I just shaved!">
+        </form>
+        <form action="/inspostactivity" method="post">
+            <input type="hidden" name="activity_name" value="cut hair">
+            <!-- <input type="hidden" name="activity_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}">
+            <input type="hidden" name="activity_day" value="{{(datetime.datetime.today() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}"> -->
+            <input type="submit" value="I just got a haircut!">
+        </form>
+    </div>
+    
+    <div class="PanelWrapper" id="Expense">
+        <h2 class="PanelCategory">Expense</h2>
+        <form action="/postexpense" method="post">
+            I bought <input type="text" name="exp_name">
+            for <input type="text" name="exp_amount">
+            <input type="text" name="exp_currency" value="{{user.currency}}">
+            file under <input type="text" name="exp_category">
+            <input type="text" name="exp_when" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">
+            <input type="submit">
+        </form>
+    </div>
+
+    <div class="PanelWrapper" id="Travel">
+        <h2 class="PanelCategory">Travel</h2>
+        <form method="post" action="/posttravel">
+            I traveled from <input type="text" name="trv_origin">
+            to <input type="text" name="trv_destination"><br>
+            I departed at <input type="text" name="trv_start_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">
+            <input type="text" name="trv_start_time"><br>
+            and arrived at <input type="text" name="trv_finish_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">
+            <input type="text" name="trv_finish_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}"><br>
+            (it took me <input type="text" name="trv_duration"> minutes)<br>
+            <input type="submit">
+        </form>
+    </div>
+
+    <div class="PanelWrapper" id="BatchExpense">
+        <h2 class="PanelCategory">Batch Expense</h2>
+        <form method="post" action="/postbatchexpense">
+            <textarea name="batchexpense" cols="100" rows="10"></textarea><br>
+            <input type="submit">
+        </form>
+    </div>
+</div>
+
 {% endblock %}

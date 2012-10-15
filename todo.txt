@@ -1,25 +1,22 @@
 ﻿TODO:
-- make timezones consistent for the user
-- format time properly in userpage
-- mockup a good userpage
-- store all time in UTC
-- specify date for events/activity, give shortcut to today and yesterday
-- rewrite everything nicely:
-  - handlers which are _writing_ to the database should be called receptor
-  - handlers which are only _reading_ the database should be called fetcher
-  - accept forms in user's timezone, but store in UTC
-  - serve things in user's timezone
-  - make general fetchers for all the tables
-    - how to handle filters? userid is mandatory as a user isn't allowed to fetch another user's data,
-      but suppose sometimes I want to fetch specific activities within a time period, and other times
-      I want to fetch all activities within a time period!
-  - as much as possible, pass objects to template, not raw strings
+- photo uploading capability
+- make batch expense uploader. Raw data must be copyable from libreoffice
+- make pages prettier
+- put travel in userpage
+- more sleep statistics
+- more coffee statistics
+  (min time between cups)
+- more meal statistics
+  (usual lunch, dinner time?)
+- more hygiene statistics
+- sleep charts
+- record more things on user table to minimize database hits
 
-REWRITE EVERYTHING
-
-LOGS:
-20-September-2012
-- made comment database work
-- store time input from panel in UTC (time_input - user.timezone)
-
-this line is added just because
+DONE:
+-make general timed activity record submission form (14-Oct-2012)
+- wrote generic time between activities calculator (12-Oct-2012)
+- wrote average coffee per day calculator(12-Oct-2012)
+- wrote sleep debt calculator (12-Oct-2012)
+- wrote sleep average calculator (12-Oct-2012)
+- fix timedelta problem (12-Oct-2012)
+- fix greeting in panel page (10-Oct-2012)
