@@ -1,6 +1,7 @@
 ﻿TODO:
+- make batch expense uploader more flexible
+- data presentation for quick inspection (user only!)
 - photo uploading capability
-- make batch expense uploader. Raw data must be copyable from libreoffice
 - make pages prettier
 - put travel in userpage
 - more sleep statistics
@@ -13,7 +14,8 @@
 - record more things on user table to minimize database hits
 
 DONE:
--make general timed activity record submission form (14-Oct-2012)
+- make batch expense uploader. Raw data must be copyable from libreoffice
+- make general timed activity record submission form (14-Oct-2012)
 - wrote generic time between activities calculator (12-Oct-2012)
 - wrote average coffee per day calculator(12-Oct-2012)
 - wrote sleep debt calculator (12-Oct-2012)

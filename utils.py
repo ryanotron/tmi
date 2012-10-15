@@ -33,3 +33,7 @@ def validate_user(userid):
         return db.get(user)
     else:
         return None
+        
+def str_to_datetime(datestr):
+    d,m,y = [int(elem) for elem in datestr.split('/')]
+    return datetime.datetime(y, m, d)

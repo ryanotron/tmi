@@ -416,9 +416,20 @@ class PostBatchExpenseHandler(SuperHandler):
                     expenses = self.request.get('batchexpense')
                     if expenses:
                         expenses = expenses.split('\n')
-                        expenses = [elem.split('\t') for elem in expenses]
                         for elem in expenses:
-                            logging.error(elem)
+                            expense = constants.batchexpense_re.match(elem)
+                            if expense:
+                                new_expense = models.ExpenseModel(userid   = str(userid),
+                                                                  name     = expense.group('name'),
+                                                                  category = expense.group('cat'),
+                                                                  amount   = float(expense.group('amount')),
+                                                                  when     = utils.str_to_datetime(expense.group('when')),
+                                                                  currency = user.currency)
+                                logging.error(expense.groups())
+                                new_expense.put()
+                                user.last_seen = datetime.datetime.utcnow()
+                                user.put()
+                                self.redirect('/panel')
                         self.redirect('/panel')
                     else:
                         self.redirect('/panel')
