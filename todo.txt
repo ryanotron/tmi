@@ -1,37 +1,50 @@
 ﻿TODO:
+- PROJECT MANAGEMENT
+  - categorize todo list (this file)
+  
 - MOAR CSS
-- put latest submission to panel page (it's important to cache data into UserModel or w/e)
-- arrange panel more logically
-- think of a better way to do stats (minimize database hits!)
-  - do stats in batch, store in UserModel?
-- make batch expense uploader more flexible
-  - insensitivity to decimals
-  - optional currency parameter
-  - am I abusing regex now?
-- data presentation for quick inspection + quick editing(user only!)
-- photo uploading capability
-  - for self portrait
-  - for meal menus
-  - for travel origin/destinations
-  - think of a way to add photos to everything!
-- make pages prettier
-- put travel in userpage
-- more sleep statistics
-- more coffee statistics
-  (min time between cups)
-- more meal statistics
-  (usual lunch, dinner time?)
-- more hygiene statistics
-- sleep charts
-- record more things on user table to minimize database hits
+  - make textarea fit div sizes
+  
+- PARTY AT THE BACK
+  - think of a better way to do stats (minimize database hits!)
+    - do stats in batch, store in UserModel?
+  - make batch expense uploader more flexible
+    - insensitivity to decimals
+    - optional currency parameter
+    - am I abusing regex now?
+  - add option to show off purchases
+  - photo uploading capability
+    - for self portrait
+    - for meal menus
+    - for travel origin/destinations
+    - think of a way to add photos to everything!
+  - add cups of coffee so far today stats
+  - find a way to make charts
+  
+- I AM SO PRETTY
+  - arrange panel more logically
+  - put latest submission to panel page (it's important to cache data into UserModel or w/e)
+  - configurable data presentation table
+  - make space for photos
+  - put travel in userpage
 
 DONE:
-- begin css file for simple things (get sans-serif typeface, for starter)
-- moved shortcuts to the top
-- timed activities presentation page
-- activities presentation page
-- check weekly sleep average calculator (time zoning)
-- make batch expense uploader. Raw data must be copyable from libreoffice
+- MOAR CSS
+  -
+
+- PARTY AT THE BACK
+    -
+
+- I AM SO PRETTY
+    - 
+
+- PRE-PRETTIFICATION
+- begin css file for simple things (get sans-serif typeface, for starter) (15-Oct-2012)
+- moved shortcuts to the top (15-Oct-2012)
+- timed activities presentation page (15-Oct-2012)
+- activities presentation page (15-Oct-2012)
+- check weekly sleep average calculator (time zoning) (15-Oct-2012)
+- make batch expense uploader. Raw data must be copyable from libreoffice (15-Oct-2012)
 - make general timed activity record submission form (14-Oct-2012)
 - wrote generic time between activities calculator (12-Oct-2012)
 - wrote average coffee per day calculator(12-Oct-2012)

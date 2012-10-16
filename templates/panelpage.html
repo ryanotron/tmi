@@ -30,7 +30,7 @@
     <div class="PanelWrapper" id="UserMessage">
         <h2 class="PanelCategory">Tell your stalkers something!</h2>
         <form method="post" action="/postmessage">
-            <textarea name="user_message" rows="2" cols="100"></textarea><br>
+            <textarea name="user_message"></textarea><br>
             <input type="submit">
         </form>
     </div>
@@ -39,8 +39,8 @@
         <h2 class="PanelCategory">General Activity</h2>
         <form action="/postactivity" method="post">
             Name <input type="text" name="activity_name"><br>
-            Day <input type="text" name="activity_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}"><br>
-            Time <input type="text" name="activity_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}"><br>
+            Day <input maxlength="10" class="Date" type="text" name="activity_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}"><br>
+            Time <input class="Time" type="text" name="activity_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}"><br>
             <input type="submit">
         </form>
     </div>
@@ -49,10 +49,10 @@
         <h2 class="PanelCategory">General Timed Activity</h2>
         <form action="/posttimedactivity" method="post">
             Name <input type="text" name="act_name"><br>
-            Start time <input type="text" name="act_start_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">
-            <input type="text" name="act_start_time"><br>
-            End time <input type="text" name="act_end_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">
-            <input type="text" name="act_end_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}"><br>
+            Start time <input class="Date" type="text" name="act_start_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">
+            <input class="Time" type="text" name="act_start_time"><br>
+            End time <input class="Date" type="text" name="act_end_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">
+            <input class="Time" type="text" name="act_end_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}"><br>
             (duration) <input type="text" name="act_duration"><br> hours
             <input type="submit">
         </form>
@@ -66,10 +66,10 @@
         </form>
         <form action="/posttimedactivity" method="post">
             <input type="hidden" name="act_name" value="sleep">
-            Slept at <input type="text" name="act_start_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone - 6.0)).strftime('%d/%m/%Y')}}">, 
-            <input type="text" name="act_start_time"><br>
-            Woke up at <input type="text" name="act_end_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">, 
-            <input type="text" name="act_end_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}"><br>
+            Slept at <input class="Date" type="text" name="act_start_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone - 6.0)).strftime('%d/%m/%Y')}}">, 
+            <input class="Time" type="text" name="act_start_time"><br>
+            Woke up at <input class="Date" type="text" name="act_end_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">, 
+            <input class="Time" type="text" name="act_end_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}"><br>
             for <input type="text" name="act_duration"> hours<br>
             <input type="submit">
         </form>
@@ -83,10 +83,10 @@
             </select>
             of <input type="text" name="meal_menu"><br>
             at <input type="text" name="meal_place"><br>
-            at this time <input type="text" name="meal_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">
-            <input type="text" name="meal_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}"><br>
+            at this time <input class="Date" type="text" name="meal_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">
+            <input class="Time" type="text" name="meal_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}"><br>
             and it costed me <input type="text" name="meal_cost">
-            <input type="text" name="meal_currency" value="{{user.currency}}"><br>
+            <input class="Currency" type="text" name="meal_currency" value="{{user.currency}}"><br>
             <input type="submit">
         </form>
     </div>
@@ -95,21 +95,10 @@
         <h2 class="PanelCategory">Hygiene</h2>
         <form action="/postactivity" method="post">
             Shower 
-            <input type="text" name="activity_day" value="{{(datetime.datetime.today() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}"> 
-            <input type="text" name="activity_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}">
+            <input class="Date" type="text" name="activity_day" value="{{(datetime.datetime.today() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}"> 
+            <input class="Time" type="text" name="activity_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}">
             <input type="hidden" name="activity_name" value="shower">
         </form><br>
-        <form action="/inspostactivity" method="post">
-            <input type="hidden" name="activity_name" value="shower">
-            <input type="submit" value="I just showered!">
-        </form>
-        <form action="/inspostactivity" method="post">
-            <input type="hidden" name="activity_name" value="shave">
-            <input type="submit" value="I just shaved!">
-        </form>
-        <form action="/inspostactivity" method="post">
-            <input type="hidden" name="activity_name" value="cut hair">
-            <input type="submit" value="I just got a haircut!">
         </form>
     </div>
     
@@ -118,9 +107,9 @@
         <form action="/postexpense" method="post">
             I bought <input type="text" name="exp_name">
             for <input type="text" name="exp_amount">
-            <input type="text" name="exp_currency" value="{{user.currency}}">
+            <input class="Currency" type="text" name="exp_currency" value="{{user.currency}}"><br>
             file under <input type="text" name="exp_category">
-            <input type="text" name="exp_when" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">
+            <input class="Date" type="text" name="exp_when" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}"><br>
             <input type="submit">
         </form>
     </div>
@@ -130,10 +119,10 @@
         <form method="post" action="/posttravel">
             I traveled from <input type="text" name="trv_origin">
             to <input type="text" name="trv_destination"><br>
-            I departed at <input type="text" name="trv_start_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">
-            <input type="text" name="trv_start_time"><br>
-            and arrived at <input type="text" name="trv_finish_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">
-            <input type="text" name="trv_finish_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}"><br>
+            I departed at <input class="Date" type="text" name="trv_start_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">
+            <input class="Time" type="text" name="trv_start_time"><br>
+            and arrived at <input class="Date" type="text" name="trv_finish_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">
+            <input class="Time" type="text" name="trv_finish_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}"><br>
             (it took me <input type="text" name="trv_duration"> minutes)<br>
             <input type="submit">
         </form>
@@ -142,7 +131,7 @@
     <div class="PanelWrapper" id="BatchExpense">
         <h2 class="PanelCategory">Batch Expense</h2>
         <form method="post" action="/postbatchexpense">
-            <textarea name="batchexpense" cols="100" rows="10"></textarea><br>
+            <textarea name="batchexpense"></textarea><br>
             <input type="submit">
         </form>
     </div>

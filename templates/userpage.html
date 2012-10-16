@@ -75,13 +75,13 @@
 
 <div class="BlockWrapper" id="GuestComment">
     <h2>Tell {{user.salutation}} {{user.realname}} something</h2>
-    <form method="post" action="/postguestmessage">
+    <form class="GuestComment" method="post" action="/postguestmessage">
         Your name: <input type="text" name="guest_name"><br>
         Your message:<br>
-        <textarea col="10" row="4" name="guest_message"></textarea>
+        <textarea name="guest_message"></textarea>
         <input type="hidden" name="userid" value="{{user.key().id()}}"><br>
         <input type="submit">
-    </form>
+    </form><br>
 </div>
 
 <div class="BlockWrapper" id="PrevComments">
@@ -95,5 +95,6 @@
     {% else %}
         Nobody has told {{user.salutation}} {{user.realname}} anything yet. Be the first!
     {% endif %}
+</div>
     
 {% endblock %}

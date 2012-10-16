@@ -2,6 +2,19 @@
     font-family: Helvetica, Verdana, Arial, sans-serif;
 }
 
+textarea {
+    width: 100%;
+    height: 10%;
+    font-family: Helvetica, Verdana, Arial, sans-serif;
+    font-size: 10pt;
+}
+
+div.BlockWrapper {
+    border: 1px dashed red;
+    padding: 10px;
+    margin: 5px;
+}
+
 div.PanelWrapper {
     float: left;
     width: 50%;
@@ -10,13 +23,38 @@ div.PanelWrapper {
     margin: 2px;
 }
 
+#Shortcuts form {
+    float: left;
+}
+
+h1 {
+    margin: 1px;
+}
+
 h2 {
     font-size: 14pt;
+    margin: 1px;
 }
 
 form {
-    float: left;
+    float: none;
     margin: 10px;
+}
+
+input.Date {
+    width: 12ch;
+}
+
+input.Time {
+    width: 6ch;
+}
+
+input.Currency {
+    width: 5ch;
+}
+
+form.GuestComment textarea {
+    width: 50%;
 }
 
 table, th, td {
