@@ -24,6 +24,8 @@
     {% set coffee_daily_average = stats.average_coffee_per_day(user) -%}
     
     {% set meal_status = stats.meal_status(user) -%}
+    <div class="Sub_BlockWrapper">
+        <h3>Sleep</h3>
     {% if sleep_status['wake_time'] %}
         <p>Woke up at {{sleep_status['wake_time'].strftime('%H:%M')}} after {{'%1.2f' % sleep_status['sleep_hours']}} hours of sleep.</p>
         <p>Last week's average sleep per day was {{'%1.2f' % sleep_average}} hours. To maintain this average, {{user.salutation}} {{user.realname}} has a sleep debt of {{'%1.2f' % sleep_debt}} hours</p>
@@ -31,17 +33,25 @@
     {% else %}
         <p>{{user.salutation}} {{user.realname}} has not recorded any sleep time yet. We cannot know if {{user.salutation}} {{user.realname}} is well rested or not.</p>
     {% endif %}
-    {% if coffee_status['latest_cup'] %}
-        <p>Most recently had coffee {{'%1.2f' % coffee_status['latest_cup']}} hours ago</p>
-        <p>{{user.salutation}} {{user.realname}} drinks on average {{'%1.2f' % coffee_daily_average}} cups of coffee per day</p>
-    {% else %}
-        <p>{{user.salutation}} {{user.realname}} has not recorded drinking a cup of coffee yet. We cannot know if {{user.salutation}} {{user.realname}} is well caffeinated or not</p>
-    {% endif %}
+    </div>
+    
+    <div class="Sub_BlockWrapper">
+        <h3>Coffee</h3>
+        {% if coffee_stats -%}
+            <p>{{user.salutation}} {{user.realname}}'s last cup of coffee was {{'%2.2f' % coffee_stats['last_cup']}} hours ago. Today {{user.nom_pronoun}} has had {{'%2d' % coffee_stats['todays_total']}} cup(s). On average {{user.nom_pronoun}} drinks {{'%1.2f' % coffee_stats['alltime_average']}} cups a day.</p>
+        {% else -%}
+            <p>{{user.salutation}} {{user.realname}} has not shared {{user.pos_determi}} habits yet. Could {{user.nom_pronoun}} be a milk drinker?</p>
+        {% endif %}
+    </div>
+    
+    <div class="Sub_BlockWrapper">
+        <h3>Meal</h3>
     {% if meal_status['meal_time'] %}
         <p>Latest meal was a {{meal_status['latest_category']}} at {{meal_status['meal_time'].strftime('%d/%m/%Y %H:%M')}}, with menu {{meal_status['latest_menu']}}</p>
     {% else %}
         <p>{{user.salutation}} {{user.realname}} has not recorded any meal yet. We cannot know if {{user.salutation}} {{user.realname}} is well fed or not</p>
     {% endif %}
+    </div>
 </div>
 
 <div class="BlockWrapper" id="Hygiene">

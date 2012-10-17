@@ -85,24 +85,25 @@ def coffee_stats(user):
     userid = str(user.key().id())
     coffees = get_activities(user, 'coffee')
     status = {}
+    logging.error('coffee stats requested')
     if coffees:
         status['last_cup'] = (datetime.datetime.utcnow() - coffees[0].when).total_seconds() / (3600.0)
-        
+        logging.error('last cup retrieved')        
         status['todays_total'] = 0
         done = False
         i = 0
         today = datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)
-        while not done or i < len(coffees):
+        while (not done) and i < len(coffees):
             if (coffees[i].when + datetime.timedelta(hours = user.timezone)).day < today.day:
                 done = True
             else:
-                logging.error(i)
+                logging.error('we are now at record number %d' % i)
                 status['todays_total'] += 1
                 i += 1
                 
         daysince = (datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone) - coffees[-1].when).days
         if daysince > 0:
-            status['alltime_average'] = len(coffees) / daysince
+            status['alltime_average'] = len(coffees) / (1.0 * daysince)
         else:
             status['alltime_average'] = 0
             

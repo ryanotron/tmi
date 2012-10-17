@@ -8,6 +8,7 @@
 - PARTY AT THE BACK
   - think of a better way to do stats (minimize database hits!)
     - do stats in batch, store in UserModel?
+    - build things in cacheable manner, calculate stats in handler, not template
   - make batch expense uploader more flexible
     - insensitivity to decimals
     - optional currency parameter
@@ -33,7 +34,7 @@ DONE:
   - shifted a few things arond (16-Oct-2012)
 
 - PARTY AT THE BACK
-    -
+    - consolidated coffee status functions in stats.py (17-Oct-2012)
 
 - I AM SO PRETTY
     - began public user page (17-Oct-2012)

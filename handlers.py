@@ -1,4 +1,4 @@
-import utils, models, constants
+import utils, models, constants, stats
 from google.appengine.ext import db
 import webapp2
 import datetime, logging
@@ -673,7 +673,9 @@ class UserpageHandler(SuperHandler):
         users = list(users)
         if len(users) > 0:
             user = users[0]
-            self.render('userpage.html', user = user)
+            coffee_stats = stats.coffee_stats(user)
+            self.render('userpage.html', user = user,
+                                         coffee_stats = coffee_stats,)
         else:
             self.redirect('/') # go to user not found page
             
