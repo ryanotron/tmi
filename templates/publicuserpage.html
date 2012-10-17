@@ -1,0 +1,20 @@
+﻿{% extends 'basepage.html' %}
+
+{% block content %}
+    <div class="BlockWrapper">
+        <h1>{{user.salutation}} {{user.realname}}</h1>
+        <p>Last seen on {{(user.last_seen + datetime.timedelta(hours = user.timezone)).strftime('%H:%M, %d/%m/%Y')}} UTC{{'%+2.1f' % user.timezone}}, which is {{'%2.2f' % ((datetime.datetime.utcnow() - user.last_seen).total_seconds() / (60.0 * 60))}} hours ago.</p>
+    </div>
+    
+    <div class="BlockWrapper">
+        <h2>Energy</h2>
+        <div class="Sub_BlockWrapper">
+            {% set coffee_stats = stats.coffee_stats(user) -%}
+            {% if coffee_stats -%}
+                <p>{{user.salutation}} {{user.realname}}'s last cup of coffee was {{'%2.2f' % coffee_stats['last_cup']}} hours ago. Today {{user.nom_pronoun}} has had {{'%2d' % coffee_stats['todays_total']}} cup(s). On average {{user.nom_pronoun}} drinks {{coffee_stats['alltime_average']}} cups a day.</p>
+            {% else %}
+                <p>{{user.salutation}} {{user.realname}} has not shared {{user.pos_determi}} habits yet. Could {{user.nom_pronoun}} be a milk drinker?</p>
+            {% endif %}
+        <div>
+        
+{% endblock %}

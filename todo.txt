@@ -30,13 +30,13 @@
 
 DONE:
 - MOAR CSS
-  -
+  - shifted a few things arond (16-Oct-2012)
 
 - PARTY AT THE BACK
     -
 
 - I AM SO PRETTY
-    - 
+    - began public user page (17-Oct-2012)
 
 - PRE-PRETTIFICATION
 - begin css file for simple things (get sans-serif typeface, for starter) (15-Oct-2012)

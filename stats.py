@@ -80,7 +80,36 @@ def sleep_debt(user):
                 total_debt = total_debt + max([0.0, last_week_average - duration])
         #logging.error('calculated sleep debt!')
         return total_debt
-    
+
+def coffee_stats(user):
+    userid = str(user.key().id())
+    coffees = get_activities(user, 'coffee')
+    status = {}
+    if coffees:
+        status['last_cup'] = (datetime.datetime.utcnow() - coffees[0].when).total_seconds() / (3600.0)
+        
+        status['todays_total'] = 0
+        done = False
+        i = 0
+        today = datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)
+        while not done or i < len(coffees):
+            if (coffees[i].when + datetime.timedelta(hours = user.timezone)).day < today.day:
+                done = True
+            else:
+                logging.error(i)
+                status['todays_total'] += 1
+                i += 1
+                
+        daysince = (datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone) - coffees[-1].when).days
+        if daysince > 0:
+            status['alltime_average'] = len(coffees) / daysince
+        else:
+            status['alltime_average'] = 0
+            
+        return status
+    else:
+        return None
+
 def coffee_status(user):
     userid = str(user.key().id())
     coffees = db.GqlQuery('select * from ActivityModel where userid = :1 and name = :2 order by when desc limit 1', userid, 'coffee')

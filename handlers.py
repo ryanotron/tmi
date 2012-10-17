@@ -676,3 +676,13 @@ class UserpageHandler(SuperHandler):
             self.render('userpage.html', user = user)
         else:
             self.redirect('/') # go to user not found page
+            
+class PublicUserpageHandler(SuperHandler):
+    def get(self, username):
+        users = db.GqlQuery('select * from UserModel where username = :1 limit 1', username)
+        users = list(users)
+        if len(users) > 0:
+            user = users[0]
+            self.render('publicuserpage.html', user = user)
+        else:
+            self.redirect('/')

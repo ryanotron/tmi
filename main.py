@@ -20,5 +20,6 @@ app = webapp2.WSGIApplication([('/', h.MainpageHandler),
                                ('/panel/?', h.PanelHandler),
                                ('/activities/?', h.PresentActivityHandler),
                                ('/timedactivities/?', h.PresentTimedActivityHandler),
+                               ('/u/' + r'([a-zA-Z0-9_-]{4,20})/public/?', h.PublicUserpageHandler),
                                ('/u/' + r'([a-zA-Z0-9_-]{4,20})/?', h.UserpageHandler),],
                                debug = True)
