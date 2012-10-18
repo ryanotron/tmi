@@ -39,6 +39,40 @@ def get_sleeps(user):
         logging.error('sleep not found')
         return None
 
+def get_timed_activities(user, act_name, orderby = 'end', order = 'desc', number = 0):
+    userid = str(user.key().id())
+    query = 'select * from TimedActivityModel where userid = \'%s\' and name = \'%s\' order by \'%s\' \'%s\'' % (userid, act_name, orderby, order)
+    if number > 0:
+        query += ' limit %d' % number
+    activities = db.GqlQuery(query)
+    return list(activities)
+    
+def sleep_stats(user):
+    sleeps = get_timed_activities(user, 'sleep')
+    status = {}
+    
+    if not sleeps:
+        return None
+    else:
+        # latest sleep
+        status['latest_wake'] = sleeps[-1].end + datetime.timedelta(hours = user.timezone)
+        status['latest_duration'] = (sleeps[-1].end - sleeps[-1].start).total_seconds() / (3600.0) # hours
+        
+        # last week's average
+        now = datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)
+        startday = now - datetime.timedelta(days = 7 + now.weekday())
+        endday   = now - datetime.timedelta(days = now.weekday())
+        total_sleep = 0.0
+        for sleep in sleeps:
+            endtime = sleep.end + datetime.timedelta(hours = user.timezone)
+            if endtime > startday and endtime < endday:
+                duration = (sleep.end - sleep.start).total_seconds() / (60.0 * 60.0)
+                total_sleep = total_sleep + duration
+        status['last_week_mean'] =  total_sleep / 7.0
+        
+        # this week's debt
+        
+        
 def last_week_average_sleep(user):
     #logging.error('calculating average sleep...')
     sleeps = get_sleeps(user)
@@ -107,6 +141,17 @@ def coffee_stats(user):
         else:
             status['alltime_average'] = 0
             
+        # make a 2D list of days ago and cups of coffee
+        # this will be used for making coffee chart
+        totaldays = daysince + 1
+        dailycups = [0 for i in range(totaldays)]
+        logging.error('totaldays %d\n' % totaldays)
+        for coffee in coffees:
+            daysago = -1*((coffee.when + datetime.timedelta(hours = user.timezone)).day - today.day)
+            logging.error(daysago)
+            dailycups[daysago] += 1
+        status['daily_cups'] = dailycups
+        logging.error(dailycups)
         return status
     else:
         return None
