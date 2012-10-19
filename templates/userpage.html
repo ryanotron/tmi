@@ -33,6 +33,12 @@
     {% else %}
         <p>{{user.salutation}} {{user.realname}} has not recorded any sleep time yet. We cannot know if {{user.salutation}} {{user.realname}} is well rested or not.</p>
     {% endif %}
+    
+    {% if sleep_stats -%}
+        <p>{{user.salutation}} {{user.realname}} woke up at {{sleep_stats['latest_waketime'].strftime('%H:%M')}} after {{'%2.2f' % sleep_stats['latest_duration']}} hours of sleep. {{user.nom_pronoun}} slept for, on average, {{'%2.2f' % sleep_stats['lastweek_average']}} hours per day last week, and for {{'%2.2f' % sleep_stats['alltime_average']}} hours all time. To maintain {{user.pos_determi}} all time average {{user.salutation}} {{user.realname}} has a sleep debt of {{'%2.2f' % sleep_stats['debt_by_alltime']}} hours.</p>
+    {% else -%}
+        <p>{{user.salutation}} {{user.realname}} has not recorded any sleep time yet. Perhaps {{user.nom_pronoun}} has cracked the secret for not needing sleep and is cruelly withholding it from us?</p>
+    {% endif %}
     </div>
     
     <div class="Sub_BlockWrapper">

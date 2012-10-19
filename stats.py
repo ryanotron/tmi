@@ -41,7 +41,7 @@ def get_sleeps(user):
 
 def get_timed_activities(user, act_name, orderby = 'end', order = 'desc', number = 0):
     userid = str(user.key().id())
-    query = 'select * from TimedActivityModel where userid = \'%s\' and name = \'%s\' order by \'%s\' \'%s\'' % (userid, act_name, orderby, order)
+    query = 'select * from TimedActivityModel where userid = \'%s\' and name = \'%s\' order by %s %s' % (userid, act_name, orderby, order)
     if number > 0:
         query += ' limit %d' % number
     activities = db.GqlQuery(query)
@@ -52,26 +52,53 @@ def sleep_stats(user):
     status = {}
     
     if not sleeps:
+        logging.error('no sleep found')
         return None
     else:
+        # pre-processing
+        status = {}
+        timeshift = datetime.timedelta(hours = user.timezone)
+        today = datetime.datetime.utcnow() + timeshift
+        
+        for i in range(len(sleeps)):
+            sleeps[i].end   = sleeps[i].end + timeshift
+            sleeps[i].start = sleeps[i].start + timeshift # from now on, sleeps are in user's timezone
+        
         # latest sleep
-        status['latest_wake'] = sleeps[-1].end + datetime.timedelta(hours = user.timezone)
-        status['latest_duration'] = (sleeps[-1].end - sleeps[-1].start).total_seconds() / (3600.0) # hours
+        status['latest_waketime'] = sleeps[0].end
+        status['latest_duration'] = (sleeps[0].end - sleeps[0].start).total_seconds() / 3600.0
         
-        # last week's average
-        now = datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)
-        startday = now - datetime.timedelta(days = 7 + now.weekday())
-        endday   = now - datetime.timedelta(days = now.weekday())
-        total_sleep = 0.0
+        # last week's average and all time average and this week's total
+        lastweek_total = 0.0
+        thisweek_total = 0.0
+        alltime_total  = 0.0
+        lastweek_start = today - datetime.timedelta(today.weekday() + 7)
+        lastweek_end   = today - datetime.timedelta(today.weekday())
+        
         for sleep in sleeps:
-            endtime = sleep.end + datetime.timedelta(hours = user.timezone)
-            if endtime > startday and endtime < endday:
-                duration = (sleep.end - sleep.start).total_seconds() / (60.0 * 60.0)
-                total_sleep = total_sleep + duration
-        status['last_week_mean'] =  total_sleep / 7.0
+            duration = (sleep.end - sleep.start).total_seconds() / 3600.0
+            alltime_total += duration
+            if sleep.end < lastweek_end and sleep.end > lastweek_start:
+                lastweek_total += duration
+                logging.error('lastweek total %2.2f' % lastweek_total)
+            elif sleep.end > lastweek_end:
+                thisweek_total += duration
+                
+        totalday = (today - sleeps[-1].end).days
+        if totalday > 0:
+            status['alltime_average'] = alltime_total / totalday
+        else:
+            status['alltime_average'] = 0
+            
+        if (today - sleeps[-1].end).days < 7:
+            status['lastweek_average'] = 0
+        else:
+            status['lastweek_average'] = lastweek_total / 7.0
         
-        # this week's debt
-        
+        # sleep debts
+        status['debt_by_lastweek'] = status['lastweek_average'] * today.weekday() - thisweek_total
+        status['debt_by_alltime']  = status['alltime_average'] * today.weekday() - thisweek_total
+        return status
         
 def last_week_average_sleep(user):
     #logging.error('calculating average sleep...')
@@ -119,10 +146,10 @@ def coffee_stats(user):
     userid = str(user.key().id())
     coffees = get_activities(user, 'coffee')
     status = {}
-    logging.error('coffee stats requested')
+    #logging.error('coffee stats requested')
     if coffees:
         status['last_cup'] = (datetime.datetime.utcnow() - coffees[0].when).total_seconds() / (3600.0)
-        logging.error('last cup retrieved')        
+        #logging.error('last cup retrieved')        
         status['todays_total'] = 0
         done = False
         i = 0
@@ -131,7 +158,7 @@ def coffee_stats(user):
             if (coffees[i].when + datetime.timedelta(hours = user.timezone)).day < today.day:
                 done = True
             else:
-                logging.error('we are now at record number %d' % i)
+                #logging.error('we are now at record number %d' % i)
                 status['todays_total'] += 1
                 i += 1
                 
@@ -145,13 +172,13 @@ def coffee_stats(user):
         # this will be used for making coffee chart
         totaldays = daysince + 1
         dailycups = [0 for i in range(totaldays)]
-        logging.error('totaldays %d\n' % totaldays)
+        #logging.error('totaldays %d\n' % totaldays)
         for coffee in coffees:
             daysago = -1*((coffee.when + datetime.timedelta(hours = user.timezone)).day - today.day)
-            logging.error(daysago)
+            #logging.error(daysago)
             dailycups[daysago] += 1
         status['daily_cups'] = dailycups
-        logging.error(dailycups)
+        #logging.error(dailycups)
         return status
     else:
         return None

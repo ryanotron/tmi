@@ -674,8 +674,11 @@ class UserpageHandler(SuperHandler):
         if len(users) > 0:
             user = users[0]
             coffee_stats = stats.coffee_stats(user)
+            sleep_stats  = stats.sleep_stats(user)
+            logging.error(sleep_stats)
             self.render('userpage.html', user = user,
-                                         coffee_stats = coffee_stats,)
+                                         coffee_stats = coffee_stats,
+                                         sleep_stats = sleep_stats,)
         else:
             self.redirect('/') # go to user not found page
             
