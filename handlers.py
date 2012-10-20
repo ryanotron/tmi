@@ -356,7 +356,61 @@ class PostTimedActivityHandler(SuperHandler):
                 self.redirect('/login')
         else:
             self.redirect('/login')
-            
+
+class PostBatchTimedActivityHandler(SuperHandler):
+    def post(self):
+        userid = self.request.cookies.get('userid')
+        if userid:
+            userid = utils.verify_cookie(userid)
+            if userid:
+                user = utils.validate_user(userid)
+                if user:
+                    activities = self.request.get('batchactivities')
+                    if activities:
+                        activities = activities.split('\n')
+                        for act in activities:
+                            act = [elem.strip() for elem in act.split('\t')]
+                            try:
+                                name = act[0]
+
+                                logging.error('begin parsing start time')
+                                start = act[1]
+                                logging.error('start is '+ start)
+                                startmatch = constants.datetime_re.match(start)
+                                logging.error(str(startmatch))
+                                D,M,Y,h,m = [int(elem) for elem in startmatch.groups()]
+                                start = datetime.datetime(Y, M, D, h, m)
+
+                                logging.error('begin parsing end time')
+                                end = act[2]
+                                logging.error('end is ' + end)
+                                endmatch = constants.datetime_re.match(end)
+                                logging.error(str(endmatch))
+                                D,M,Y,h,m = [int(elem) for elem in endmatch.groups()]
+                                logging.error(str([D,M,Y,h,m]))
+                                end = datetime.datetime(Y, M, D, h, m)
+                                logging.error(end)
+
+                                new_act = models.TimedActivityModel(userid = userid,
+                                                                name = name,
+                                                                start = start - datetime.timedelta(hours = user.timezone),
+                                                                end = end - datetime.timedelta(hours = user.timezone))
+                                new_act.put()
+                                logging.error('put act into database')
+                                user.last_seen = datetime.datetime.utcnow()
+                                user.put()
+                                logging.error('updated user in database')
+                            except:
+                                logging.error('error!' + str(act))
+                                self.redirect('/panel')
+                                
+                else:
+                    self.redirect('/login')
+            else:
+                self.redirect('/login')
+        else:
+            self.redirect('/login')
+
 class PostExpenseHandler(SuperHandler):
     def post(self):
         userid = self.request.cookies.get('userid')
