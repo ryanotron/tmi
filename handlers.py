@@ -280,6 +280,55 @@ class InsPostActivityHandler(SuperHandler):
                 self.redirect('login')
         else:
             self.redirect('login')
+
+class PostBatchActivityHandler(SuperHandler):
+    def post(self):
+        userid = self.request.cookies.get('userid')
+        if userid:
+            userid = utils.verify_cookie(userid)
+            if userid:
+                user = utils.validate_user(userid)
+                if user:
+                    activities = self.request.get('activities')
+                    if activities:
+                        activities = activities.split('\n')
+                        for activity in activities:
+                            activity = [elem.strip() for elem in activity.split('\t')]
+                            if len(activity) >= 2:
+                                name = activity[0]
+                                when = activity[1]
+                                logging.error('when is ' + when)
+                                try:
+                                    whenmatch = constants.datetime_re.match(when)
+                                    logging.error(str(whenmatch))
+                                    D,M,Y,h,m = [int(elem) for elem in whenmatch.groups()]
+                                    when = datetime.datetime(Y, M, D, h, m)
+                                    logging.error(when)
+                                except:
+                                    logging.error('error parsing datetime')
+                                    self.redirect('/panel')
+
+                                new_act = models.ActivityModel(userid = userid,
+                                                               name = name,
+                                                               when = when - datetime.timedelta(hours = user.timezone))
+                                new_act.put()
+
+                                user.last_seen = datetime.datetime.now()
+                                user.put()
+                            else:
+                                logging.error('wrong format')
+                                self.redirect('/panel')
+                    else:
+                        self.redirect('/panel')
+                else:
+                    logging.error('failed to validated user')
+                    self.redirect('/login')
+            else:
+                logging.error('failed to verify cookie')
+                self.redirect('/login')
+        else:
+            logging.error('failed to find cookie')
+            self.redirect('/login')
             
 class PostTimedActivityHandler(SuperHandler):
     def post(self):
@@ -730,6 +779,7 @@ class UserpageHandler(SuperHandler):
             coffee_stats = stats.coffee_stats(user)
             sleep_stats  = stats.sleep_stats(user)
             logging.error(sleep_stats)
+            logging.error(coffee_stats['daily_cups'])
             self.render('userpage.html', user = user,
                                          coffee_stats = coffee_stats,
                                          sleep_stats = sleep_stats,)

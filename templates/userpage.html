@@ -1,5 +1,32 @@
 ﻿{% extends 'basepage.html' %}
 
+{% block head %}
+<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+{% if coffee_stats -%}
+{% set daily_cups = coffee_stats['daily_cups'] -%}
+<script type="text/javascript">
+    google.load('visualization','1', {packages:['corechart']});
+    google.setOnLoadCallback(drawChart)
+    function drawChart() {
+        var data = new google.visualization.DataTable();
+        data.addColumn('number', 'days ago');
+        data.addColumn('number', 'cups');
+        {% for cup in daily_cups -%}
+        data.addRow([{{0 - (loop.length - 1 -loop.index0)}}, {{cup}}]);
+        {% endfor %}
+        var options = {'width': 500,
+                       'height': 400,
+                       'lineWidth': 1,
+                       hAxis: {format: '##', title: 'Days ago'},
+                       vAxis: {format: '##', title: 'Cups'}};
+
+        var chart = new google.visualization.ScatterChart(document.getElementById('coffee_chart'));
+        chart.draw(data, options);
+    }
+</script>
+{% endif %}
+{% endblock %}
+
 {% block content %}
 <div class="BlockWrapper" id="PersonalInfo">
     <h2>Too much information on</h2>
@@ -26,14 +53,6 @@
     {% set meal_status = stats.meal_status(user) -%}
     <div class="Sub_BlockWrapper">
         <h3>Sleep</h3>
-    {% if sleep_status['wake_time'] %}
-        <p>Woke up at {{sleep_status['wake_time'].strftime('%H:%M')}} after {{'%1.2f' % sleep_status['sleep_hours']}} hours of sleep.</p>
-        <p>Last week's average sleep per day was {{'%1.2f' % sleep_average}} hours. To maintain this average, {{user.salutation}} {{user.realname}} has a sleep debt of {{'%1.2f' % sleep_debt}} hours</p>
-        <p>All time average sleep per day is {{'%1.2f' % sleep_average_alltime}} hours.</p>
-    {% else %}
-        <p>{{user.salutation}} {{user.realname}} has not recorded any sleep time yet. We cannot know if {{user.salutation}} {{user.realname}} is well rested or not.</p>
-    {% endif %}
-    
     {% if sleep_stats -%}
         <p>{{user.salutation}} {{user.realname}} woke up at {{sleep_stats['latest_waketime'].strftime('%H:%M')}} after {{'%2.2f' % sleep_stats['latest_duration']}} hours of sleep. {{user.nom_pronoun}} slept for, on average, {{'%2.2f' % sleep_stats['lastweek_average']}} hours per day last week, and for {{'%2.2f' % sleep_stats['alltime_average']}} hours all time. To maintain {{user.pos_determi}} all time average {{user.salutation}} {{user.realname}} has a sleep debt of {{'%2.2f' % sleep_stats['debt_by_alltime']}} hours.</p>
     {% else -%}
@@ -48,6 +67,11 @@
         {% else -%}
             <p>{{user.salutation}} {{user.realname}} has not shared {{user.pos_determi}} habits yet. Could {{user.nom_pronoun}} be a milk drinker?</p>
         {% endif %}
+
+        <div class="ChartWrapper">
+            <h3>{{user.salutation}} {{user.realname}}'s daily cup of coffee
+            <div id="coffee_chart"></div>
+        </div>
     </div>
     
     <div class="Sub_BlockWrapper">

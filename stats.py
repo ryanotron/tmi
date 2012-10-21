@@ -177,6 +177,7 @@ def coffee_stats(user):
             daysago = -1*((coffee.when + datetime.timedelta(hours = user.timezone)).day - today.day)
             #logging.error(daysago)
             dailycups[daysago] += 1
+        dailycups.reverse()
         status['daily_cups'] = dailycups
         #logging.error(dailycups)
         return status

@@ -9,6 +9,12 @@ textarea {
     font-size: 10pt;
 }
 
+div.Sub_BlockWrapper {
+    border: 1px dashed green;
+    padding: 5px;
+    margin: 5px;
+}
+
 div.BlockWrapper {
     border: 1px dashed red;
     padding: 10px;

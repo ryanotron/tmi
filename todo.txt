@@ -34,6 +34,8 @@ DONE:
   - shifted a few things arond (16-Oct-2012)
 
 - PARTY AT THE BACK
+    - added batch activity recorder (21-Oct-2012)
+    - added batch timed activity recorder (20-Oct-2012)
     - consolidated coffee status functions in stats.py (17-Oct-2012)
     - add cups of coffee so far today stats
 
