@@ -1,0 +1,20 @@
+<script type="text/javascript">
+    google.load('visualization','1', {packages:['corechart']});
+    google.setOnLoadCallback(drawChart)
+    function drawChart() {
+        var data = new google.visualization.DataTable();
+        data.addColumn('number', 'days ago');
+        data.addColumn('number', 'cups');
+        {% for cup in daily_cups -%}
+        data.addRow([{{0 - (loop.length - 1 -loop.index0)}}, {{cup}}]);
+        {% endfor %}
+        var options = {'width': 500,
+                       'height': 400,
+                       'lineWidth': 1,
+                       hAxis: {format: '##', title: 'Days ago'},
+                       vAxis: {format: '##', title: 'Cups'}};
+
+        var chart = new google.visualization.ScatterChart(document.getElementById('coffee_chart'));
+        chart.draw(data, options);
+    }
+</script>

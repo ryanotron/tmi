@@ -1,5 +1,6 @@
 import utils, models, constants, stats
 from google.appengine.ext import db
+from google.appengine.api import images
 import webapp2
 import datetime, logging
 
@@ -166,6 +167,7 @@ class ProfileHandler(SuperHandler):
                 new_currency = self.request.get('currency')
                 new_email    = self.request.get('email')
                 new_gender   = self.request.get('gender')
+                new_photo    = self.request.get('photo')
                 
                 updated = False
                 
@@ -199,6 +201,11 @@ class ProfileHandler(SuperHandler):
                         user.pos_determi = 'its'
                         user.nom_pronoun = 'it'
                     updated = True
+
+                if new_photo:
+                    new_photo = images.resize(new_photo, height = 150)
+                    user.photo = db.Blob(new_photo)
+                    updated = True
                     
                 if updated:
                     user.last_seen = datetime.datetime.utcnow()
@@ -211,6 +218,16 @@ class ProfileHandler(SuperHandler):
                 self.redirect('/login')
         else:
             self.redirect('/login')
+
+class ImageHandler(SuperHandler):
+    def get(self):
+        user = db.get(self.request.get('img_key'))
+        logging.error(str(user))
+        if user.photo:
+            self.response.headers['Content-Type'] = 'image/png'
+            self.response.out.write(user.photo)
+        else:
+            logging.error('image not found')
 
 class PostActivityHandler(SuperHandler):
     def post(self):

@@ -14,6 +14,7 @@ class UserModel(db.Model):
     pos_pronoun = db.StringProperty() # possessive pronoun
     nom_pronoun = db.StringProperty() # nominative pronoun
     pos_determi = db.StringProperty() # possessive determinant
+    photo       = db.BlobProperty()
 
 class ActivityModel(db.Model):
     userid = db.StringProperty(required = True)

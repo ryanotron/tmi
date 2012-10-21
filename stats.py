@@ -74,6 +74,8 @@ def sleep_stats(user):
         alltime_total  = 0.0
         lastweek_start = today - datetime.timedelta(today.weekday() + 7)
         lastweek_end   = today - datetime.timedelta(today.weekday())
+
+        status['sleep_list'] = []
         
         for sleep in sleeps:
             duration = (sleep.end - sleep.start).total_seconds() / 3600.0

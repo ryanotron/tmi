@@ -2,7 +2,7 @@
 
 {% block content %}
 <h2>Comrade {{user.username}}</h2>
-<form method="post">
+<form method="post" enctype="multipart/form-data">
     <table>
         <tr>
             <td>Salutation
@@ -25,6 +25,9 @@
         <tr>
             <td>currency
             <td><input type="text" name="currency" value="{{user.currency}}">
+        <tr>
+            <td>photo
+            <td><input type="file" name="photo">
         <tr>
             <td><input type="submit" value="save">
     </table>
