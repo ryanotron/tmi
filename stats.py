@@ -1,4 +1,4 @@
-﻿import datetime, logging, numpy
+﻿import datetime, logging
 from google.appengine.ext import db
 
 def get_timed_activities(user, act_name, orderby = 'end', order = 'desc', number = 0):

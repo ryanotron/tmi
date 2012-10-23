@@ -204,7 +204,12 @@ class ProfileHandler(SuperHandler):
 
                 if new_photo:
                     new_photo = images.resize(new_photo, height = 150)
-                    user.photo = db.Blob(new_photo)
+                    new_photo = models.ImageModel(userid = userid,
+                                                  uploaded = datetime.datetime.utcnow(),
+                                                  image = db.Blob(new_photo))
+                    new_photo.put()
+                    img_key = new_photo.key()
+                    user.photo_key = str(img_key)
                     updated = True
                     
                 if updated:
@@ -221,11 +226,11 @@ class ProfileHandler(SuperHandler):
 
 class ImageHandler(SuperHandler):
     def get(self):
-        user = db.get(self.request.get('img_key'))
-        logging.error(str(user))
-        if user.photo:
+        image = db.get(self.request.get('img_key'))
+        #user = db.get(self.request.get('img_key'))
+        if image.image:
             self.response.headers['Content-Type'] = 'image/png'
-            self.response.out.write(user.photo)
+            self.response.out.write(image.image)
         else:
             logging.error('image not found')
 
