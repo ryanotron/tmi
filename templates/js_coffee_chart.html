@@ -3,18 +3,18 @@
     google.setOnLoadCallback(drawChart)
     function drawChart() {
         var data = new google.visualization.DataTable();
-        data.addColumn('number', 'days ago');
+        data.addColumn('date', 'Date');
         data.addColumn('number', 'cups');
         {% for cup in daily_cups -%}
-        data.addRow([{{0 - (loop.length - 1 -loop.index0)}}, {{cup}}]);
+        data.addRow([new Date({{cup[0].year}}, {{cup[0].month - 1}}, {{cup[0].day}}), {{cup[1]}}]);
         {% endfor %}
         var options = {'width': 500,
                        'height': 400,
                        'lineWidth': 1,
-                       hAxis: {format: '##', title: 'Days ago'},
+                       'pointSize': 5,
                        vAxis: {format: '##', title: 'Cups'}};
 
-        var chart = new google.visualization.ScatterChart(document.getElementById('coffee_chart'));
+        var chart = new google.visualization.LineChart(document.getElementById('coffee_chart'));
         chart.draw(data, options);
     }
 </script>

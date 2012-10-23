@@ -1,22 +1,19 @@
 <script type="text/javascript">
-    google.load('visualization','1', {packages:['corechart']});
     google.setOnLoadCallback(drawSleepChart);
     function drawSleepChart() {
         var data = new google.visualization.DataTable();
         data.addColumn('date', 'Date');
-        data.addColumn('number', 'sleep time');
-        data.addColumn('number', 'sleep time');
-        data.addColumn('number', 'sleep time');
-        data.addColumn('number', 'sleep time');
+        data.addColumn('number', 'sleep hours');
 
-        {% for sleep in sleep_stats['sleep_list'] %}
-        data.addRow([new Date(sleep['Y'], sleep['M'], sleep['D']), sleep['start_h'], sleep['start_h']. sleep['end_h'], sleep['end_h']);
-        {% endfor %}
+        {% for sleep in sleep_stats['sleep_list'] -%}
+        data.addRow([new Date({{sleep[0].year}}, {{sleep[0].month - 1}}, {{sleep[0].day}}), {{'%2.2f' % sleep[1]}}]);
+        {% endfor -%}
 
         var options = {width: 500,
                        height: 400,
-                       vAxis: {direction: -1},};
-        var chart = new google.visualization.CandleStickChart(document.getElementById('sleep_chart'));
+                       pointSize: 3,
+                       lineWidth: 1,};
+        var chart = new google.visualization.LineChart(document.getElementById('sleep_chart'));
         chart.draw(data, options);
     }
 </script>

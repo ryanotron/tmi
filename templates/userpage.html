@@ -2,12 +2,14 @@
 
 {% block head %}
 <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+<script type="text/javascript">google.load('visualization','1', {packages:['corechart']});</script>
 {% if coffee_stats -%}
 {% set daily_cups = coffee_stats['daily_cups'] -%}
 {% include 'js_coffee_chart.html' %}
 {% endif %}
 
 {% if sleep_stats -%}
+{% set sleep_list = sleep_stats['sleep_list'] -%}
 {% include 'js_sleep_chart.html' %}
 {% endif %}
 {% endblock %}
@@ -28,16 +30,7 @@
 </div>
 
 <div class="BlockWrapper" id="Energy">
-    <h2>Energy</h2>
-    {% set sleep_status = stats.sleep_status(user) -%}
-    
-    {% set sleep_average = stats.last_week_average_sleep(user) -%}
-    {% set sleep_debt = stats.sleep_debt(user) -%}
-    {% set sleep_average_alltime = stats.all_time_average_sleep(user) -%}
-    
-    {% set coffee_status = stats.coffee_status(user) -%}
-    {% set coffee_daily_average = stats.average_coffee_per_day(user) -%}
-    
+    <h2>Energy</h2>    
     {% set meal_status = stats.meal_status(user) -%}
     <div class="Sub_BlockWrapper">
         <h3>Sleep</h3>
@@ -46,6 +39,10 @@
     {% else -%}
         <p>{{user.salutation}} {{user.realname}} has not recorded any sleep time yet. Perhaps {{user.nom_pronoun}} has cracked the secret for not needing sleep and is cruelly withholding it from us?</p>
     {% endif %}
+        <div class="ChartWrapper">
+            <h3>{{user.salutation}} {{user.realname}}'s sleep hours</h3>
+            <div id="sleep_chart">
+        </div>
     </div>
     
     <div class="Sub_BlockWrapper">
