@@ -1,4 +1,6 @@
-﻿TODO:
+﻿checking new battlestation
+
+TODO:
 - PROJECT MANAGEMENT
   - categorize todo list (this file)
   
