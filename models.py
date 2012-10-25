@@ -65,4 +65,24 @@ class GuestMessageModel(db.Model):
     message   = db.TextProperty()
     when      = db.DateTimeProperty()
     
+class BookLibraryModel(db.Model):
+    userid = db.StringProperty(required = True)
+    title  = db.StringProperty()
+    author = db.StringProperty()
+    isbn   = db.StringProperty()
+    doi    = db.StringProperty()
+    added  = db.DateTimeProperty()
+    start  = db.DateTimeProperty()
+    finish = db.DateTimeProperty()
+    active = db.BooleanProperty()
+    image  = db.StringProperty()
     
+class GameLibraryModel(db.Model):
+    userid = db.StringProperty()
+    title  = db.StringProperty()
+    added  = db.DateTimeProperty()
+    start  = db.DateTimeProperty()
+    finish = db.DateTimeProperty()
+    active = db.BooleanProperty()
+    platform = db.StringProperty()
+    image = db.StringProperty()

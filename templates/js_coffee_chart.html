@@ -8,8 +8,7 @@
         {% for cup in daily_cups -%}
         data.addRow([new Date({{cup[0].year}}, {{cup[0].month - 1}}, {{cup[0].day}}), {{cup[1]}}]);
         {% endfor %}
-        var options = {'width': 500,
-                       'height': 400,
+        var options = {'height': 400,
                        'lineWidth': 1,
                        'pointSize': 5,
                        vAxis: {format: '##', title: 'Cups'}};

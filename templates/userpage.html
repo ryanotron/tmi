@@ -43,7 +43,7 @@
     {% endif %}
         <div class="ChartWrapper">
             <h3>{{user.salutation}} {{user.realname}}'s sleep hours</h3>
-            <div id="sleep_chart">
+            <div id="sleep_chart"></div>
         </div>
     </div>
     
@@ -63,11 +63,12 @@
     
     <div class="Sub_BlockWrapper">
         <h3>Meal</h3>
-    {% if meal_status['meal_time'] %}
-        <p>Latest meal was a {{meal_status['latest_category']}} at {{meal_status['meal_time'].strftime('%d/%m/%Y %H:%M')}}, with menu {{meal_status['latest_menu']}}</p>
-    {% else %}
-        <p>{{user.salutation}} {{user.realname}} has not recorded any meal yet. We cannot know if {{user.salutation}} {{user.realname}} is well fed or not</p>
-    {% endif %}
+        {% if meal_stats -%}
+            <p>The menu of {{user.salutation}} {{user.realname}}'s latest meal was {{meal_stats['latest_meal'].menu}}, {{user.nom_pronoun}} had it on {{meal_stats['latest_meal'].when.strftime('%d/%m/%Y %H:%M')}}.</p>
+            <p>{{user.salutation}} {{user.realname}} tends to have lunch {{'%2.2f' % meal_stats['mu_br_to_lu']}} hours after breakfast, and dinner {{'%2.2f' % meal_stats['mu_lu_to_di']}} hours after lunch.<p>
+        {% else %}
+            <p>{{user.salutation}} {{user.realname}} has not recorded any meal yet. Perhaps {{user.nom_pronoun}} has discovered the secret of not needing food to survive and is cruelly withholding it from us. Or perhaps {{user.nom_pronoun}} has died of starvation.</p>
+        {% endif %}
     </div>
 </div>
 
@@ -81,20 +82,17 @@
     {% set haircut_interval = stats.average_time_between_activities(user, 'cut hair') / (60.0 * 60.0 * 24.0) %}
     
     {% if shower_status['timelatest'] %}
-        <p>{{user.salutation}} {{user.realname}} last showered {{'%2.2f' % (shower_status['timesince'] / (60.0 * 60.0))}} hours ago.</p>
-        <p>{{user.salutation}} {{user.realname}} usually showers every {{'%2.2f' % shower_interval}} hours</p>
+        <p>{{user.salutation}} {{user.realname}} last showered {{'%2.2f' % (shower_status['timesince'] / (60.0 * 60.0))}} hours ago, {{user.nom_pronoun}} usually showers every {{'%2.2f' % shower_interval}} hours</p>
     {% else %}
         <p>{{user.salutation}} {{user.realname}} has not recorded to have showered yet. We can only hope that {{user.salutation}} {{user.realname}} is not stinky</p>
     {% endif %}
     {% if shave_status['timelatest'] %}
-        <p>{{user.salutation}} {{user.realname}} last shaved {{'%2.2f' % (shave_status['timesince'] / (60.0 * 60.0 * 24))}} day(s) ago.</p>
-        <p>{{user.salutation}} {{user.realname}} usually shaves every {{'%1.2f' % shave_interval}} days</p>
+        <p>{{user.salutation}} {{user.realname}} last shaved {{'%2.2f' % (shave_status['timesince'] / (60.0 * 60.0 * 24))}} day(s) ago, {{user.nom_pronoun}} usually shaves every {{'%1.2f' % shave_interval}} days</p>
     {% else %}
         <p>{{user.salutation}} {{user.realname}} has not recorded to have shaved yet. Perhaps {{user.salutation}} {{user.realname}} is trying to grow a manscape?</p>
     {% endif %}
     {% if haircut_status['timelatest'] %}
-        <p>{{user.salutation}} {{user.realname}} last got a haircut {{'%2.2f' % (haircut_status['timesince'] / (60.0 * 60.0 * 24))}} day(s) ago.</p>
-        <p>{{user.salutation}} {{user.realname}} usually gets a haircut every {{'%1.2f' % haircut_interval}} days</p>
+        <p>{{user.salutation}} {{user.realname}} last got a haircut {{'%2.2f' % (haircut_status['timesince'] / (60.0 * 60.0 * 24))}} day(s) ago, {{user.nom_pronoun}} usually gets a haircut every {{'%1.2f' % haircut_interval}} days</p>
     {% else %}
         <p>{{user.salutation}} {{user.realname}} has not recorded any haircut yet. Perhaps {{user.salutation}} {{user.realname}} is trying to grow beautiful long locks?</p>
     {% endif %}

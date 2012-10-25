@@ -1,9 +1,10 @@
 ﻿body {
     font-family: Helvetica, Verdana, Arial, sans-serif;
+    font-size: 12pt;
 }
 
 textarea {
-    width: 100%;
+    width: 75%;
     height: 10%;
     font-family: Helvetica, Verdana, Arial, sans-serif;
     font-size: 10pt;
@@ -31,20 +32,24 @@ div.Sub_BlockWrapper {
     margin: 5px;
 }
 
+div.ChartWrapper {
+    width: 80%;
+}
+
 div.BlockWrapper {
     border: 1px dashed red;
-    width: auto;
-    padding: 10px;
+    width: 80%;
+    padding: 5px;
     margin: 5px;
     display: absolute;
 }
 
 div.PanelWrapper {
     float: left;
-    width: 50%;
+    width: 80%;
     border: 1px solid black;
     padding: 5px;
-    margin: 2px;
+    margin: 5px;
 }
 
 #Shortcuts form {
@@ -60,9 +65,13 @@ h2 {
     margin: 1px;
 }
 
+div.PanelWrapper form {
+    background-color: ffffee;
+}
+
 form {
-    float: none;
-    margin: 10px;
+    margin: 5px;
+    padding: 5px;
 }
 
 input.Date {
@@ -75,10 +84,6 @@ input.Time {
 
 input.Currency {
     width: 5ch;
-}
-
-form.GuestComment textarea {
-    width: 50%;
 }
 
 table, th, td {

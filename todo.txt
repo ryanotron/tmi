@@ -3,8 +3,10 @@
   - categorize todo list (this file)
   
 - MOAR CSS
+  - adjusted panel page width
   
 - PARTY AT THE BACK
+  - batch meal recorder
   - caching
   - think of a better way to do stats (minimize database hits!)
     - do stats in batch, store in UserModel?
@@ -18,7 +20,6 @@
     - for meal menus
     - for travel origin/destinations
     - think of a way to add photos to everything!
-  - batch recorders
   
 - I AM SO PRETTY
   - arrange panel more logically
@@ -28,9 +29,11 @@
 
 DONE:
 - MOAR CSS
+  - some panel color adjustments (25-Oct-2012)
   - shifted a few things around (16-Oct-2012)
 
 - PARTY AT THE BACK
+    - added time-between-meal calculator (25-Oct-2012)
     - added sleep hours chart (23-Oct-2012)
     - improved sleep stats (23-Oct-2012)
     - fixed coffee stats (23-Oct-2012)
@@ -42,6 +45,7 @@ DONE:
 
 - I AM SO PRETTY
     - began public user page (17-Oct-2012)
+    - changed chart width
 
 - PRE-PRETTIFICATION
 - begin css file for simple things (get sans-serif typeface, for starter) (15-Oct-2012)

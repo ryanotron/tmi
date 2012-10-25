@@ -63,7 +63,7 @@
         <form action="/inspostactivity" method="post">
             <input type="hidden" name="activity_name" value="coffee">
             <input type="submit" value="I just had coffee!">
-        </form>
+        </form><hr>
         <form action="/posttimedactivity" method="post">
             <input type="hidden" name="act_name" value="sleep">
             Slept at <input class="Date" type="text" name="act_start_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone - 6.0)).strftime('%d/%m/%Y')}}">, 
@@ -72,7 +72,7 @@
             <input class="Time" type="text" name="act_end_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}"><br>
             for <input type="text" name="act_duration"> hours<br>
             <input type="submit">
-        </form>
+        </form><hr>
         <form action="/postmeal" method="post">
             I had <select name="meal_category">
                 <option value="breakfast">Breakfast</option>
@@ -97,7 +97,8 @@
             Shower 
             <input class="Date" type="text" name="activity_day" value="{{(datetime.datetime.today() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}"> 
             <input class="Time" type="text" name="activity_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}">
-            <input type="hidden" name="activity_name" value="shower">
+            <input type="hidden" name="activity_name" value="shower"><br>
+            <input type="submit">
         </form><br>
         </form>
     </div>
