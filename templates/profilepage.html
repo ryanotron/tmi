@@ -13,9 +13,22 @@
         <tr>
             <td>Gender
             <td>
-                <input type="radio" name="gender" value="male">male
-                <input type="radio" name="gender" value="female">female
-                <input type="radio" name="gender" value="unspecified" checked>unspecified
+                {% if user.gender == 'male' -%}
+                    {% set m_checked = 'checked' -%}
+                    {% set f_checked = '' -%}
+                    {% set u_checked = '' -%}
+                {% elif user.gender == 'female' -%}
+                    {% set m_checked = '' -%}
+                    {% set f_checked = 'checked' -%}
+                    {% set u_checked = '' -%}
+                {% else %}
+                    {% set m_checked = '' -%}
+                    {% set f_checked = '' -%}
+                    {% set u_checked = 'checked' -%}
+                {% endif %}
+                <input type="radio" name="gender" value="male" {{m_checked}}>male
+                <input type="radio" name="gender" value="female" {{f_checked}}>female
+                <input type="radio" name="gender" value="unspecified" {{u_checked}}>unspecified
         <tr>
             <td>email
             <td><input type="text" name="email" value="{{user.email}}">

@@ -116,9 +116,9 @@ class LoginHandler(SuperHandler):
         if username and password:
             user = db.GqlQuery('select * from UserModel where username = :1 limit 1', username)
             user = list(user)
-            logging.error('hit database')
+            #logging.error('hit database')
             if len(user) > 0:
-                logging.error('user found')
+                #logging.error('user found')
                 user = user[0]
                 if utils.verify_password(username, password, user.hashedpw):
                     userid = str(user.key().id())
@@ -204,7 +204,12 @@ class ProfileHandler(SuperHandler):
 
                 if new_photo:
                     new_photo = images.resize(new_photo, height = 150)
-                    user.photo = db.Blob(new_photo)
+                    new_photo = models.ImageModel(userid = userid,
+                                                  uploaded = datetime.datetime.utcnow(),
+                                                  image = db.Blob(new_photo))
+                    new_photo.put()
+                    img_key = new_photo.key()
+                    user.photo_key = str(img_key)
                     updated = True
                     
                 if updated:
@@ -221,11 +226,11 @@ class ProfileHandler(SuperHandler):
 
 class ImageHandler(SuperHandler):
     def get(self):
-        user = db.get(self.request.get('img_key'))
-        logging.error(str(user))
-        if user.photo:
+        image = db.get(self.request.get('img_key'))
+        #user = db.get(self.request.get('img_key'))
+        if image.image:
             self.response.headers['Content-Type'] = 'image/png'
-            self.response.out.write(user.photo)
+            self.response.out.write(image.image)
         else:
             logging.error('image not found')
 
@@ -246,13 +251,13 @@ class PostActivityHandler(SuperHandler):
                             h, m = activity_time.split(':')
                             h = int(h)
                             m = int(m)
-                            logging.error('split hours')
+                            #logging.error('split hours')
 
                             D, M, Y = activity_day.split('/')
                             Y = int(Y)
                             M = int(M)
                             D = int(D)
-                            logging.error('split day')
+                            #logging.error('split day')
 
                             new_activity = models.ActivityModel(userid = userid,
                                                                 name   = activity_name,
@@ -263,7 +268,7 @@ class PostActivityHandler(SuperHandler):
                             new_activity.put()
                             self.redirect('/panel')
                         except:
-                            logging.error('exception occured')
+                            #logging.error('exception occured')
                             self.redirect('/panel')
 
                     else:
@@ -314,15 +319,15 @@ class PostBatchActivityHandler(SuperHandler):
                             if len(activity) >= 2:
                                 name = activity[0]
                                 when = activity[1]
-                                logging.error('when is ' + when)
+                                #logging.error('when is ' + when)
                                 try:
                                     whenmatch = constants.datetime_re.match(when)
-                                    logging.error(str(whenmatch))
+                                    #logging.error(str(whenmatch))
                                     D,M,Y,h,m = [int(elem) for elem in whenmatch.groups()]
                                     when = datetime.datetime(Y, M, D, h, m)
-                                    logging.error(when)
+                                    #logging.error(when)
                                 except:
-                                    logging.error('error parsing datetime')
+                                    #logging.error('error parsing datetime')
                                     self.redirect('/panel')
 
                                 new_act = models.ActivityModel(userid = userid,
@@ -333,18 +338,18 @@ class PostBatchActivityHandler(SuperHandler):
                                 user.last_seen = datetime.datetime.now()
                                 user.put()
                             else:
-                                logging.error('wrong format')
+                                #logging.error('wrong format')
                                 self.redirect('/panel')
                     else:
                         self.redirect('/panel')
                 else:
-                    logging.error('failed to validated user')
+                    #logging.error('failed to validated user')
                     self.redirect('/login')
             else:
-                logging.error('failed to verify cookie')
+                #logging.error('failed to verify cookie')
                 self.redirect('/login')
         else:
-            logging.error('failed to find cookie')
+            #logging.error('failed to find cookie')
             self.redirect('/login')
             
 class PostTimedActivityHandler(SuperHandler):
@@ -439,35 +444,35 @@ class PostBatchTimedActivityHandler(SuperHandler):
                             try:
                                 name = act[0]
 
-                                logging.error('begin parsing start time')
+                                #logging.error('begin parsing start time')
                                 start = act[1]
-                                logging.error('start is '+ start)
+                                #logging.error('start is '+ start)
                                 startmatch = constants.datetime_re.match(start)
-                                logging.error(str(startmatch))
+                                #logging.error(str(startmatch))
                                 D,M,Y,h,m = [int(elem) for elem in startmatch.groups()]
                                 start = datetime.datetime(Y, M, D, h, m)
 
-                                logging.error('begin parsing end time')
+                                #logging.error('begin parsing end time')
                                 end = act[2]
-                                logging.error('end is ' + end)
+                                #logging.error('end is ' + end)
                                 endmatch = constants.datetime_re.match(end)
-                                logging.error(str(endmatch))
+                                #logging.error(str(endmatch))
                                 D,M,Y,h,m = [int(elem) for elem in endmatch.groups()]
-                                logging.error(str([D,M,Y,h,m]))
+                                #logging.error(str([D,M,Y,h,m]))
                                 end = datetime.datetime(Y, M, D, h, m)
-                                logging.error(end)
+                                #logging.error(end)
 
                                 new_act = models.TimedActivityModel(userid = userid,
                                                                 name = name,
                                                                 start = start - datetime.timedelta(hours = user.timezone),
                                                                 end = end - datetime.timedelta(hours = user.timezone))
                                 new_act.put()
-                                logging.error('put act into database')
+                                #logging.error('put act into database')
                                 user.last_seen = datetime.datetime.utcnow()
                                 user.put()
-                                logging.error('updated user in database')
+                                #logging.error('updated user in database')
                             except:
-                                logging.error('error!' + str(act))
+                                #logging.error('error!' + str(act))
                                 self.redirect('/panel')
                                 
                 else:
@@ -500,7 +505,7 @@ class PostExpenseHandler(SuperHandler):
                             if not exp_currency:
                                 exp_currency = user.currency
                                 
-                            #logging.error('making new expense object')
+                            ##logging.error('making new expense object')
                             new_expense = models.ExpenseModel(userid = userid,
                                                               name = exp_name,
                                                               category = exp_category,
@@ -795,11 +800,13 @@ class UserpageHandler(SuperHandler):
             user = users[0]
             coffee_stats = stats.coffee_stats(user)
             sleep_stats  = stats.sleep_stats(user)
-            logging.error(sleep_stats)
-            logging.error(coffee_stats['daily_cups'])
+            meal_stats = stats.meal_stats(user)
+            #logging.error(sleep_stats)
+            #logging.error(coffee_stats['daily_cups'])
             self.render('userpage.html', user = user,
                                          coffee_stats = coffee_stats,
-                                         sleep_stats = sleep_stats,)
+                                         sleep_stats = sleep_stats,
+                                         meal_stats = meal_stats)
         else:
             self.redirect('/') # go to user not found page
             

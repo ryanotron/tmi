@@ -1,4 +1,4 @@
-﻿import datetime, logging, numpy
+﻿import datetime, logging
 from google.appengine.ext import db
 
 def get_timed_activities(user, act_name, orderby = 'end', order = 'desc', number = 0):
@@ -14,7 +14,7 @@ def sleep_stats(user):
     status = {}
     
     if not sleeps:
-        logging.error('no sleep found')
+        #logging.error('no sleep found')
         return None
     else:
         # pre-processing
@@ -44,7 +44,7 @@ def sleep_stats(user):
             alltime_total += duration
             if sleep.end < lastweek_end and sleep.end > lastweek_start:
                 lastweek_total += duration
-                logging.error('lastweek total %2.2f' % lastweek_total)
+                #logging.error('lastweek total %2.2f' % lastweek_total)
             elif sleep.end > lastweek_end:
                 thisweek_total += duration
                 
@@ -147,6 +147,70 @@ def get_activities(user, act_name, order = 'desc', number = 0):
     acts = db.GqlQuery(query)
     return list(acts)
     
+def get_meals(user, order = 'desc', number = 0):
+    userid = str(user.key().id())
+    query = 'select * from MealModel where userid = \'%s\' order by when %s' % (userid, order)
+    if number > 0:
+        query += ' limit %d' % number
+    meals = db.GqlQuery(query)
+    return list(meals)
+    
+def meal_stats(user):
+    meals = get_meals(user, order = 'desc')
+    
+    if not meals:
+        return None
+        
+    # pre-processing
+    status = {}
+    latest_retrieved = False
+    for i in range(len(meals)):
+        meals[i].when += datetime.timedelta(hours = user.timezone)
+        if not latest_retrieved and meals[i].category != 'snack':
+            status['latest_meal'] = meals[i]
+            latest_retrieved = True
+
+    br_to_lu = []
+    lu_to_di = []
+    prev_meal = None
+    for meal in meals:
+        if prev_meal:
+            #logging.error('prev meal '+prev_meal.category+', meal '+meal.category)
+            if prev_meal.category == 'lunch' and meal.category == 'breakfast':
+                if prev_meal.when.day == meal.when.day:
+                    dt = -1.0*(meal.when - prev_meal.when).total_seconds() / 3600.0
+                    br_to_lu.append(dt)
+            elif (prev_meal.category == 'dinner' or prev_meal.category == 'supper') and meal.category == 'lunch':
+                if prev_meal.when.day == meal.when.day:
+                    dt = -1.0*(meal.when - prev_meal.when).total_seconds() / 3600.0
+                    lu_to_di.append(dt)
+            prev_meal = meal
+        else:
+            prev_meal = meal
+            
+    #logging.error('breakfast to lunch ' + str(br_to_lu))
+    #logging.error('lunch to dinner ' + str(lu_to_di))
+    
+    if len(br_to_lu) > 0:
+        status['mu_br_to_lu'] = sum(br_to_lu) / len(br_to_lu)
+    else:
+        status['mu_br_to_lu'] = 0.0
+        
+    if len(lu_to_di) > 0:
+        status['mu_lu_to_di'] = sum(lu_to_di) / len(lu_to_di)
+    else:
+        status['mu_lu_to_di'] = 0.0
+        
+    return status
+    
+def get_activities(user, act_name, order = 'desc', number = 0):
+    userid = str(user.key().id())
+    query = 'select * from ActivityModel where userid = \'%s\' and name = \'%s\' order by when %s' % (userid, act_name, order)
+    if number > 0:
+        query = query + ' limit %d' % number
+    acts = db.GqlQuery(query)
+    return list(acts)
+    
 def time_between_activities(user, act_name, order = 'desc', number = 0):
     activities = get_activities(user, act_name, order, number)
     timelist = []
@@ -161,31 +225,7 @@ def average_time_between_activities(user, act_name):
         return sum(timelist) / len(timelist)
     else:
         return 0
-    
-def get_coffees(user):
-    return get_activities(user, 'coffee', 'asc')
-    
-def coffee_per_day(user):
-    coffees = get_coffees(user)
-    if coffees:
-        daylist = [0]
-        numdays = (coffees[-1].when - coffees[0].when).days + 1
-        current = coffees[0].when
-        for coffee in coffees:
-            if coffee.when.day == current.day:
-                daylist[-1] = daylist[-1] + 1
-            else:
-                daylist.append(1)
-                current = coffee.when
-        return (daylist, numdays)
-        
-def average_coffee_per_day(user):
-    coffee_list, numday = coffee_per_day(user)
-    if len(coffee_list) > 0:
-        return 1.0 * sum(coffee_list) / numday # gotta make it float
-    else:
-        return 0
-    
+
 def activity_status(user, act_name, number):
     userid = str(user.key().id())
     query = 'select * from ActivityModel where userid = \'%s\' and name = \'%s\' order by when desc' % (userid, act_name)
@@ -198,7 +238,7 @@ def activity_status(user, act_name, number):
         latest = acts[0]
         timelatest = latest.when + datetime.timedelta(hours = user.timezone)
         timesince  = (datetime.datetime.utcnow() - latest.when).total_seconds()
-        logging.error(str(timesince))
+        #logging.error(str(timesince))
         return {'timelatest': timelatest, 'timesince': timesince}
     else:
         pass

@@ -52,6 +52,11 @@ indexes:
   properties:
   - name: userid
   - name: when
+
+- kind: MealModel
+  properties:
+  - name: userid
+  - name: when
     direction: desc
 
 - kind: SelfMessageModel
