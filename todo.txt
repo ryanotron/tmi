@@ -5,6 +5,10 @@
 - MOAR CSS
   
 - PARTY AT THE BACK
+  - library model for books
+  - library model for games
+  - both libraries include currently active book/game
+  - start/stop travel recording method
   - caching
   - think of a better way to do stats (minimize database hits!)
     - do stats in batch, store in UserModel?
