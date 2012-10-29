@@ -1,6 +1,7 @@
 ﻿{% extends 'basepage.html' %}
 
 {% block head %}
+<title>{{user.salutation}} {{user.realname}} - Too Much Information!</title>
 <script type="text/javascript" src="http://www.google.com/jsapi"></script>
 <script type="text/javascript">google.load('visualization','1', {packages:['corechart']});</script>
 {% if coffee_stats -%}

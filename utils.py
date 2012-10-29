@@ -34,6 +34,17 @@ def validate_user(userid):
     else:
         return None
         
+def verify_user(userid_cookie):
+    userid = verify_cookie(userid_cookie)
+    if userid:
+        user = validate_user(userid)
+        if user:
+            return userid, user
+        else:
+            return None
+    else:
+        return None
+        
 def str_to_datetime(datestr):
     d,m,y = [int(elem) for elem in datestr.split('/')]
     return datetime.datetime(y, m, d)

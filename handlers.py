@@ -283,25 +283,19 @@ class PostActivityHandler(SuperHandler):
 class InsPostActivityHandler(SuperHandler):
     def post(self):
         userid = self.request.cookies.get('userid')
-        if userid:
-            userid = utils.verify_cookie(userid)
-            if userid:
-                user = utils.validate_user(userid)
-                if user:
-                    act_name = self.request.get('activity_name')
-                    new_act = models.ActivityModel(userid = userid,
-                                                   name   = act_name,
-                                                   when   = datetime.datetime.utcnow())
-                    new_act.put()
-                    user.last_seen = datetime.datetime.utcnow()
-                    user.put()
-                    self.redirect('/panel')
-                else:
-                    self.redirect('login')
-            else:
-                self.redirect('login')
+        userid, user = utils.verify_user(userid)
+        if user:
+            act_name = self.request.get('activity_name')
+            logging.error('posted '+act_name+' from instant, with new user verification method')
+            new_act = models.ActivityModel(userid = userid,
+                                           name   = act_name,
+                                           when   = datetime.datetime.utcnow())
+            new_act.put()
+            user.last_seen = datetime.datetime.utcnow()
+            user.put()
+            self.redirect('/panel')
         else:
-            self.redirect('login')
+            self.redirect('/login')
 
 class PostBatchActivityHandler(SuperHandler):
     def post(self):
@@ -692,6 +686,48 @@ class PostMealHandler(SuperHandler):
                     self.redirect('/login')
             else:
                 self.redirect('/login')
+        else:
+            self.redirect('/login')
+            
+class PostBookHandler(SuperHandler):
+    def post(self):
+        userid = self.request.cookies.get('userid')
+        userid, user = utils.verify_user(userid)
+        if user:
+            title = self.request.get('title')
+            author = self.request.get('title')
+            isbn = self.request.get('isbn')
+            doi = self.request.get('doi')
+            added = datetime.datetime.utcnow()
+            start = self.request.get('start')
+            finish = self.request.get('finish')
+            active = self.request.get('active')
+            image = self.request.get('image')
+            if not title:
+                self.redirect('/panel')
+            else:
+                new_book = models.BookLibraryModel(userid = userid,
+                                                   title = title,
+                                                   author = author,
+                                                   isbn = isbn,
+                                                   doi = doi,
+                                                   added = added,
+                                                   start = start,
+                                                   finish = finish,
+                                                   active = bool(active))
+                                                   
+                if image:
+                    image = images.resize(image, height = 150)
+                    image = models.ImageModel(userid = userid,
+                                              uploaded = datetime.datetime.now(),
+                                              image = db.Blob(image))
+                    image.put()
+                    image_id = str(image.key())
+                    new_book.image = image_id
+                new_book.put()
+                user.last_seen = datetime.datetime.now()
+                user.put()
+                self.redirect('/panel')
         else:
             self.redirect('/login')
             

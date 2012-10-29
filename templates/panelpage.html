@@ -1,5 +1,9 @@
 ﻿{% extends 'basepage.html' %}
 
+{% block head %}
+<title>Panel ({{user.username}}) - Too Much Information!</title>
+{% endblock %}
+
 {% block content %}
 <h1 class="Header" id="PanelHeader">What have you done, {{user.salutation}} {{user.realname}}?</h1>
 <div class="Wrapper" id="PanelOverWrapper">
@@ -126,6 +130,41 @@
             <input class="Time" type="text" name="trv_finish_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}"><br>
             (it took me <input type="text" name="trv_duration"> minutes)<br>
             <input type="submit">
+        </form>
+    </div>
+    
+    <div class="PanelWrapper" id="Distractions">
+        <h2 class="PanelCategory">Distraction</h2>
+        <form method="post" action="/postbook" enctype="multipart/form-data">
+            <h3>Register a book</h3>
+            <table>
+                <tr>
+                    <td>title
+                    <td><input type="text" name="title">
+                <tr>
+                    <td>author
+                    <td><input type="text" name="author">
+                <tr>
+                    <td>isbn
+                    <td><input type="text" name="isbn">
+                <tr>
+                    <td>doi
+                    <td><input type="text" name="doi">
+                <tr>
+                    <td>start
+                    <td><input type="text" name="start">
+                <tr>
+                    <td>finish
+                    <td><input type="text" name="finish">
+                <tr>
+                    <td>active
+                    <td><input type="checkbox" name="active" value="True">
+                <tr>
+                    <td>cover
+                    <td><input type="file" name="image">
+                <tr>
+                    <td><input type="submit">
+            </table>
         </form>
     </div>
 
