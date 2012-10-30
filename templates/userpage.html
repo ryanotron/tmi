@@ -99,6 +99,22 @@
     {% endif %}
 </div>
 
+<div class="BlockWrapper" id="Books">
+    <h2>{{user.salutation}} {{user.realname}} is currently reading</h2>
+    {% if active_books -%}
+        {% for book in active_books -%}
+            <div class="BookContainer">
+            {{book.title}} by {{book.author}}
+            {% if book.image -%}
+            <img src="../img?img_key={{book.image}}"></img>
+            {% endif %}
+            </div>
+        {% endfor %}
+    {% else -%}
+        <p>Nothing. {{user.salutation}} {{user.realname}} is not currently reading anything.</p>
+    {% endif %}
+</div>
+
 <div class="BlockWrapper" id="GuestComment">
     <h2>Tell {{user.salutation}} {{user.realname}} something</h2>
     <form class="GuestComment" method="post" action="/postguestmessage">

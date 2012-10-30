@@ -695,17 +695,40 @@ class PostBookHandler(SuperHandler):
         userid, user = utils.verify_user(userid)
         if user:
             title = self.request.get('title')
-            author = self.request.get('title')
+            author = self.request.get('author')
+            if not author:
+                author = 'unknown'
             isbn = self.request.get('isbn')
             doi = self.request.get('doi')
             added = datetime.datetime.utcnow()
-            start = self.request.get('start')
-            finish = self.request.get('finish')
+            start_d = self.request.get('start_d')
+            start_h = self.request.get('start_h')
+            finish_d = self.request.get('finish_d')
+            finish_h = self.request.get('finish_h')
             active = self.request.get('active')
             image = self.request.get('image')
             if not title:
                 self.redirect('/panel')
             else:
+                start = None
+                finish = None
+                if start_h:
+                    try:
+                        D, M, Y = [int(elem) for elem in start_d.split('/')]
+                        h, m = [int(elem) for elem in start_h.split(':')]
+                        start = datetime.datetime(Y, M, D, h, m)
+                    except:
+                        logging.error('failed parsing datetime')
+                        self.redirect('/panel')
+                if finish_h:
+                    try:
+                        D, M, Y = [int(elem) for elem in finish_d.split('/')]
+                        h, m = [int(elem) for elem in finish_h.split(':')]
+                        finish = datetime.datetime(Y, M, D, h, m)
+                    except:
+                        logging.error('failed parsing datetime')
+                        self.redirect('/panel')
+                        
                 new_book = models.BookLibraryModel(userid = userid,
                                                    title = title,
                                                    author = author,
@@ -719,13 +742,74 @@ class PostBookHandler(SuperHandler):
                 if image:
                     image = images.resize(image, height = 150)
                     image = models.ImageModel(userid = userid,
-                                              uploaded = datetime.datetime.now(),
+                                              uploaded = datetime.datetime.utcnow(),
                                               image = db.Blob(image))
                     image.put()
                     image_id = str(image.key())
                     new_book.image = image_id
+                
                 new_book.put()
-                user.last_seen = datetime.datetime.now()
+                user.last_seen = datetime.datetime.utcnow()
+                user.put()
+                self.redirect('/panel')
+        else:
+            self.redirect('/login')
+            
+class PostGameHandler(SuperHandler):
+    def post(self):
+        userid_cookie = self.request.cookies.get('userid')
+        userid, user = utils.verify_user(userid_cookie)
+        if user:
+            title = self.request.get('title')
+            platform = self.request.get('platform')
+            added = datetime.datetime.utcnow()
+            start_d = self.request.get('start_d')
+            start_h = self.request.get('start_h')
+            finish_d = self.request.get('finish_d')
+            finish_h = self.request.get('finish_h')
+            active = self.request.get('active')
+            image = self.request.get('image')
+            
+            if not title:
+                self.redirect('/panel')
+            else:
+                start = None
+                finish = None
+                if start_h:
+                    try:
+                        D, M, Y = [int(elem) for elem in start_d.split('/')]
+                        h, m = [int(elem) for elem in start_h.split(':')]
+                        start = datetime.datetime(Y, M, D, h, m)
+                    except:
+                        logging.error('failed parsing datetime')
+                        self.redirect('/panel')
+                if finish_h:
+                    try:
+                        D, M, Y = [int(elem) for elem in finish_d.split('/')]
+                        h, m = [int(elem) for elem in finish_h.split(':')]
+                        finish = datetime.datetime(Y, M, D, h, m)
+                    except:
+                        logging.error('failed parsing datetime')
+                        self.redirect('/panel')
+                        
+                new_game = models.GameLibraryModel(userid = userid,
+                                                   title = title,
+                                                   platform = platform,
+                                                   added = added,
+                                                   start = start,
+                                                   finish = finish,
+                                                   active = bool(active))
+                if image:
+                    image = images.resize(image, height = 150)
+                    image = models.ImageModel(userid = userid,
+                                              uploaded = datetime.datetime.utcnow(),
+                                              image = db.Blob(image))
+                    image.put()
+                    image_key = str(image.key())
+                    new_game.image = image_key
+                
+                new_game.put()
+                user.last_seen = datetime.datetime.utcnow()
                 user.put()
                 self.redirect('/panel')
         else:
@@ -837,12 +921,15 @@ class UserpageHandler(SuperHandler):
             coffee_stats = stats.coffee_stats(user)
             sleep_stats  = stats.sleep_stats(user)
             meal_stats = stats.meal_stats(user)
+            
+            active_books = db.GqlQuery('select * from BookLibraryModel where userid = :1 and active = :2', str(user.key().id()), True)
             #logging.error(sleep_stats)
             #logging.error(coffee_stats['daily_cups'])
             self.render('userpage.html', user = user,
                                          coffee_stats = coffee_stats,
                                          sleep_stats = sleep_stats,
-                                         meal_stats = meal_stats)
+                                         meal_stats = meal_stats,
+                                         active_books = active_books)
         else:
             self.redirect('/') # go to user not found page
             

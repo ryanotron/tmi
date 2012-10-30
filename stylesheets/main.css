@@ -9,6 +9,17 @@ textarea {
     font-family: Helvetica, Verdana, Arial, sans-serif;
     font-size: 10pt;
 }
+
+div.BookContainer {
+    margin: 5px;
+    padding: 5px;
+    border: 1px dotted green;
+}
+
+div#Distractions table, th, td {
+    border: none;
+}
+
 div#UserPhoto {
     border: 1px dashed blue;
     height: auto;

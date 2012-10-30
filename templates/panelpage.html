@@ -152,10 +152,40 @@
                     <td><input type="text" name="doi">
                 <tr>
                     <td>start
-                    <td><input type="text" name="start">
+                    <td><input type="text" name="start_d" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}" class="date">
+                    <input type="text" name="start_h" class="time">
                 <tr>
                     <td>finish
-                    <td><input type="text" name="finish">
+                    <td><input type="text" name="finish_d" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}" class="date">
+                    <input type="text" name="finish_h" class="time">
+                <tr>
+                    <td>active
+                    <td><input type="checkbox" name="active" value="True">
+                <tr>
+                    <td>cover
+                    <td><input type="file" name="image">
+                <tr>
+                    <td><input type="submit">
+            </table>
+        </form>
+        
+        <form method="post" action="/postgame" enctype="multipart/form-data">
+            <h3>Register a game</h3>
+            <table>
+                <tr>
+                    <td>title
+                    <td><input type="text" name="title">
+                <tr>
+                    <td>platform
+                    <td><input type="text" name="platform">
+                <tr>
+                    <td>start
+                    <td><input type="text" name="start_d" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}" class="date">
+                    <input type="text" name="start_h" class="time">
+                <tr>
+                    <td>finish
+                    <td><input type="text" name="finish_d" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}" class="date">
+                    <input type="text" name="finish_h" class="time">
                 <tr>
                     <td>active
                     <td><input type="checkbox" name="active" value="True">
