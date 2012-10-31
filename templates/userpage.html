@@ -66,6 +66,11 @@
         <h3>Meal</h3>
         {% if meal_stats -%}
             <p>The menu of {{user.salutation}} {{user.realname}}'s latest meal was {{meal_stats['latest_meal'].menu}}, {{user.nom_pronoun}} had it on {{meal_stats['latest_meal'].when.strftime('%d/%m/%Y %H:%M')}}.</p>
+            {% if meal_stats['latest_meal'].image -%}
+                <div class="ImageContainer">
+                    <img src="../img?img_key={{meal_stats['latest_meal'].image}}"></img>
+                </div>
+            {% endif %}
             <p>{{user.salutation}} {{user.realname}} tends to have lunch {{'%2.2f' % meal_stats['mu_br_to_lu']}} hours after breakfast, and dinner {{'%2.2f' % meal_stats['mu_lu_to_di']}} hours after lunch.<p>
         {% else %}
             <p>{{user.salutation}} {{user.realname}} has not recorded any meal yet. Perhaps {{user.nom_pronoun}} has discovered the secret of not needing food to survive and is cruelly withholding it from us. Or perhaps {{user.nom_pronoun}} has died of starvation.</p>
@@ -104,14 +109,34 @@
     {% if active_books -%}
         {% for book in active_books -%}
             <div class="BookContainer">
-            {{book.title}} by {{book.author}}
             {% if book.image -%}
-            <img src="../img?img_key={{book.image}}"></img>
+                <div class="ImageContainer">
+                    <img src="../img?img_key={{book.image}}"></img>
+                </div>
             {% endif %}
+            {{book.title}} by {{book.author}}
             </div>
         {% endfor %}
     {% else -%}
         <p>Nothing. {{user.salutation}} {{user.realname}} is not currently reading anything.</p>
+    {% endif %}
+</div>
+
+<div class="BlockWrapper" id="Games">
+    <h2>{{user.salutation}} {{user.realname}} is currently playing</h2>
+    {% if active_games -%}
+        {% for game in active_games -%}
+            <div class="GameContainer">
+            {% if game.image -%}
+                <div class="ImageContainer">
+                    <img src="../img?img_key={{game.image}}"></img>
+                </div>
+            {% endif %}
+            {{game.title}} on {{game.platform}}
+            </div>
+        {% endfor %}
+    {% else -%}
+        <p>Nothing. {{user.salutation}} {{user.realname}} is not currently playing anything.</p>
     {% endif %}
 </div>
 

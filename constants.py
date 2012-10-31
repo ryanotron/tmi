@@ -14,3 +14,5 @@ template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinjaenv = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir), autoescape = True)
 jinjaenv.globals['datetime'] = datetime
 jinjaenv.globals['stats'] = stats
+
+image_height = 200

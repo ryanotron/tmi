@@ -96,6 +96,7 @@ def coffee_stats(user):
         today = datetime.datetime.utcnow() + timeshift
         for i in range(len(coffees)):
             coffees[i].when = coffees[i].when + timeshift
+        daysince = (today - coffees[-1].when).daysince
             
         # begin looping over list, filling status along the way
         cups_per_day = []
@@ -112,7 +113,6 @@ def coffee_stats(user):
         status['todays_total'] = cups_per_day[0][1]
         
         # calculate alltime average
-        daysince = (today - coffees[-1].when).days
         if daysince > 0:
             status['alltime_average'] = len(coffees) / (1.0 * daysince)
         else:

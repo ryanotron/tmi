@@ -30,6 +30,13 @@ indexes:
   - name: when
     direction: desc
 
+- kind: BookLibraryModel
+  properties:
+  - name: active
+  - name: userid
+  - name: added
+    direction: desc
+
 - kind: CommuteModel
   properties:
   - name: userid
@@ -40,6 +47,13 @@ indexes:
   properties:
   - name: userid
   - name: when
+    direction: desc
+
+- kind: GameLibraryModel
+  properties:
+  - name: active
+  - name: userid
+  - name: added
     direction: desc
 
 - kind: GuestMessageModel

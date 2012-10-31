@@ -53,6 +53,7 @@ class MealModel(db.Model):
     menu     = db.StringProperty()
     place    = db.StringProperty()
     category = db.StringProperty() # breakfast, lunch, dinner, supper, snack
+    image    = db.StringProperty()
 
 class UserMessageModel(db.Model):
     userid  = db.StringProperty(required = True)

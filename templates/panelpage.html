@@ -77,7 +77,7 @@
             for <input type="text" name="act_duration"> hours<br>
             <input type="submit">
         </form><hr>
-        <form action="/postmeal" method="post">
+        <form action="/postmeal" method="post" enctype="multipart/form-data">
             I had <select name="meal_category">
                 <option value="breakfast">Breakfast</option>
                 <option value="lunch">Lunch</option>
@@ -91,6 +91,7 @@
             <input class="Time" type="text" name="meal_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}"><br>
             and it costed me <input type="text" name="meal_cost">
             <input class="Currency" type="text" name="meal_currency" value="{{user.currency}}"><br>
+            Photo <input type="file" name="meal_image"><br>
             <input type="submit">
         </form>
     </div>
@@ -152,12 +153,10 @@
                     <td><input type="text" name="doi">
                 <tr>
                     <td>start
-                    <td><input type="text" name="start_d" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}" class="date">
-                    <input type="text" name="start_h" class="time">
+                    <td><input type="text" name="start" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}" class="date">
                 <tr>
                     <td>finish
-                    <td><input type="text" name="finish_d" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}" class="date">
-                    <input type="text" name="finish_h" class="time">
+                    <td><input type="text" name="finish" class="date">
                 <tr>
                     <td>active
                     <td><input type="checkbox" name="active" value="True">
@@ -180,12 +179,10 @@
                     <td><input type="text" name="platform">
                 <tr>
                     <td>start
-                    <td><input type="text" name="start_d" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}" class="date">
-                    <input type="text" name="start_h" class="time">
+                    <td><input type="text" name="start" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}" class="date">
                 <tr>
                     <td>finish
-                    <td><input type="text" name="finish_d" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}" class="date">
-                    <input type="text" name="finish_h" class="time">
+                    <td><input type="text" name="finish" class="date">
                 <tr>
                     <td>active
                     <td><input type="checkbox" name="active" value="True">

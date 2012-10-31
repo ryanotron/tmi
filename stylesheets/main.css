@@ -10,7 +10,7 @@ textarea {
     font-size: 10pt;
 }
 
-div.BookContainer {
+div.BookContainer, div.GameContainer {
     margin: 5px;
     padding: 5px;
     border: 1px dotted green;

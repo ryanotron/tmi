@@ -635,60 +635,62 @@ class PostTravelHandler(SuperHandler):
 class PostMealHandler(SuperHandler):
     def post(self):
         userid = self.request.cookies.get('userid')
-        if userid:
-            userid = utils.verify_cookie(userid)
-            if userid:
-                user = utils.validate_user(userid)
-                if user:
-                    meal_menu     = self.request.get('meal_menu')
-                    meal_day      = self.request.get('meal_day')
-                    meal_time     = self.request.get('meal_time')
-                    meal_place    = self.request.get('meal_place')
-                    meal_category = self.request.get('meal_category')
-                    meal_cost     = self.request.get('meal_cost')
-                    meal_currency = self.request.get('meal_currency')
-                    
-                    if meal_menu and meal_time:
+        userid, user = utils.verify_user(userid)
+        if user:
+            meal_menu     = self.request.get('meal_menu')
+            meal_day      = self.request.get('meal_day')
+            meal_time     = self.request.get('meal_time')
+            meal_place    = self.request.get('meal_place')
+            meal_category = self.request.get('meal_category')
+            meal_cost     = self.request.get('meal_cost')
+            meal_currency = self.request.get('meal_currency')
+            meal_image    = self.request.get('meal_image')
+
+            if meal_menu and meal_time:
+                try:
+                    D, M, Y = [int(elem) for elem in meal_day.split('/')]
+                    h, m    = [int(elem) for elem in meal_time.split(':')]
+                    meal_time = datetime.datetime(Y, M, D, h, m) - datetime.timedelta(user.timezone)
+
+                    new_meal = models.MealModel(userid   = userid,
+                                                when     = meal_time,
+                                                menu     = meal_menu,
+                                                place    = meal_place,
+                                                category = meal_category)
+
+                    if meal_image:
+                        image = images.resize(meal_image, height = constants.image_height)
+                        image = models.ImageModel(userid = userid,
+                                                  uploaded = datetime.datetime.utcnow(),
+                                                  image = db.Blob(image))
+                        image.put()
+                        image_id = str(image.key())
+                        new_meal.image = image_id
+                        
+                    new_meal.put()
+                    if meal_cost:
+                        if not meal_currency:
+                            meal_currency = user.currency
                         try:
-                            D, M, Y = [int(elem) for elem in meal_day.split('/')]
-                            h, m    = [int(elem) for elem in meal_time.split(':')]
-                            meal_time = datetime.datetime(Y, M, D, h, m) - datetime.timedelta(user.timezone)
-                            
-                            new_meal = models.MealModel(userid   = userid,
-                                                        when     = meal_time,
-                                                        menu     = meal_menu,
-                                                        place    = meal_place,
-                                                        category = meal_category)
-                            new_meal.put()
-                            if meal_cost:
-                                if not meal_currency:
-                                    meal_currency = user.currency
-                                try:
-                                    meal_cost = float(meal_cost)
-                                    new_expense = models.ExpenseModel(userid = userid,
-                                                                      name = meal_category,
-                                                                      category = 'meal',
-                                                                      currency = meal_currency,
-                                                                      amount = meal_cost,
-                                                                      when = meal_time)
-                                    new_expense.put()
-                                except:
-                                    pass
-                            
-                            user.last_seen = datetime.datetime.utcnow()
-                            user.put()
-                            self.redirect('/panel')
+                            meal_cost = float(meal_cost)
+                            new_expense = models.ExpenseModel(userid = userid,
+                                                                name = meal_category,
+                                                                category = 'meal',
+                                                                currency = meal_currency,
+                                                                amount = meal_cost,
+                                                                when = meal_time)
+                            new_expense.put()
                         except:
-                            self.redirect('/panel')
-                    else:
-                        self.redirect('/panel')
-                else:
-                    self.redirect('/login')
-            else:
-                self.redirect('/login')
+                            pass
+
+                    user.last_seen = datetime.datetime.utcnow()
+                    user.put()
+                    self.redirect('/panel')
+                except:
+                    self.redirect('/panel')
         else:
             self.redirect('/login')
-            
+
 class PostBookHandler(SuperHandler):
     def post(self):
         userid = self.request.cookies.get('userid')
@@ -701,30 +703,24 @@ class PostBookHandler(SuperHandler):
             isbn = self.request.get('isbn')
             doi = self.request.get('doi')
             added = datetime.datetime.utcnow()
-            start_d = self.request.get('start_d')
-            start_h = self.request.get('start_h')
-            finish_d = self.request.get('finish_d')
-            finish_h = self.request.get('finish_h')
+            start = self.request.get('start')
+            finish = self.request.get('finish')
             active = self.request.get('active')
             image = self.request.get('image')
             if not title:
                 self.redirect('/panel')
             else:
-                start = None
-                finish = None
-                if start_h:
+                if start:
                     try:
-                        D, M, Y = [int(elem) for elem in start_d.split('/')]
-                        h, m = [int(elem) for elem in start_h.split(':')]
-                        start = datetime.datetime(Y, M, D, h, m)
+                        D, M, Y = [int(elem) for elem in start.split('/')]
+                        start = datetime.datetime(Y, M, D)
                     except:
                         logging.error('failed parsing datetime')
                         self.redirect('/panel')
-                if finish_h:
+                if finish:
                     try:
-                        D, M, Y = [int(elem) for elem in finish_d.split('/')]
-                        h, m = [int(elem) for elem in finish_h.split(':')]
-                        finish = datetime.datetime(Y, M, D, h, m)
+                        D, M, Y = [int(elem) for elem in finish.split('/')]
+                        finish = datetime.datetime(Y, M, D)
                     except:
                         logging.error('failed parsing datetime')
                         self.redirect('/panel')
@@ -763,31 +759,25 @@ class PostGameHandler(SuperHandler):
             title = self.request.get('title')
             platform = self.request.get('platform')
             added = datetime.datetime.utcnow()
-            start_d = self.request.get('start_d')
-            start_h = self.request.get('start_h')
-            finish_d = self.request.get('finish_d')
-            finish_h = self.request.get('finish_h')
+            start = self.request.get('start')
+            finish = self.request.get('finish')
             active = self.request.get('active')
             image = self.request.get('image')
             
             if not title:
                 self.redirect('/panel')
             else:
-                start = None
-                finish = None
-                if start_h:
+                if start:
                     try:
-                        D, M, Y = [int(elem) for elem in start_d.split('/')]
-                        h, m = [int(elem) for elem in start_h.split(':')]
-                        start = datetime.datetime(Y, M, D, h, m)
+                        D, M, Y = [int(elem) for elem in start.split('/')]
+                        start = datetime.datetime(Y, M, D)
                     except:
                         logging.error('failed parsing datetime')
                         self.redirect('/panel')
-                if finish_h:
+                if finish:
                     try:
-                        D, M, Y = [int(elem) for elem in finish_d.split('/')]
-                        h, m = [int(elem) for elem in finish_h.split(':')]
-                        finish = datetime.datetime(Y, M, D, h, m)
+                        D, M, Y = [int(elem) for elem in finish.split('/')]
+                        finish = datetime.datetime(Y, M, D)
                     except:
                         logging.error('failed parsing datetime')
                         self.redirect('/panel')
@@ -921,15 +911,18 @@ class UserpageHandler(SuperHandler):
             coffee_stats = stats.coffee_stats(user)
             sleep_stats  = stats.sleep_stats(user)
             meal_stats = stats.meal_stats(user)
-            
-            active_books = db.GqlQuery('select * from BookLibraryModel where userid = :1 and active = :2', str(user.key().id()), True)
+
+            userid = str(user.key().id())
+            active_books = db.GqlQuery('select * from BookLibraryModel where userid = :1 and active = :2 order by added desc', userid, True)
+            active_games = db.GqlQuery('select * from GameLibraryModel where userid = :1 and active = :2 order by added desc', userid, True)
             #logging.error(sleep_stats)
             #logging.error(coffee_stats['daily_cups'])
             self.render('userpage.html', user = user,
                                          coffee_stats = coffee_stats,
                                          sleep_stats = sleep_stats,
                                          meal_stats = meal_stats,
-                                         active_books = active_books)
+                                         active_books = list(active_books),
+                                         active_games = list(active_games))
         else:
             self.redirect('/') # go to user not found page
             
