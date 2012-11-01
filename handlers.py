@@ -911,6 +911,7 @@ class UserpageHandler(SuperHandler):
             coffee_stats = stats.coffee_stats(user)
             sleep_stats  = stats.sleep_stats(user)
             meal_stats = stats.meal_stats(user)
+            hygiene_stats = stats.hygiene_stats(user)
 
             userid = str(user.key().id())
             active_books = db.GqlQuery('select * from BookLibraryModel where userid = :1 and active = :2 order by added desc', userid, True)
@@ -921,6 +922,7 @@ class UserpageHandler(SuperHandler):
                                          coffee_stats = coffee_stats,
                                          sleep_stats = sleep_stats,
                                          meal_stats = meal_stats,
+                                         hygiene_stats = hygiene_stats,
                                          active_books = list(active_books),
                                          active_games = list(active_games))
         else:

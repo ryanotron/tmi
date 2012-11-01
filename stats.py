@@ -34,8 +34,8 @@ def sleep_stats(user):
         lastweek_total = 0.0
         thisweek_total = 0.0
         alltime_total  = 0.0
-        lastweek_start = today - datetime.timedelta(today.weekday() + 7)
-        lastweek_end   = today - datetime.timedelta(today.weekday())
+        lastweek_start = today - datetime.timedelta(days = (today.weekday() + 7))
+        lastweek_end   = today - datetime.timedelta(days = today.weekday())
         
         sleep_list = []
         
@@ -45,7 +45,7 @@ def sleep_stats(user):
             if sleep.end < lastweek_end and sleep.end > lastweek_start:
                 lastweek_total += duration
                 #logging.error('lastweek total %2.2f' % lastweek_total)
-            elif sleep.end > lastweek_end:
+            elif sleep.end >= lastweek_end:
                 thisweek_total += duration
                 
             if not sleep_list:
@@ -55,9 +55,20 @@ def sleep_stats(user):
                 else:
                     sleep_list.append([sleep.end + datetime.timedelta(days = 1), duration])
             else:
-                # recall that the list of sleeps is in descending order
+                # recall that the list of sleeps is in descending order,
+                # but sleep_list always appended at the end,
+                # so the current day is at the end of the list
+                
+                # if the current sleep elem ends at the same day as the latest record,
+                # add it to the latest record
                 if sleep.end.day == sleep_list[-1][0].day:
                     sleep_list[-1][1] += duration
+                # but if not (can only be the previous day, provided record is done fastidiously),
+                # then check if the sleep ended 5 hours or fewer before the start of the day of
+                # the latest record. If it is, add to latest record, else open a new day.
+                
+                # for example, if latest record is for 1-Nov, and current sleep ends at 23:00 of 
+                # 31-Oct, then it is recorded for 1-Nov
                 else:
                     forward = sleep.end + datetime.timedelta(hours = 5)
                     if forward.day == sleep_list[-1][0].day:
@@ -96,21 +107,23 @@ def coffee_stats(user):
         today = datetime.datetime.utcnow() + timeshift
         for i in range(len(coffees)):
             coffees[i].when = coffees[i].when + timeshift
-        daysince = (today - coffees[-1].when).daysince
+        daysince = (today - coffees[-1].when).days
+        
+        daily_cups = {}
+        for i in range(daysince + 2):
+            day = today - datetime.timedelta(days = i)
+            daily_cups[day.date()] = 0
             
         # begin looping over list, filling status along the way
-        cups_per_day = []
         for coffee in coffees:
-            if not cups_per_day:
-                cups_per_day.append([coffee.when, 1])
-            else:
-                if coffee.when.day == cups_per_day[-1][0].day:
-                    cups_per_day[-1][1] += 1
-                else:
-                    cups_per_day.append([coffee.when, 1])
+            day = coffee.when
+            daily_cups[day.date()] += 1
+
+        daily_cups = daily_cups.items()
+        daily_cups.sort(reverse = True)
         
         # retrieve today's total
-        status['todays_total'] = cups_per_day[0][1]
+        status['todays_total'] = daily_cups[0][1]
         
         # calculate alltime average
         if daysince > 0:
@@ -119,7 +132,7 @@ def coffee_stats(user):
             status['alltime_average'] = 0.0
             
         # report daily cups
-        status['daily_cups'] = cups_per_day
+        status['daily_cups'] = daily_cups
         return status
     else:
         return None
@@ -202,6 +215,33 @@ def meal_stats(user):
         status['mu_lu_to_di'] = 0.0
         
     return status
+    
+def hygiene_stats(user):
+    stats = {}
+    stats['shower'] = {}
+    stats['shave'] = {}
+    stats['haircut'] = {}
+    
+    showers  = get_activities(user, 'shower')
+    shaves   = get_activities(user, 'shave')
+    haircuts = get_activities(user, 'cut hair')
+    
+    if len(showers) > 0:
+        stats['shower']['latest'] = -1*(showers[0].when - datetime.datetime.utcnow()).total_seconds() / 3600.0
+        shower_between = [(showers[i].when - showers[i+1].when).total_seconds()/3600.0 for i in range(len(showers) - 1)]
+        stats['shower']['ave_interval'] = len(shower_between) > 0 and (sum(shower_between) / len(shower_between)) or 0
+        
+    if len(shaves) > 0:
+        stats['shave']['latest'] = -1*(shaves[0].when - datetime.datetime.utcnow()).total_seconds() / (3600.0 * 24)
+        shave_between = [(shaves[i].when - shaves[i+1].when).total_seconds()/(3600.0*24) for i in range(len(shaves) - 1)]
+        stats['shave']['ave_interval'] = len(shave_between) > 0 and (sum(shave_between) / len(shave_between)) or 0
+        
+    if len(haircuts) > 0:
+        stats['haircut']['latest'] = -1*(haircuts[0].when - datetime.datetime.utcnow()).total_seconds() / (3600.0 * 24)
+        haircut_between = [(haircuts[i].when - haircuts[i+1].when).total_seconds()/(3600.0*24) for i in range(len(haircuts) - 1)]
+        stats['haircut']['ave_interval'] = len(haircut_between) > 0 and (sum(haircut_between) / len(haircut_between)) or 0
+
+    return stats
     
 def get_activities(user, act_name, order = 'desc', number = 0):
     userid = str(user.key().id())
