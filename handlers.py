@@ -650,7 +650,7 @@ class PostMealHandler(SuperHandler):
                 try:
                     D, M, Y = [int(elem) for elem in meal_day.split('/')]
                     h, m    = [int(elem) for elem in meal_time.split(':')]
-                    meal_time = datetime.datetime(Y, M, D, h, m) - datetime.timedelta(user.timezone)
+                    meal_time = datetime.datetime(Y, M, D, h, m) - datetime.timedelta(hours = user.timezone)
 
                     new_meal = models.MealModel(userid   = userid,
                                                 when     = meal_time,
