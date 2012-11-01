@@ -81,15 +81,40 @@
 <div class="BlockWrapper" id="Hygiene">
     <h2>Hygiene</h2>
     {% if hygiene_stats -%}
-        {% if hygiene_stats['shower'] %}
-            <p>{{user.salutation}} {{user.realname}} last showered {{'%2.2f' % hygiene_stats['shower']['latest']}} hours ago, {{user.nom_pronoun}} usually showers every {{'%2.2f' % hygiene_stats['shower']['ave_interval']}} hours.</p>
+        {% if hygiene_stats['shower'] -%}
+            <p>{{user.salutation}} {{user.realname}} last showered {{'%2.2f' % hygiene_stats['shower']['latest']}} hours ago. 
+            {% if hygiene_stats['shave']['ave_interval'] -%}
+                {{user.nom_pronoun.capitalize()}} usually showers every {{'%2.2f' % hygiene_stats['shower']['ave_interval']}} hours.</p>
+            {% else %}
+                It is the first recorded instance of {{user.salutation}} {{user.realname}} showering.</p>
+            {% endif %}
         {% else %}
-            <p>{{user.salutation}} {{user.realname}} has not recorded any shower! {{user.salutation}} {{user.realname}} is a stinko!</p>
+                <p>{{user.salutation}} {{user.realname}} has not recorded any shower! {{user.salutation}} {{user.realname}} is a stinko!</p>
         {% endif %}
         
-        <p>{{user.salutation}} {{user.realname}} last shaved {{'%2.2f' % hygiene_stats['shave']['latest']}} days ago, {{user.nom_pronoun}} usually shaves every {{'%2.2f' % hygiene_stats['shave']['ave_interval']}} days.</p>
+        {% if hygiene_stats['shave'] -%}
+            <p>{{user.salutation}} {{user.realname}} last shaved {{'%2.2f' % hygiene_stats['shave']['latest']}} days ago. 
+            {% if hygiene_stats['shave']['ave_interval'] -%}
+                {{user.nom_pronoun.capitalize()}} usually shaves every {{'%2.2f' % hygiene_stats['shave']['ave_interval']}} days.</p>
+            {% else %}
+                It is the first recorded instance of {{user.salutation}} {{user.realname}} shaving.</p>
+            {% endif %}
+        {% else %}
+            {% if user.gender == 'male' -%}
+                <p>{{user.salutation}} {{user.realname}} is not recorded to have shaved. Let us cheer {{user.pos_determi}} effort to grow a wizard beard</p>
+            {% endif %}
+        {% endif %}
         
-        <p>{{user.salutation}} {{user.realname}} last got a haircut {{'%2.2f' % hygiene_stats['haircut']['latest']}} days ago, {{user.nom_pronoun}} usually gets a haircut every {{'%2.2f' % hygiene_stats['haircut']['ave_interval']}} days.</p>    
+        {% if hygiene_stats['haircut'] -%}
+            <p>{{user.salutation}} {{user.realname}} last got a haircut {{'%2.2f' % hygiene_stats['haircut']['latest']}} days ago. 
+            {% if hygiene_stats['haircut']['ave_interval'] -%}
+                {{user.nom_pronoun.capitalize()}} usually gets a haircut every {{'%2.2f' % hygiene_stats['haircut']['ave_interval']}} days.</p>
+            {% else %}
+                It is the first recorded instance of {{user.salutation}} {{user.realname}} getting a haircut.</p>
+            {% endif %}
+        {% else %}
+            <p>{{user.salutation}} {{user.realname}} is not recorded to have had any haircut. Let us cheer {{user.pos_determi}} attempt to grow beautiful long locks</p>
+        {% endif %}
     {% endif %}
 </div>
 
