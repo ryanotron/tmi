@@ -5,17 +5,22 @@
 <script type="text/javascript" src="http://www.google.com/jsapi"></script>
 <script type="text/javascript">google.load('visualization','1', {packages:['corechart']});</script>
 {% if coffee_stats -%}
-{% set daily_cups = coffee_stats['daily_cups'] -%}
-{% include 'js_coffee_chart.html' %}
-{% endif %}
+{% set dataset = coffee_stats['daily_cups'] -%}
+{% set chart = {'y_label': 'cups', 'div_name': 'coffee_chart'} -%}
+{% include 'js_timeline_chart.html' %}
+{%- endif %}
 
 {% if sleep_stats -%}
-{% set sleep_list = sleep_stats['sleep_list'] -%}
-{% include 'js_sleep_chart.html' %}
-{% endif %}
+{% set dataset = sleep_stats['sleep_list'] -%}
+{% set chart = {'y_label': 'hours', 'div_name': 'sleep_chart'} -%}
+{% include 'js_timeline_chart.html' -%}
+{%- endif %}
 {% endblock %}
 
 {% block content %}
+<div class="Headline">
+    Like what you see? Want to have one? Well, you can't make an account yet, but you can <a href="https://github.com/ryanotron/tmi"><i>fork me</i> on github!</a>
+</div>
 <div class="BlockWrapper" id="PersonalInfo">
     <h2>Too much information on</h2>
     <h1>{{user.salutation}} {{user.realname}}</h1>
@@ -28,8 +33,18 @@
         {% if user_messages -%}
             <h3>Latest message from {{user.salutation}} {{user.realname}}</h3>
             <p class="UserMessage">{{user_messages[0].message}}</p>
-        {% endif -%}
+        {%- endif -%}
     </div>
+    {% if social_media -%}
+    <div id="SocialMedia">
+        <h3>Find {{user.salutation}} {{user.realname}} elsewhere! {{user.nom_pronoun.capitalize()}} is...</h3>
+        <ul>
+        {% for site in social_media -%}
+            <li>{{site.sm_username}} on {{site.sm_sitename}}
+        {%- endfor %}
+        </ul>
+    </div>
+    {%- endif %}
 </div>
 
 <div class="BlockWrapper" id="Energy">
@@ -41,7 +56,7 @@
         <p>{{user.salutation}} {{user.realname}} woke up at {{sleep_stats['latest_waketime'].strftime('%H:%M')}} after {{'%2.2f' % sleep_stats['latest_duration']}} hours of sleep. {{user.nom_pronoun}} slept for, on average, {{'%2.2f' % sleep_stats['lastweek_average']}} hours per day last week, and for {{'%2.2f' % sleep_stats['alltime_average']}} hours all time. To maintain {{user.pos_determi}} all time average {{user.salutation}} {{user.realname}} has a sleep debt of {{'%2.2f' % sleep_stats['debt_by_alltime']}} hours.</p>
     {% else -%}
         <p>{{user.salutation}} {{user.realname}} has not recorded any sleep time yet. Perhaps {{user.nom_pronoun}} has cracked the secret for not needing sleep and is cruelly withholding it from us?</p>
-    {% endif %}
+    {%- endif %}
         <div class="ChartWrapper">
             <h3>{{user.salutation}} {{user.realname}}'s sleep hours</h3>
             <div id="sleep_chart"></div>
@@ -54,7 +69,7 @@
             <p>{{user.salutation}} {{user.realname}}'s last cup of coffee was {{'%2.2f' % coffee_stats['last_cup']}} hours ago. Today {{user.nom_pronoun}} has had {{'%2d' % coffee_stats['todays_total']}} cup(s). On average {{user.nom_pronoun}} drinks {{'%1.2f' % coffee_stats['alltime_average']}} cups a day.</p>
         {% else -%}
             <p>{{user.salutation}} {{user.realname}} has not shared {{user.pos_determi}} habits yet. Could {{user.nom_pronoun}} be a milk drinker?</p>
-        {% endif %}
+        {%- endif %}
 
         <div class="ChartWrapper">
             <h3>{{user.salutation}} {{user.realname}}'s daily cup of coffee
@@ -65,16 +80,16 @@
     <div class="Sub_BlockWrapper">
         <h3>Meal</h3>
         {% if meal_stats -%}
-            <p>The menu of {{user.salutation}} {{user.realname}}'s latest meal was {{meal_stats['latest_meal'].menu}}, {{user.nom_pronoun}} had it on {{meal_stats['latest_meal'].when.strftime('%d/%m/%Y %H:%M')}}.</p>
+            <p>The menu of {{user.salutation}} {{user.realname}}'s latest meal was {{meal_stats['latest_meal'].menu}}. {{user.nom_pronoun.capitalize()}} had it {{'%2.2f' % meal_stats['latest_hours_ago']}} hours ago on {{meal_stats['latest_meal'].when.strftime('%d/%m/%Y %H:%M')}}.</p>
             {% if meal_stats['latest_meal'].image -%}
                 <div class="ImageContainer">
                     <img src="../img?img_key={{meal_stats['latest_meal'].image}}"></img>
                 </div>
-            {% endif %}
+            {%- endif %}
             <p>{{user.salutation}} {{user.realname}} tends to have lunch {{'%2.2f' % meal_stats['mu_br_to_lu']}} hours after breakfast, and dinner {{'%2.2f' % meal_stats['mu_lu_to_di']}} hours after lunch.<p>
         {% else %}
             <p>{{user.salutation}} {{user.realname}} has not recorded any meal yet. Perhaps {{user.nom_pronoun}} has discovered the secret of not needing food to survive and is cruelly withholding it from us. Or perhaps {{user.nom_pronoun}} has died of starvation.</p>
-        {% endif %}
+        {%- endif %}
     </div>
 </div>
 
@@ -90,7 +105,7 @@
             {% endif %}
         {% else %}
                 <p>{{user.salutation}} {{user.realname}} has not recorded any shower! {{user.salutation}} {{user.realname}} is a stinko!</p>
-        {% endif %}
+        {%- endif %}
         
         {% if hygiene_stats['shave'] -%}
             <p>{{user.salutation}} {{user.realname}} last shaved {{'%2.2f' % hygiene_stats['shave']['latest']}} days ago. 
@@ -103,7 +118,7 @@
             {% if user.gender == 'male' -%}
                 <p>{{user.salutation}} {{user.realname}} is not recorded to have shaved. Let us cheer {{user.pos_determi}} effort to grow a wizard beard</p>
             {% endif %}
-        {% endif %}
+        {%- endif %}
         
         {% if hygiene_stats['haircut'] -%}
             <p>{{user.salutation}} {{user.realname}} last got a haircut {{'%2.2f' % hygiene_stats['haircut']['latest']}} days ago. 
@@ -114,8 +129,8 @@
             {% endif %}
         {% else %}
             <p>{{user.salutation}} {{user.realname}} is not recorded to have had any haircut. Let us cheer {{user.pos_determi}} attempt to grow beautiful long locks</p>
-        {% endif %}
-    {% endif %}
+        {%- endif %}
+    {%- endif %}
 </div>
 
 <div class="BlockWrapper" id="Books">

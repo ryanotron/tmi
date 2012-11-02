@@ -16,6 +16,13 @@ class UserModel(db.Model):
     pos_determi = db.StringProperty() # possessive determinant
     photo_key   = db.StringProperty()
     
+class SocialMediaModel(db.Model):
+    userid = db.StringProperty(required = True)
+    sm_username = db.StringProperty(required = True)
+    sm_sitename = db.StringProperty(required = True)
+    sm_siteurl  = db.LinkProperty()
+    sm_userpage = db.LinkProperty()
+    
 class ImageModel(db.Model):
     userid   = db.StringProperty(required = True)
     image    = db.BlobProperty()

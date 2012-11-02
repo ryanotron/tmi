@@ -169,6 +169,11 @@ class ProfileHandler(SuperHandler):
                 new_gender   = self.request.get('gender')
                 new_photo    = self.request.get('photo')
                 
+                new_sm_uname = self.request.get('sm_uname')
+                new_sm_site  = self.request.get('sm_site')
+                new_sm_url   = self.request.get('sm_url')
+                new_sm_upage = self.request.get('sm_upage')
+                
                 updated = False
                 
                 if new_salutation != user.salutation:
@@ -210,6 +215,21 @@ class ProfileHandler(SuperHandler):
                     new_photo.put()
                     img_key = new_photo.key()
                     user.photo_key = str(img_key)
+                    updated = True
+                    
+                if new_sm_uname and new_sm_site:
+                    new_sm = models.SocialMediaModel(userid = userid,
+                                                     sm_sitename = new_sm_site,
+                                                     sm_username = new_sm_uname)
+                    if new_sm_url:
+                        new_sm.sm_siteurl = new_sm_url
+                    elif constants.social_media_dictionary.has_key(new_sm_site):
+                        new_sm.sm_siteurl = constants.social_media_dictionary[new_sm_site]
+                        
+                    if new_sm_upage:
+                        new_sm.sm_userpage = new_sm_upage
+                        
+                    new_sm.put()
                     updated = True
                     
                 if updated:
@@ -914,12 +934,14 @@ class UserpageHandler(SuperHandler):
             hygiene_stats = stats.hygiene_stats(user)
 
             userid = str(user.key().id())
+            social_media = db.GqlQuery('select * from SocialMediaModel where userid = :1', userid)
             active_books = db.GqlQuery('select * from BookLibraryModel where userid = :1 and active = :2 order by added desc', userid, True)
             active_games = db.GqlQuery('select * from GameLibraryModel where userid = :1 and active = :2 order by added desc', userid, True)
             #logging.error(sleep_stats)
             #logging.error(coffee_stats['daily_cups'])
             self.render('userpage.html', user = user,
                                          coffee_stats = coffee_stats,
+                                         social_media = social_media,
                                          sleep_stats = sleep_stats,
                                          meal_stats = meal_stats,
                                          hygiene_stats = hygiene_stats,
@@ -937,3 +959,26 @@ class PublicUserpageHandler(SuperHandler):
             self.render('publicuserpage.html', user = user)
         else:
             self.redirect('/')
+            
+class HackHandler(SuperHandler):
+    def get(self):
+        userid = self.request.cookies.get('userid')
+        userid, user = utils.verify_user(userid)
+        if user:
+            self.render('hackpage.html', user = user)
+        else:
+            self.redirect('/login')
+            
+    def post(self):
+        userid = self.request.cookies.get('userid')
+        userid, user = utils.verify_user(userid)
+        if user:
+            meals = db.GqlQuery('select * from MealModel where userid = :1', userid)
+            meals = list(meals)
+            for meal in meals:
+                if meal.when < datetime.datetime(2012, 10, 31):
+                    meal.when = meal.when + datetime.timedelta(days = 8, hours = -8)
+                    meal.put()
+            self.redirect('/panel')
+        else:
+            self.redirect('/login')

@@ -25,7 +25,7 @@
                     {% set m_checked = '' -%}
                     {% set f_checked = '' -%}
                     {% set u_checked = 'checked' -%}
-                {% endif %}
+                {%- endif %}
                 <input type="radio" name="gender" value="male" {{m_checked}}>male
                 <input type="radio" name="gender" value="female" {{f_checked}}>female
                 <input type="radio" name="gender" value="unspecified" {{u_checked}}>unspecified
@@ -41,9 +41,23 @@
         <tr>
             <td>photo
             <td><input type="file" name="photo">
-        <tr>
-            <td><input type="submit" value="save">
     </table>
+    <h3>Add a social media link!</h3>
+    <table>
+        <tr>
+            <td>Site name
+            <td><input type="text" name="sm_site">
+        <tr>
+            <td>Site URL
+            <td><input type="text" name="sm_url">
+        <tr>
+            <td>User name
+            <td><input type="text" name="sm_uname">
+        <tr>
+            <td>User page
+            <td><input type="text" name="sm_upage">
+    </table>
+    <input type="submit" value="save">
 </form>
 
 <a href="/u/{{user.username}}">Back to your page</a>

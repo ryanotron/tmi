@@ -34,8 +34,9 @@ def sleep_stats(user):
         lastweek_total = 0.0
         thisweek_total = 0.0
         alltime_total  = 0.0
-        lastweek_start = today - datetime.timedelta(days = (today.weekday() + 7))
-        lastweek_end   = today - datetime.timedelta(days = today.weekday())
+        lastweek_start = today - datetime.timedelta(days = (today.weekday() + 7), hours = today.hour + today.minute/60.0)
+        lastweek_end   = today - datetime.timedelta(days = today.weekday(), hours = today.hour + today.minute/60.0)
+        logging.error(lastweek_end)
         
         sleep_list = []
         
@@ -89,8 +90,10 @@ def sleep_stats(user):
             status['lastweek_average'] = lastweek_total / 7.0
         
         # sleep debts
-        status['debt_by_lastweek'] = status['lastweek_average'] * today.weekday() - thisweek_total
-        status['debt_by_alltime']  = status['alltime_average'] * today.weekday() - thisweek_total
+        status['debt_by_lastweek'] = max(0, status['lastweek_average'] * (today.weekday() + 1) - thisweek_total)
+        status['debt_by_alltime']  = max(0, status['alltime_average'] * (today.weekday() + 1) - thisweek_total)
+        logging.error('total days this week %d' % (today.weekday() + 1))
+        logging.error('total hours of sleep this week %d' % thisweek_total)
         return status
 
 def coffee_stats(user):
@@ -169,40 +172,37 @@ def get_meals(user, order = 'desc', number = 0):
     return list(meals)
     
 def meal_stats(user):
-    meals = get_meals(user, order = 'desc')
-    
+    meals = get_meals(user, order = 'asc')
     if not meals:
         return None
         
     # pre-processing
+    now = datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)
     status = {}
-    latest_retrieved = False
     for i in range(len(meals)):
         meals[i].when += datetime.timedelta(hours = user.timezone)
-        if not latest_retrieved and meals[i].category != 'snack':
-            status['latest_meal'] = meals[i]
-            latest_retrieved = True
+        
+    proper_meals = [meal for meal in meals if meal.category in ('breakfast', 'lunch', 'dinner')]
+        
+    status['latest_meal'] = proper_meals[-1]
+    status['latest_hours_ago'] = (now - proper_meals[-1].when).total_seconds() / 3600.0
 
     br_to_lu = []
     lu_to_di = []
     prev_meal = None
-    for meal in meals:
-        if prev_meal:
-            #logging.error('prev meal '+prev_meal.category+', meal '+meal.category)
-            if prev_meal.category == 'lunch' and meal.category == 'breakfast':
-                if prev_meal.when.day == meal.when.day:
-                    dt = -1.0*(meal.when - prev_meal.when).total_seconds() / 3600.0
-                    br_to_lu.append(dt)
-            elif (prev_meal.category == 'dinner' or prev_meal.category == 'supper') and meal.category == 'lunch':
-                if prev_meal.when.day == meal.when.day:
-                    dt = -1.0*(meal.when - prev_meal.when).total_seconds() / 3600.0
-                    lu_to_di.append(dt)
+    for meal in proper_meals:
+        if not prev_meal:
             prev_meal = meal
         else:
+            if prev_meal.category == 'breakfast' and meal.category == 'lunch':
+                if prev_meal.when.day == meal.when.day:
+                    dt = (meal.when - prev_meal.when).total_seconds() / 3600.0
+                    br_to_lu.append(dt)
+            elif prev_meal.category == 'lunch' and meal.category == 'dinner':
+                if prev_meal.when.day == meal.when.day:
+                    dt = (meal.when - prev_meal.when).total_seconds() / 3600.0
+                    lu_to_di.append(dt)
             prev_meal = meal
-            
-    #logging.error('breakfast to lunch ' + str(br_to_lu))
-    #logging.error('lunch to dinner ' + str(lu_to_di))
     
     if len(br_to_lu) > 0:
         status['mu_br_to_lu'] = sum(br_to_lu) / len(br_to_lu)

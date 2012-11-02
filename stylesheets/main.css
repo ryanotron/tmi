@@ -3,11 +3,22 @@
     font-size: 12pt;
 }
 
+div.Headline {
+    background-color: #555555;
+    color: #ffffff;
+    padding: 5px;
+    margin: 5px;
+    width: 80%;
+}
+
+div.Headline a {
+    color: #ddddff;
+}
+
 textarea {
     width: 75%;
     height: 10%;
     font-family: Helvetica, Verdana, Arial, sans-serif;
-    font-size: 10pt;
 }
 
 div.BookContainer, div.GameContainer {

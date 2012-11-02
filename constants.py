@@ -16,3 +16,8 @@ jinjaenv.globals['datetime'] = datetime
 jinjaenv.globals['stats'] = stats
 
 image_height = 200
+
+social_media_dictionary = {'facebook': 'http://www.facebook.com',
+                           'twitter': 'http://www.twitter.com',
+                           'github': 'http://www.github.com',
+                           'steam': 'http://www.steampowered.com'}

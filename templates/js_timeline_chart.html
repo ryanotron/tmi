@@ -1,0 +1,19 @@
+﻿<script type="text/javascript">
+    google.load('visualization','1', {packages:['corechart']});
+    google.setOnLoadCallback(drawChart)
+    function drawChart() {
+        var data = new google.visualization.DataTable();
+        data.addColumn('date', 'Date');
+        data.addColumn('number', '{{chart["y_label"]}}');
+        {% for point in dataset -%}
+        data.addRow([new Date({{point[0].year}}, {{point[0].month - 1}}, {{point[0].day}}), {{'%2.2f' % point[1]}}]);
+        {%- endfor %}
+        var options = {'height': 400,
+                       'lineWidth': 1,
+                       'pointSize': 5,
+                       vAxis: {format: '##', title: '{{chart["y_label"]}}'}};
+
+        var chart = new google.visualization.LineChart(document.getElementById('{{chart["div_name"]}}'));
+        chart.draw(data, options);
+    }
+</script>
