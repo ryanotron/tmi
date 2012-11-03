@@ -29,22 +29,24 @@
     </div>
     <div id="UserInfo">
         <p>Last seen on {{(user.last_seen + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y, %H:%M')}} UTC {{'%+2.1f' % user.timezone}}</p>
+        {% if social_media -%}
+        <div id="SocialMedia">
+            <h3>Find {{user.salutation}} {{user.realname}} elsewhere! {{user.nom_pronoun.capitalize()}} is...</h3>
+            <ul>
+            {% for site in social_media -%}
+                <li>{{site.sm_username}} on {{site.sm_sitename}}
+            {%- endfor %}
+            </ul>
+        </div>
+        {%- endif %}
         {% set user_messages = stats.user_messages(user, 1) -%}
         {% if user_messages -%}
+        <div id="UserMessage">
             <h3>Latest message from {{user.salutation}} {{user.realname}}</h3>
-            <p class="UserMessage">{{user_messages[0].message}}</p>
+            <p>{{user_messages[0].message}}</p>
+        </div>
         {%- endif -%}
     </div>
-    {% if social_media -%}
-    <div id="SocialMedia">
-        <h3>Find {{user.salutation}} {{user.realname}} elsewhere! {{user.nom_pronoun.capitalize()}} is...</h3>
-        <ul>
-        {% for site in social_media -%}
-            <li>{{site.sm_username}} on {{site.sm_sitename}}
-        {%- endfor %}
-        </ul>
-    </div>
-    {%- endif %}
 </div>
 
 <div class="BlockWrapper" id="Energy">
