@@ -18,8 +18,9 @@
 {% endblock %}
 
 {% block content %}
+<div class="OverWrapper">
 <div class="Headline">
-    Like what you see? Want to have one? Well, you can't make an account yet, but you can <a href="https://github.com/ryanotron/tmi"><i>fork me</i> on github!</a>
+    Like what you see? Want to have one? Well, you can't make an account yet, but you can <a href="https://github.com/ryanotron/tmi">fork me on github!</a>
 </div>
 <div class="BlockWrapper" id="PersonalInfo">
     <h2>Too much information on</h2>
@@ -34,16 +35,23 @@
             <h3>Find {{user.salutation}} {{user.realname}} elsewhere! {{user.nom_pronoun.capitalize()}} is...</h3>
             <ul>
             {% for site in social_media -%}
-                <li>{{site.sm_username}} on {{site.sm_sitename}}
+                <li>{%- if site.sm_userpage -%}<a href="{{site.sm_userpage}}">{{site.sm_username}}</a>{%- else -%}{{site.sm_username}} {% endif -%} on <a href="{{site.sm_siteurl}}">{{site.sm_sitename}}</a>
             {%- endfor %}
             </ul>
         </div>
         {%- endif %}
-        {% set user_messages = stats.user_messages(user, 1) -%}
+        {% set user_messages = user_messages -%}
         {% if user_messages -%}
         <div id="UserMessage">
-            <h3>Latest message from {{user.salutation}} {{user.realname}}</h3>
-            <p>{{user_messages[0].message}}</p>
+            <h3>Latest messages from {{user.salutation}} {{user.realname}}</h3>
+            {% for message in user_messages -%}
+            <div class="Message">
+                on {{message.when.strftime('%d/%m/%Y - %H:%M')}} UTC{{'%+2.1f' % user.timezone}}
+                <blockquote>
+                {{message.message}}
+                </blockquote>
+            </div>
+            {% endfor-%}
         </div>
         {%- endif -%}
     </div>
@@ -145,7 +153,7 @@
                     <img src="../img?img_key={{book.image}}"></img>
                 </div>
             {% endif %}
-            {{book.title}} by {{book.author}}
+            {{book.title}} <br> by {{book.author}}
             </div>
         {% endfor %}
     {% else -%}
@@ -163,7 +171,7 @@
                     <img src="../img?img_key={{game.image}}"></img>
                 </div>
             {% endif %}
-            {{game.title}} on {{game.platform}}
+            {{game.title}} on <br> {{game.platform}}
             </div>
         {% endfor %}
     {% else -%}
@@ -183,16 +191,19 @@
 </div>
 
 <div class="BlockWrapper" id="PrevComments">
-    {% set messages = stats.guest_messages(user, 3) -%}
+    {% set messages = guest_messages -%}
     <h2>What people has told {{user.salutation}} {{user.realname}}</h2>
     {% if messages -%}
         {% for message in messages -%}
-            {{message.guestname}} said on {{(message.when + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y %H:%M')}}:<br>
-            {{message.message}}<br><hr>
+            <div class="Message">
+            {{message.guestname}} said on {{(message.when + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y %H:%M')}}:
+            <blockquote>{{message.message}}</blockquote>
+            </div>
         {% endfor -%}
     {% else %}
         Nobody has told {{user.salutation}} {{user.realname}} anything yet. Be the first!
     {% endif %}
+</div>
 </div>
     
 {% endblock %}

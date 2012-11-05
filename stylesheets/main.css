@@ -18,9 +18,16 @@ h3 {
 
 div {
     float: left;
-    padding: 5px;
+    padding: 3px;
     margin: 3px;
-    border: 1px dashed blue;
+    border: 0px dashed blue;
+    width: auto;
+}
+
+div.OverWrapper {
+    border: none;
+    margin: 0px;
+    padding: 0px;
 }
 
 div.Headline {
@@ -30,19 +37,25 @@ div.Headline {
 
 div.BlockWrapper {
     width: 95%;
+    border: 1px solid red;
 }
 
 div#UserPhoto {
-    width: 10%;
+    width: auto;
     text-align: center;
 }
 
 div#UserInfo {
-    width: 80%;
+    width: auto;
 }
 
 div#UserInfo div {
     width: 95%;
+}
+
+div.Message {
+    width: 95%;
+    background-color: #dddddd;
 }
 
 div.Sub_BlockWrapper {

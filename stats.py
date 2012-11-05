@@ -296,7 +296,7 @@ def user_messages(user, number):
     else:
         pass
         
-def guest_messages(user, number):
+def guest_messages(user, number = 0):
     userid = str(user.key().id())
     query = 'select * from GuestMessageModel where userid = \'%s\' order by when desc' % userid
     if number > 0:

@@ -905,7 +905,20 @@ class PresentTimedActivityHandler(SuperHandler):
                 self.redirect('/login')
         else:
             self.redirect('/login')
-            
+
+class LibraryHandler(SuperHandler):
+    def get(self):
+        userid = self.request.cookies.get('userid')
+        userid, user = utils.verify_user(userid)
+        if user:
+            books = db.GqlQuery('select * from BookLibraryModel where userid = :1 order by added desc', userid)
+            books = list(books)
+            self.render('librarypage.html', login = True, books = books)
+        else:
+            username = self.request.get('user')
+            user = db.GqlQuery('select * from UserModel where username = :1 limit 1' username)
+            self.render('librarypage.html', login = False)
+
 class PanelHandler(SuperHandler):
     def get(self):
         userid = self.request.cookies.get('userid')
@@ -937,8 +950,10 @@ class UserpageHandler(SuperHandler):
             social_media = db.GqlQuery('select * from SocialMediaModel where userid = :1', userid)
             active_books = db.GqlQuery('select * from BookLibraryModel where userid = :1 and active = :2 order by added desc', userid, True)
             active_games = db.GqlQuery('select * from GameLibraryModel where userid = :1 and active = :2 order by added desc', userid, True)
-            #logging.error(sleep_stats)
-            #logging.error(coffee_stats['daily_cups'])
+            
+            user_messages = stats.user_messages(user, 5)
+            guest_messages = stats.guest_messages(user)
+            
             self.render('userpage.html', user = user,
                                          coffee_stats = coffee_stats,
                                          social_media = social_media,
@@ -946,7 +961,9 @@ class UserpageHandler(SuperHandler):
                                          meal_stats = meal_stats,
                                          hygiene_stats = hygiene_stats,
                                          active_books = list(active_books),
-                                         active_games = list(active_games))
+                                         active_games = list(active_games),
+                                         user_messages = user_messages,
+                                         guest_messages = guest_messages)
         else:
             self.redirect('/') # go to user not found page
             
