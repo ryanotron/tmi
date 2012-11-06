@@ -910,14 +910,36 @@ class LibraryHandler(SuperHandler):
     def get(self):
         userid = self.request.cookies.get('userid')
         userid, user = utils.verify_user(userid)
+        libtype = self.request.get('type')
+        libmodel = 'BookLibraryModel'
+        if libtype.lower() in ('game', 'games'):
+            libtype = 'game'
+            libmodel = 'GameLibraryModel'
+        else:
+            libtype = 'book'
+            
         if user:
-            books = db.GqlQuery('select * from BookLibraryModel where userid = :1 order by added desc', userid)
+            books = db.GqlQuery('select * from %s where userid = :1 order by added desc' % libmodel, userid)
             books = list(books)
-            self.render('librarypage.html', login = True, books = books)
+            self.render('librarypage.html', user = user, login = True, books = books, libtype=libtype)
         else:
             username = self.request.get('user')
-            user = db.GqlQuery('select * from UserModel where username = :1 limit 1' username)
-            self.render('librarypage.html', login = False)
+            user = list(db.GqlQuery('select * from UserModel where username = :1 limit 1', username))
+            if user[0]: 
+                userid = str(user[0].key().id())
+                books = list(db.GqlQuery('select * from %s where userid = :1 order by added desc' % libmodel, userid))
+                self.render('librarypage.html', user = user[0], login = False, books = books, libtype=libtype)
+            else:
+                self.redirect('/')
+                
+    def post(self):
+        book = db.get(self.request.get('key'))
+        book.active = not book.active
+        book.put()
+        if book.platform:
+            self.redirect('/library?type=game')
+        else:
+            self.redirect('/library?type=book')
 
 class PanelHandler(SuperHandler):
     def get(self):

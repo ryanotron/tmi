@@ -37,6 +37,12 @@ indexes:
   - name: added
     direction: desc
 
+- kind: BookLibraryModel
+  properties:
+  - name: userid
+  - name: added
+    direction: desc
+
 - kind: CommuteModel
   properties:
   - name: userid
@@ -52,6 +58,12 @@ indexes:
 - kind: GameLibraryModel
   properties:
   - name: active
+  - name: userid
+  - name: added
+    direction: desc
+
+- kind: GameLibraryModel
+  properties:
   - name: userid
   - name: added
     direction: desc

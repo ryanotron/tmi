@@ -12,6 +12,9 @@ def securify_cookie(s):
     return s + '|' + hashlib.sha256(s + constants.COOKIESECRET).hexdigest()
     
 def verify_cookie(s):
+    logging.error('cookie string is %s' % s)
+    if not s:
+        return None
     value, vhash = s.split('|')
     if s == securify_cookie(value):
         return value
@@ -43,7 +46,7 @@ def verify_user(userid_cookie):
         else:
             return None
     else:
-        return None
+        return None, None
         
 def str_to_datetime(datestr):
     d,m,y = [int(elem) for elem in datestr.split('/')]

@@ -153,7 +153,9 @@
                     <img src="../img?img_key={{book.image}}"></img>
                 </div>
             {% endif %}
-            {{book.title}} <br> by {{book.author}}
+                <div class="BookDescription">
+                    {{book.title}} <br> by {{book.author}}
+                </div>
             </div>
         {% endfor %}
     {% else -%}
@@ -171,7 +173,9 @@
                     <img src="../img?img_key={{game.image}}"></img>
                 </div>
             {% endif %}
-            {{game.title}} on <br> {{game.platform}}
+                <div class="GameDescripton">
+                    {{game.title}} on <br> {{game.platform}}
+                </div>
             </div>
         {% endfor %}
     {% else -%}

@@ -1,0 +1,43 @@
+﻿{% extends 'basepage.html' %}
+
+{% block head %}
+<title>{{user.salutation}} {{user.realname}} - {{libtype.capitalize()}} Library</title>
+{% endblock %}
+
+{% block content %}
+<div class="OverWrapper">
+    {% if books %}
+    {% for book in books %}
+    <div class="LibItem">
+        {% if book.image %}
+        <div class="ImageContainer"><img src="/img?img_key={{book.image}}"></div>
+        {% endif %}
+        <div class="BookDescription">
+            {{book.title}}<br>
+            {% if libtype == 'book' %}
+            by {{book.author}}
+            {% if book.active %}
+            <br>{{user.salutation}} {{user.realname}} is currently reading this book
+            {% endif %}
+            {% elif libtype == 'game' %}
+            on {{book.platform}}
+            {% if book.active %}
+            <br>{{user.salutation}} {{user.realname}} is currently playing this game
+            {% endif %}
+            {% endif %}
+        </div>
+        {% if login %}
+        <div class="Toggler">
+        <form method="post">
+            <input type="hidden" name="key" value="{{book.key()}}">
+            <input type="submit" value="toggle activation">
+        </form>
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+    {% else %}
+    {{user.salutation}} {{user.realname}} is not known to collect any {{libtype}}
+    {% endif %}
+</div>
+{% endblock %}

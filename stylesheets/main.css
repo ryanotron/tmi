@@ -4,7 +4,7 @@
 
 p, h1, h2, h3 {
     margin: 1px;
-    padding: 0px;
+    padding: 0px; 
 }
 
 h1, h2 {
@@ -20,7 +20,7 @@ div {
     float: left;
     padding: 3px;
     margin: 3px;
-    border: 0px dashed blue;
+    border: 1px dashed blue; /*for debugging*/
     width: auto;
 }
 
@@ -72,7 +72,27 @@ div.ChartWrapper div {
 }
 
 div.BookContainer, div.GameContainer {
-    width: 30%;
+    width: auto;
+    margin-top: auto;
+    margin-bottom: auto;
+    height: 160px;
+    padding: 10px;
+}
+
+div.BookDescription, div.GameDescription {
+    margin-left: 10px;
+    margin-top:0px;
+    width: auto;
+}
+
+div.ImageContainer {
+    margin: 0px;
+    padding: 5px;
+}
+
+div.ImageContainer img {
+    margin: 0px;
+    padding: 0px;
 }
 
 textarea {
@@ -90,4 +110,12 @@ div.PanelWrapper h2 {
 div#Shortcuts form {
     float: left;
     margin: 10px;
+}
+
+div.LibItem {
+    width: 95%;
+}
+
+div.Toggler {
+    float: right;
 }
