@@ -162,6 +162,7 @@
 <div class="BlockWrapper" id="Books">
     <h2>{{user.salutation}} {{user.realname}} is currently reading</h2>
     {% if active_books -%}
+        <div class="ActiveBooks">
         {% for book in active_books -%}
             <div class="BookContainer">
             {% if book.image -%}
@@ -174,14 +175,34 @@
                 </div>
             </div>
         {% endfor %}
+        </div>
     {% else -%}
         <p>Nothing. {{user.salutation}} {{user.realname}} is not currently reading anything.</p>
+    {% endif %}
+    {% if inactive_books -%}
+        <div class="InactiveBooks">
+        {% for book in inactive_books -%}
+            <div class="BookContainer">
+            {% if book.image -%}
+                <div class="ImageContainer">
+                    <img src="../img?img_key={{book.image}}"></img>
+                </div>
+            {% endif %}
+                <div class="BookDescription">
+                    {{book.title}} <br> by {{book.author}}
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+    {% else -%}
+        <p>Nothing. {{user.salutation}} {{user.realname}} has not read anything.</p>
     {% endif %}
 </div>
 
 <div class="BlockWrapper" id="Games">
     <h2>{{user.salutation}} {{user.realname}} is currently playing</h2>
     {% if active_games -%}
+        <div class="ActiveGames">
         {% for game in active_games -%}
             <div class="GameContainer">
             {% if game.image -%}
@@ -194,8 +215,27 @@
                 </div>
             </div>
         {% endfor %}
+        </div>
     {% else -%}
         <p>Nothing. {{user.salutation}} {{user.realname}} is not currently playing anything.</p>
+    {% endif %}
+    {% if inactive_games -%}
+        <div class="InactiveGames">
+        {% for game in inactive_games -%}
+            <div class="GameContainer">
+            {% if game.image -%}
+                <div class="ImageContainer">
+                    <img src="../img?img_key={{game.image}}"></img>
+                </div>
+            {% endif %}
+                <div class="GameDescripton">
+                    {{game.title}} on <br> {{game.platform}}
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+    {% else -%}
+        <p>Nothing. {{user.salutation}} {{user.realname}} has not finished any game.</p>
     {% endif %}
 </div>
 

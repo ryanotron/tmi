@@ -40,6 +40,7 @@ class SignupHandler(SuperHandler):
         password = self.request.get('password')
         verify   = self.request.get('verify')
         email    = self.request.get('email')
+        betakey  = self.request.get('betakey')
         
         error = False
         username_error = ''
@@ -62,14 +63,31 @@ class SignupHandler(SuperHandler):
                     valid_pw = constants.password_re.match(password)
                     if valid_pw:
                         if password == verify:
-                            new_user = models.UserModel(username   = username,
-                                                        hashedpw   = utils.securify_password(username, password),
-                                                        nameday    = datetime.datetime.utcnow(),
-                                                        salutation = 'Comrade',
-                                                        realname   = username,
-                                                        last_seen  = datetime.datetime.utcnow(),
-                                                        timezone   = 8.0,
-                                                        currency   = 'SGD')
+                            if not betakey:
+                                error = True
+                                betakey_error = 'Fill in your beta key!'
+                            else:
+                                dbkey = db.GqlQuery('select * from BetaKeyModel where keystring = :1 limit 1', betakey)
+                                if len(list(dbkey)) > 0: 
+                                    dbkey = list(dbkey)[0]
+                                    if not dbkey.used:
+                                        dbkey.used = True
+                                        dbkey.whenused = datetime.datetime.utcnow()
+                                        dbkey.put()
+                                        new_user = models.UserModel(username   = username,
+                                                                    hashedpw   = utils.securify_password(username, password),
+                                                                    nameday    = datetime.datetime.utcnow(),
+                                                                    salutation = 'Comrade',
+                                                                    realname   = username,
+                                                                    last_seen  = datetime.datetime.utcnow(),
+                                                                    timezone   = 8.0,
+                                                                    currency   = 'SGD')
+                                    else:
+                                        betakey_error = 'this key is already used!'
+                                        error = True
+                                else:
+                                    betakey_error = 'invalid beta key!'
+                                    error = True
                         else:
                             verification_error = 'Passwords do not match!'
                             error = True
@@ -96,7 +114,8 @@ class SignupHandler(SuperHandler):
                                            username_error = username_error,
                                            password_error = password_error,
                                            verification_error = verification_error,
-                                           email_error = email_error)
+                                           email_error = email_error,
+                                           betakey_error = betakey_error)
         else:
             new_user.put()
             userid = str(new_user.key().id())
@@ -935,6 +954,10 @@ class LibraryHandler(SuperHandler):
     def post(self):
         book = db.get(self.request.get('key'))
         book.active = not book.active
+        if book.active:
+            book.start = datetime.datetime.utcnow()
+        else:
+            book.finish = datetime.datetime.utcnow()
         book.put()
         if hasattr(book, 'platform'):
             self.redirect('/library?type=game')
@@ -970,8 +993,12 @@ class UserpageHandler(SuperHandler):
 
             userid = str(user.key().id())
             social_media = db.GqlQuery('select * from SocialMediaModel where userid = :1', userid)
-            active_books = db.GqlQuery('select * from BookLibraryModel where userid = :1 and active = :2 order by added desc', userid, True)
-            active_games = db.GqlQuery('select * from GameLibraryModel where userid = :1 and active = :2 order by added desc', userid, True)
+            books = list(db.GqlQuery('select * from BookLibraryModel where userid = :1 order by added desc limit 5', userid))
+            active_books = [book for book in books if book.active]
+            inactive_books = [book for book in books if not book.active]
+            games = list(db.GqlQuery('select * from GameLibraryModel where userid = :1 order by added desc limit 5', userid))
+            active_games = [game for game in games if game.active]
+            inactive_games = [game for game in games if not game.active]
             
             user_messages = stats.user_messages(user, 5)
             guest_messages = stats.guest_messages(user)
@@ -982,8 +1009,10 @@ class UserpageHandler(SuperHandler):
                                          sleep_stats = sleep_stats,
                                          meal_stats = meal_stats,
                                          hygiene_stats = hygiene_stats,
-                                         active_books = list(active_books),
-                                         active_games = list(active_games),
+                                         active_books = active_books,
+                                         inactive_books = inactive_books,
+                                         active_games = active_games,
+                                         inactive_games = inactive_games,
                                          user_messages = user_messages,
                                          guest_messages = guest_messages)
         else:
@@ -1012,12 +1041,15 @@ class HackHandler(SuperHandler):
         userid = self.request.cookies.get('userid')
         userid, user = utils.verify_user(userid)
         if user:
-            meals = db.GqlQuery('select * from MealModel where userid = :1', userid)
-            meals = list(meals)
-            for meal in meals:
-                if meal.when < datetime.datetime(2012, 10, 31):
-                    meal.when = meal.when + datetime.timedelta(days = 8, hours = -8)
-                    meal.put()
+            betakey = models.BetaKeyModel(keystring = 'humpty dumpty',
+                                          used = False)
+            betakey.put()
+            # meals = db.GqlQuery('select * from MealModel where userid = :1', userid)
+            # meals = list(meals)
+            # for meal in meals:
+                # if meal.when < datetime.datetime(2012, 10, 31):
+                    # meal.when = meal.when + datetime.timedelta(days = 8, hours = -8)
+                    # meal.put()
             self.redirect('/panel')
         else:
             self.redirect('/login')

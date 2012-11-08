@@ -1,7 +1,7 @@
 ﻿{% extends 'basepage.html' %}
 
 {% block content %}
-    <h2>Sign up to tell people Too Much Information about yourself!</h2>
+    <!--<h2>Sign up to tell people Too Much Information about yourself!</h2>-->
     <form method="post">
         <table>
             <tr>
@@ -20,6 +20,10 @@
                 <td>email (optional)
                 <td><input type="text" name="email" value="{{email}}">
                 <td>{{email_error}}
+            <tr>
+                <td>beta key
+                <td><input type="text" name="betakey">
+                <td>{{betakey_error}}
             <tr>
                 <td><input type="submit" value="sign up!">
         </table>

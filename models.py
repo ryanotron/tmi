@@ -94,3 +94,8 @@ class GameLibraryModel(db.Model):
     active = db.BooleanProperty()
     platform = db.StringProperty()
     image = db.StringProperty()
+    
+class BetaKeyModel(db.Model):
+    keystring = db.StringProperty()
+    used = db.BooleanProperty()
+    whenused = db.DateTimeProperty()
