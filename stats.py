@@ -1,4 +1,4 @@
-﻿import datetime, logging
+﻿import datetime, logging, numpy
 from google.appengine.ext import db
 
 def get_timed_activities(user, act_name, orderby = 'end', order = 'desc', number = 0):
@@ -92,8 +92,13 @@ def sleep_stats(user):
         # sleep debts
         status['debt_by_lastweek'] = max(0, status['lastweek_average'] * (today.weekday() + 1) - thisweek_total)
         status['debt_by_alltime']  = max(0, status['alltime_average'] * (today.weekday() + 1) - thisweek_total)
-        logging.error('total days this week %d' % (today.weekday() + 1))
-        logging.error('total hours of sleep this week %d' % thisweek_total)
+        #logging.error('total days this week %d' % (today.weekday() + 1))
+        #logging.error('total hours of sleep this week %d' % thisweek_total)
+        
+        # sleep histogram
+        h, b = numpy.histogram([elem[1] for elem in sleep_list], bins = numpy.ceil(numpy.sqrt(len(sleep_list))))
+        sleep_histogram = zip(b[:len(h)], b[1:len(h)+1], h)
+        status['sleep_histogram'] = sleep_histogram
         return status
 
 def coffee_stats(user):
@@ -110,10 +115,10 @@ def coffee_stats(user):
         today = datetime.datetime.utcnow() + timeshift
         for i in range(len(coffees)):
             coffees[i].when = coffees[i].when + timeshift
-        daysince = (today - coffees[-1].when).days
+        daysince = (today.date() - coffees[-1].when.date()).days
         
         daily_cups = {}
-        for i in range(daysince + 2):
+        for i in range(daysince + 1):
             day = today - datetime.timedelta(days = i)
             daily_cups[day.date()] = 0
             
@@ -136,6 +141,11 @@ def coffee_stats(user):
             
         # report daily cups
         status['daily_cups'] = daily_cups
+        
+        # calculate daily cups histogram
+        h, b = numpy.histogram([elem[1] for elem in daily_cups], bins = numpy.ceil(numpy.sqrt(len(daily_cups))))
+        coffee_histogram = zip(b[:len(h)], b[1:len(h)+1], h)
+        status['coffee_histogram'] = coffee_histogram
         return status
     else:
         return None

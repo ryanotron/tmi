@@ -8,12 +8,20 @@
 {% set dataset = coffee_stats['daily_cups'] -%}
 {% set chart = {'y_label': 'cups', 'div_name': 'coffee_chart'} -%}
 {% include 'js_timeline_chart.html' %}
+
+{% set dataset = coffee_stats['coffee_histogram'] -%}
+{% set chart = {'y_label': 'frequency', 'div_name': 'coffee_histogram', 'title':'Coffee Histogram'} -%}
+{% include 'js_histogram_chart.html' %}
 {%- endif %}
 
 {% if sleep_stats -%}
 {% set dataset = sleep_stats['sleep_list'] -%}
 {% set chart = {'y_label': 'hours', 'div_name': 'sleep_chart'} -%}
 {% include 'js_timeline_chart.html' -%}
+
+{% set dataset = sleep_stats['sleep_histogram'] -%}
+{% set chart = {'y_label': 'frequency', 'div_name': 'sleep_histogram', 'title': 'Sleep Histogram'} -%}
+{% include 'js_histogram_chart.html' -%}
 {%- endif %}
 {% endblock %}
 
@@ -71,6 +79,10 @@
             <h3>{{user.salutation}} {{user.realname}}'s sleep hours</h3>
             <div id="sleep_chart"></div>
         </div>
+        <div class="ChartWrapper">
+            <h3>{{user.salutation}} {{user.realname}}'s sleep hours</h3>
+            <div id="sleep_histogram"></div>
+        </div>
     </div>
     
     <div class="Sub_BlockWrapper">
@@ -82,8 +94,12 @@
         {%- endif %}
 
         <div class="ChartWrapper">
-            <h3>{{user.salutation}} {{user.realname}}'s daily cup of coffee
+            <h3>{{user.salutation}} {{user.realname}}'s daily cup of coffee</h3>
             <div id="coffee_chart"></div>
+        </div>
+        <div class="ChartWrapper">
+            <h3>{{user.salutation}} {{user.realname}}'s daily cup of coffee</h3>
+            <div id="coffee_histogram"></div>
         </div>
     </div>
     

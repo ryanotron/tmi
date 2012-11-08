@@ -936,7 +936,7 @@ class LibraryHandler(SuperHandler):
         book = db.get(self.request.get('key'))
         book.active = not book.active
         book.put()
-        if book.platform:
+        if hasattr(book, 'platform'):
             self.redirect('/library?type=game')
         else:
             self.redirect('/library?type=book')
