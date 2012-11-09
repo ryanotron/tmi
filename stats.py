@@ -239,6 +239,9 @@ def hygiene_stats(user):
     if len(showers) > 0:
         stats['shower']['latest'] = -1*(showers[0].when - datetime.datetime.utcnow()).total_seconds() / 3600.0
         shower_between = [(showers[i].when - showers[i+1].when).total_seconds()/3600.0 for i in range(len(showers) - 1)]
+        h, b = numpy.histogram(shower_between, bins = numpy.ceil(numpy.sqrt(len(shower_between))))
+        shower_histogram = zip(b[:len(h)], b[1:len(h)+1], h)
+        stats['shower']['histogram'] = shower_histogram
         stats['shower']['ave_interval'] = len(shower_between) > 0 and (sum(shower_between) / len(shower_between)) or 0
         
     if len(shaves) > 0:

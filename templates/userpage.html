@@ -23,6 +23,12 @@
 {% set chart = {'y_label': 'frequency', 'div_name': 'sleep_histogram', 'title': 'Sleep Histogram'} -%}
 {% include 'js_histogram_chart.html' -%}
 {%- endif %}
+
+{% if hygiene_stats['shower']['histogram'] -%}
+{% set dataset = hygiene_stats['shower']['histogram'] -%}
+{% set chart = {'y_label': 'frequency', 'div_name': 'shower_histogram', 'title': 'Shower Histogram'} -%}
+{% include 'js_histogram_chart.html' -%}
+{% endif -%}
 {% endblock %}
 
 {% block content %}
@@ -124,8 +130,11 @@
     {% if hygiene_stats -%}
         {% if hygiene_stats['shower'] -%}
             <p>{{user.salutation}} {{user.realname}} last showered {{'%2.2f' % hygiene_stats['shower']['latest']}} hours ago. 
-            {% if hygiene_stats['shave']['ave_interval'] -%}
+            {% if hygiene_stats['shower']['ave_interval'] -%}
                 {{user.nom_pronoun.capitalize()}} usually showers every {{'%2.2f' % hygiene_stats['shower']['ave_interval']}} hours.</p>
+                <div class="ChartWrapper">
+                    <div id="shower_histogram"></div>
+                </div>
             {% else %}
                 It is the first recorded instance of {{user.salutation}} {{user.realname}} showering.</p>
             {% endif %}

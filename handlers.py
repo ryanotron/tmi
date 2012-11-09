@@ -81,7 +81,10 @@ class SignupHandler(SuperHandler):
                                                                     realname   = username,
                                                                     last_seen  = datetime.datetime.utcnow(),
                                                                     timezone   = 8.0,
-                                                                    currency   = 'SGD')
+                                                                    currency   = 'SGD',
+                                                                    nom_pronoun = 'it',
+                                                                    pos_determi = 'its',
+                                                                    pos_pronoun = 'its')
                                     else:
                                         betakey_error = 'this key is already used!'
                                         error = True
@@ -926,7 +929,7 @@ class PresentTimedActivityHandler(SuperHandler):
             self.redirect('/login')
 
 class LibraryHandler(SuperHandler):
-    def get(self):
+    def get(self, username):
         userid = self.request.cookies.get('userid')
         userid, user = utils.verify_user(userid)
         libtype = self.request.get('type')
@@ -937,12 +940,11 @@ class LibraryHandler(SuperHandler):
         else:
             libtype = 'book'
             
-        if user:
+        if user and user.username == username:
             books = db.GqlQuery('select * from %s where userid = :1 order by added desc' % libmodel, userid)
             books = list(books)
             self.render('librarypage.html', user = user, login = True, books = books, libtype=libtype)
         else:
-            username = self.request.get('user')
             user = list(db.GqlQuery('select * from UserModel where username = :1 limit 1', username))
             if user[0]: 
                 userid = str(user[0].key().id())
@@ -951,18 +953,30 @@ class LibraryHandler(SuperHandler):
             else:
                 self.redirect('/')
                 
-    def post(self):
+    def post(self, username):
         book = db.get(self.request.get('key'))
-        book.active = not book.active
-        if book.active:
-            book.start = datetime.datetime.utcnow()
-        else:
-            book.finish = datetime.datetime.utcnow()
+        act = self.request.get('act')
+        if act == 'toggle':
+            book.active = not book.active
+            if book.active:
+                book.start = datetime.datetime.utcnow()
+            else:
+                book.finish = datetime.datetime.utcnow()
+        elif act == 'new_img':
+            image = self.request.get('new_img')
+            if image:
+                image = images.resize(image, height = 150)
+                image = models.ImageModel(userid = book.userid,
+                                          image = db.Blob(image),
+                                          uploaded = datetime.datetime.utcnow())
+                image.put()
+                imkey = str(image.key())
+                book.image = imkey
         book.put()
         if hasattr(book, 'platform'):
-            self.redirect('/library?type=game')
+            self.redirect('/u/'+username+'/library?type=game')
         else:
-            self.redirect('/library?type=book')
+            self.redirect('/u'+username+'/library?type=book')
 
 class PanelHandler(SuperHandler):
     def get(self):
