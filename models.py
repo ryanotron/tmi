@@ -27,6 +27,7 @@ class ImageModel(db.Model):
     userid   = db.StringProperty(required = True)
     image    = db.BlobProperty()
     uploaded = db.DateTimeProperty()
+    category = db.StringProperty() #profile_img, meal_img, book_img, game_img, expense_img
 
 class ActivityModel(db.Model):
     userid = db.StringProperty(required = True)

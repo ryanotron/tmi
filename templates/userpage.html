@@ -6,27 +6,27 @@
 <script type="text/javascript">google.load('visualization','1', {packages:['corechart']});</script>
 {% if coffee_stats -%}
 {% set dataset = coffee_stats['daily_cups'] -%}
-{% set chart = {'y_label': 'cups', 'div_name': 'coffee_chart'} -%}
+{% set chart = {'y_label': 'cups', 'div_name': 'coffee_chart', 'xspace':'con'} -%}
 {% include 'js_timeline_chart.html' %}
 
 {% set dataset = coffee_stats['coffee_histogram'] -%}
-{% set chart = {'y_label': 'frequency', 'div_name': 'coffee_histogram', 'title':'Coffee Histogram'} -%}
+{% set chart = {'y_label': 'frequency', 'div_name': 'coffee_histogram', 'title':'Coffee Histogram', 'xspace':'dis'} -%}
 {% include 'js_histogram_chart.html' %}
 {%- endif %}
 
 {% if sleep_stats -%}
 {% set dataset = sleep_stats['sleep_list'] -%}
-{% set chart = {'y_label': 'hours', 'div_name': 'sleep_chart'} -%}
+{% set chart = {'y_label': 'hours', 'div_name': 'sleep_chart', 'xspace':'con'} -%}
 {% include 'js_timeline_chart.html' -%}
 
 {% set dataset = sleep_stats['sleep_histogram'] -%}
-{% set chart = {'y_label': 'frequency', 'div_name': 'sleep_histogram', 'title': 'Sleep Histogram'} -%}
+{% set chart = {'y_label': 'frequency', 'div_name': 'sleep_histogram', 'title': 'Sleep Histogram', 'xspace':'con'} -%}
 {% include 'js_histogram_chart.html' -%}
 {%- endif %}
 
 {% if hygiene_stats['shower']['histogram'] -%}
 {% set dataset = hygiene_stats['shower']['histogram'] -%}
-{% set chart = {'y_label': 'frequency', 'div_name': 'shower_histogram', 'title': 'Shower Histogram'} -%}
+{% set chart = {'y_label': 'frequency', 'div_name': 'shower_histogram', 'title': 'Shower Histogram', 'xspace':'con'} -%}
 {% include 'js_histogram_chart.html' -%}
 {% endif -%}
 {% endblock %}

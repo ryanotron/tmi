@@ -143,8 +143,10 @@ def coffee_stats(user):
         status['daily_cups'] = daily_cups
         
         # calculate daily cups histogram
-        h, b = numpy.histogram([elem[1] for elem in daily_cups], bins = numpy.ceil(numpy.sqrt(len(daily_cups))))
-        coffee_histogram = zip(b[:len(h)], b[1:len(h)+1], h)
+        #h, b = numpy.histogram([elem[1] for elem in daily_cups], bins = numpy.ceil(numpy.sqrt(len(daily_cups))))
+        #coffee_histogram = zip(b[:len(h)], b[1:len(h)+1], h)
+        h, b = numpy.histogram([elem[1] for elem in daily_cups], bins = range(0, max([elem[1] for elem in daily_cups]) + 2))
+        coffee_histogram = zip(b, b, h)
         status['coffee_histogram'] = coffee_histogram
         return status
     else:
@@ -216,11 +218,15 @@ def meal_stats(user):
     
     if len(br_to_lu) > 0:
         status['mu_br_to_lu'] = sum(br_to_lu) / len(br_to_lu)
+        h, b = numpy.histogram(br_to_lu, bins = numpy.ceil(numpy.sqrt(len(br_to_lu))))
+        status['brlu_histogram'] = zip(b, b[1:], h)
     else:
         status['mu_br_to_lu'] = 0.0
         
     if len(lu_to_di) > 0:
         status['mu_lu_to_di'] = sum(lu_to_di) / len(lu_to_di)
+        h, b = numpy.histogram(lu_to_di, bins = numpy.ceil(numpy.sqrt(len(lu_to_di))))
+        status['ludi_histogram'] = zip(b, b[1:], h)
     else:
         status['mu_lu_to_di'] = 0.0
         

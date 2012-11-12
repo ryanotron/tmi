@@ -6,7 +6,11 @@
         data.addColumn('string', 'bin');
         data.addColumn('number', '{{chart["y_label"]}}');
         {% for point in dataset -%}
+        {% if chart['xspace'] == 'con' %}
         data.addRow(['{{'%2.1f to %2.1f' % (point[0], point[1])}}', {{'%2.2f' % point[2]}}]);
+        {% else %}
+        data.addRow(['{{"%d" % point[0]}}', {{'%d' % point[2]}}]);
+        {% endif %}
         {%- endfor %}
         var options = {height: 300,
                        width: 500,

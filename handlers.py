@@ -233,7 +233,8 @@ class ProfileHandler(SuperHandler):
                     new_photo = images.resize(new_photo, height = 150)
                     new_photo = models.ImageModel(userid = userid,
                                                   uploaded = datetime.datetime.utcnow(),
-                                                  image = db.Blob(new_photo))
+                                                  image = db.Blob(new_photo),
+                                                  category = 'profile_img')
                     new_photo.put()
                     img_key = new_photo.key()
                     user.photo_key = str(img_key)
@@ -600,6 +601,13 @@ class PostBatchExpenseHandler(SuperHandler):
                 self.redirect('login')
         else:
             self.redirect('login')
+
+class CategorizeExpenseHandler(SuperHandler):
+    def post(self):
+        public_categories = self.request.get('public_category', allow_multiple = True)
+        for cat in public_categories:
+            logging.error(cat)
+        self.redirect('/panel')
             
 class PostTravelHandler(SuperHandler):
     def post(self):
@@ -704,7 +712,8 @@ class PostMealHandler(SuperHandler):
                         image = images.resize(meal_image, height = constants.image_height)
                         image = models.ImageModel(userid = userid,
                                                   uploaded = datetime.datetime.utcnow(),
-                                                  image = db.Blob(image))
+                                                  image = db.Blob(image),
+                                                  category = 'meal_img')
                         image.put()
                         image_id = str(image.key())
                         new_meal.image = image_id
@@ -766,6 +775,8 @@ class PostBookHandler(SuperHandler):
                     except:
                         logging.error('failed parsing datetime')
                         self.redirect('/panel')
+                if not start and bool(active):
+                    start = datetime.datetime.utcnow()
                         
                 new_book = models.BookLibraryModel(userid = userid,
                                                    title = title,
@@ -781,7 +792,8 @@ class PostBookHandler(SuperHandler):
                     image = images.resize(image, height = 150)
                     image = models.ImageModel(userid = userid,
                                               uploaded = datetime.datetime.utcnow(),
-                                              image = db.Blob(image))
+                                              image = db.Blob(image),
+                                              category = 'book_img')
                     image.put()
                     image_id = str(image.key())
                     new_book.image = image_id
@@ -823,6 +835,8 @@ class PostGameHandler(SuperHandler):
                     except:
                         logging.error('failed parsing datetime')
                         self.redirect('/panel')
+                if not start and bool(active):
+                    start = datetime.datetime.utcnow()
                         
                 new_game = models.GameLibraryModel(userid = userid,
                                                    title = title,
@@ -835,7 +849,8 @@ class PostGameHandler(SuperHandler):
                     image = images.resize(image, height = 150)
                     image = models.ImageModel(userid = userid,
                                               uploaded = datetime.datetime.utcnow(),
-                                              image = db.Blob(image))
+                                              image = db.Blob(image),
+                                              category = 'game_img')
                     image.put()
                     image_key = str(image.key())
                     new_game.image = image_key
@@ -981,16 +996,12 @@ class LibraryHandler(SuperHandler):
 class PanelHandler(SuperHandler):
     def get(self):
         userid = self.request.cookies.get('userid')
-        if userid:
-            userid = utils.verify_cookie(userid)
-            if userid:
-                user = utils.validate_user(userid)
-                if user:
-                    self.render('panelpage.html', user = user)
-                else:
-                    self.redirect('/login')
-            else:
-                self.redirect('/login')
+        userid, user = utils.verify_user(userid)
+        if user:
+            expenses = list(db.GqlQuery('select * from ExpenseModel where userid = :1', userid))
+            expense_categories = list(set(e.category for e in expenses))
+            self.render('panelpage.html', user = user,
+                                          expense_categories = expense_categories)
         else:
             self.redirect('/login')
             

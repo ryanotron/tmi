@@ -119,6 +119,18 @@
             <input type="submit">
         </form>
     </div>
+    
+    <div class="PanelWrapper" id="ExpenseCategories">
+        <form action="/categorizeexpense" method="post">
+            Recorded expense categories
+            <ul>
+            {% for category in expense_categories %}
+                <li><input type="checkbox" name="public_category" value="{{category}}">{{category}}
+            {% endfor %}
+            </ul>
+            <input type="submit">
+        </form>
+    </div>
 
     <div class="PanelWrapper" id="Travel">
         <h2 class="PanelCategory">Travel</h2>
@@ -197,6 +209,7 @@
 
     <div class="PanelWrapper" id="BatchExpense">
         <h2 class="PanelCategory">Batch Expense</h2>
+        <p>use this format: [dd/mm/yyyy]\t[name]\t[amount]\t[category]</p>
         <form method="post" action="/postbatchexpense">
             <textarea name="batchexpense"></textarea><br>
             <input type="submit">
@@ -205,6 +218,7 @@
 
     <div class="PanelWrapper" id="BatchActivity">
         <h2 class="PanelCategory">Batch Activity</h2>
+        <p>use this format: [name]\t[dd/mm/yyyy HH:MM]</p>
         <form method="post" action="/postbatchactivity">
             <textarea name="activities"></textarea><br>
             <input type="submit">
@@ -213,6 +227,7 @@
 
     <div class="PanelWrapper" id="BatchTimedActivity">
         <h2 class="PanelCategory">Batch Timed Activity</h2>
+        <p>use this format: [name]\t[dd/mm/yyyy HH:MM (start)]\t[dd/mm/yyyy HH:MM (end)]</p>
         <form method="post" action="/postbatchtimedactivity">
             <textarea name="batchactivities"></textarea><br>
             <input type="submit">
