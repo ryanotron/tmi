@@ -1,5 +1,7 @@
 ﻿body {
     font-family: Helvetica, Verdana, Arial, sans-serif;
+    margin: 0px;
+    padding: 0px;
 }
 
 p, h1, h2, h3 {
@@ -18,14 +20,13 @@ h3 {
 
 div {
     float: left;
-    padding: 3px;
-    margin: 3px;
+    padding: 0px;
+    margin: 0px;
     border: 1px dashed blue; /*for debugging*/
     width: auto;
 }
 
 div.OverWrapper {
-    border: none;
     margin: 0px;
     padding: 0px;
 }
