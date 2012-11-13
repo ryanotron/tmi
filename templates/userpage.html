@@ -3,6 +3,7 @@
 <head>
 <title>{{user.salutation}} {{user.realname}} - Too Much Information!</title>
 <link type="text/css" rel="stylesheet" href="/stylesheets/userpage.css">
+<link rel="shortcut-icon" href="/favicon.ico" type="x-icon">
 <script type="text/javascript" src="http://www.google.com/jsapi"></script>
 <script type="text/javascript">google.load('visualization','1', {packages:['corechart']});</script>
 {% if coffee_stats -%}
@@ -38,7 +39,7 @@
         <div class="CenterBlock">
             (Last seen {{'%2.2f' % ((datetime.datetime.utcnow() - user.last_seen).total_seconds()/3600.0)}} hours ago)
         </div>
-        <div class="FullSubBlock" class="PhotoGallery">
+        <div class="FullSubBlock" id="PhotoGallery">
             <div class="SubBlock">
                 <img src="../img?img_key={{user.photo_key}}">
             </div>
