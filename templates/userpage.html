@@ -191,10 +191,10 @@
                 </div>
             </div>
             {% endfor -%}
+            {% else -%}
+            <p>{{user.salutation}} {{user.realname}} is currently not reading any book. Recommend something.</p>
+            {% endif -%}
         </div>
-        {% else -%}
-        <p>{{user.salutation}} {{user.realname}} is currently not reading any book. Recommend something.</p>
-        {% endif -%}
 
         <div class="FullSubBlock">
             <h3>Previously reading</h3>
@@ -236,10 +236,10 @@
                 </div>
             </div>
             {% endfor -%}
+            {% else -%}
+            <p>{{user.salutation}} {{user.realname}} is currently not playing any game. Recommend something.</p>
+            {% endif %}
         </div>
-        {% else -%}
-        <p>{{user.salutation}} {{user.realname}} is currently not playing any game. Recommend something.</p>
-        {% endif %}
 
         <div class="FullSubBlock">
             <h3>Previously playing</h3>

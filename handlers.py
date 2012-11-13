@@ -991,7 +991,7 @@ class LibraryHandler(SuperHandler):
         if hasattr(book, 'platform'):
             self.redirect('/u/'+username+'/library?type=game')
         else:
-            self.redirect('/u'+username+'/library?type=book')
+            self.redirect('/u/'+username+'/library?type=book')
 
 class PanelHandler(SuperHandler):
     def get(self):
