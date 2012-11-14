@@ -6,6 +6,17 @@
 <link rel="shortcut-icon" href="/favicon.ico" type="x-icon">
 <script type="text/javascript" src="http://www.google.com/jsapi"></script>
 <script type="text/javascript">google.load('visualization','1', {packages:['corechart']});</script>
+{% if meal_stats -%}
+{% set dataset = meal_stats['lu_histogram'] -%}
+{% set chart = {'y_label': 'frequency', 'div_name': 'lunch_histogram', 'title':'Lunch Time Histogram', 'xspace':'str'} -%}
+{% include 'js_histogram_chart.html' -%}
+{% set dataset = meal_stats['br_histogram'] -%}
+{% set chart = {'y_label': 'frequency', 'div_name': 'breakfast_histogram', 'title':'Breakfast Time Histogram', 'xspace':'str'} -%}
+{% include 'js_histogram_chart.html' -%}
+{% set dataset = meal_stats['di_histogram'] -%}
+{% set chart = {'y_label': 'frequency', 'div_name': 'dinner_histogram', 'title':'Dinner Time Histogram', 'xspace':'str'} -%}
+{% include 'js_histogram_chart.html' -%}
+{% endif -%}
 {% if coffee_stats -%}
 {% set dataset = coffee_stats['daily_cups'] -%}
 {% set chart = {'y_label': 'cups', 'div_name': 'coffee_chart', 'xspace':'con', 'title': 'Coffee Timeline'} -%}
@@ -97,6 +108,11 @@
             <div class="SubBlock">
                 <p>{{user.salutation}} {{user.realname}} last had {{meal_stats['latest_meal'].category}} {{'%2.2f' % meal_stats['latest_hours_ago']}} hours ago on {{meal_stats['latest_meal'].when.strftime('%d/%m/%Y %H:%M')}}. The menu was {{meal_stats['latest_meal'].menu}}</p>
                 <p>{{user.salutation}} {{user.realname}} tends to have lunch {{'%2.2f' % meal_stats['mu_br_to_lu']}} hours after breakfast, and dinner {{'%2.2f' % meal_stats['mu_lu_to_di']}} hours after lunch.<p>
+            </div>
+            <div class="ChartWrapper">
+                <div id="breakfast_histogram"></div>
+                <div id="lunch_histogram"></div>
+                <div id="dinner_histogram"></div>
             </div>
             {% else -%}
             <p>{{user.salutation}} {{user.realname}} has not recorded any meal yet. Perhaps {{user.nom_pronoun}} has discovered the secret of not needing food to survive and is cruelly withholding it from us. Or perhaps {{user.nom_pronoun}} has died of starvation.</p>

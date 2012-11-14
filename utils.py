@@ -12,7 +12,7 @@ def securify_cookie(s):
     return s + '|' + hashlib.sha256(s + constants.COOKIESECRET).hexdigest()
     
 def verify_cookie(s):
-    logging.error('cookie string is %s' % s)
+    #logging.error('cookie string is %s' % s)
     if not s:
         return None
     value, vhash = s.split('|')

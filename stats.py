@@ -198,6 +198,24 @@ def meal_stats(user):
         
     status['latest_meal'] = proper_meals[-1]
     status['latest_hours_ago'] = (now - proper_meals[-1].when).total_seconds() / 3600.0
+    
+    getminutes = lambda meal: meal.when.hour + meal.when.minute/60.0
+    brlist = [getminutes(meal) for meal in proper_meals if meal.category == 'breakfast']
+    lulist = [getminutes(meal) for meal in proper_meals if meal.category == 'lunch']
+    dilist = [getminutes(meal) for meal in proper_meals if meal.category == 'dinner']
+    
+    gethours = lambda x: '%02d:%02d' % (abs(x), abs(60*(x - abs(x))))
+    h, b = numpy.histogram(brlist, bins = numpy.ceil(numpy.sqrt(len(brlist))))
+    b = [gethours(e) for e in b]
+    status['br_histogram'] = zip(b, b[1:], h)
+    
+    h, b = numpy.histogram(lulist, bins = numpy.ceil(numpy.sqrt(len(lulist))))
+    b = [gethours(e) for e in b]
+    status['lu_histogram'] = zip(b, b[1:], h)
+    
+    h, b = numpy.histogram(dilist, bins = numpy.ceil(numpy.sqrt(len(dilist))))
+    b = [gethours(e) for e in b]
+    status['di_histogram'] = zip(b, b[1:], h)
 
     br_to_lu = []
     lu_to_di = []

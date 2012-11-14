@@ -392,76 +392,77 @@ class PostBatchActivityHandler(SuperHandler):
 class PostTimedActivityHandler(SuperHandler):
     def post(self):
         userid = self.request.cookies.get('userid')
-        if userid:
-            userid = utils.verify_cookie(userid)
-            if userid:
-                user = utils.validate_user(userid)
-                if user:
-                    act_name       = self.request.get('act_name')
-                    act_start_day  = self.request.get('act_start_day')
-                    act_start_time = self.request.get('act_start_time')
-                    act_end_day    = self.request.get('act_end_day')
-                    act_end_time   = self.request.get('act_end_time')
-                    act_duration   = self.request.get('act_duration')
-                    
-                    if act_name:
-                        if act_start_time:
-                            try:
-                                D, M, Y = [int(elem) for elem in act_start_day.split('/')]
-                                h, m    = [int(elem) for elem in act_start_time.split(':')]
-                                act_start_time = datetime.datetime(Y, M, D, h, m)                                
-                            except:
-                                self.redirect('/panel')
-                                
-                            if act_end_time:
-                                try:
-                                    D, M, Y = [int(elem) for elem in act_end_day.split('/')]
-                                    h, m    = [int(elem) for elem in act_end_time.split(':')]
-                                    act_end_time = datetime.datetime(Y, M, D, h, m)
-                                except:
-                                    self.redirect('/panel')
-                                
-                            elif act_duration:
-                                try:
-                                    act_end_time = act_start_time + datetime.timedelta(minutes = float(act_duration))
-                                except:
-                                    self.redirect('/panel')
-                                    
-                            else:
-                                self.redirect('/panel')
-                        elif act_end_time:
-                            try:
-                                D, M, Y = [int(elem) for elem in act_end_day.split('/')]
-                                h, m    = [int(elem) for elem in act_end_time.split(':')]
-                                act_end_time = datetime.datetime(Y, M, D, h, m)
-                            except:
-                                self.redirect('/panel')
-                            
-                            if act_duration:
-                                try:
-                                    act_start_time = act_end_time - datetime.timedelta(hours = float(act_duration))
-                                except:
-                                    self.redirect('/panel')
-                            else:
-                                self.redirect('/panel')
-                                
-                        else:
-                            self.redirect('/panel')
-                            
-                        new_timed_act = models.TimedActivityModel(userid = userid,
-                                                                  name   = act_name,
-                                                                  start  = act_start_time - datetime.timedelta(hours = user.timezone),
-                                                                  end    = act_end_time - datetime.timedelta(hours = user.timezone))
-                        new_timed_act.put()
-                        user.last_seen = datetime.datetime.utcnow()
-                        user.put()
+        userid, user = utils.verify_user(userid)
+        if user:
+            act_name       = self.request.get('act_name')
+            act_start_day  = self.request.get('act_start_day')
+            act_start_time = self.request.get('act_start_time')
+            act_end_day    = self.request.get('act_end_day')
+            act_end_time   = self.request.get('act_end_time')
+            act_duration   = self.request.get('act_duration')
+            error = False
+            
+            if act_name:
+                if act_start_time:
+                    try:
+                        D, M, Y = [int(elem) for elem in act_start_day.split('/')]
+                        h, m    = [int(elem) for elem in act_start_time.split(':')]
+                        act_start_time = datetime.datetime(Y, M, D, h, m)                                
+                    except:
+                        error = True
                         self.redirect('/panel')
+                        
+                    if act_end_time:
+                        try:
+                            D, M, Y = [int(elem) for elem in act_end_day.split('/')]
+                            h, m    = [int(elem) for elem in act_end_time.split(':')]
+                            act_end_time = datetime.datetime(Y, M, D, h, m)
+                        except:
+                            error = True
+                            self.redirect('/panel')
+                    elif act_duration:
+                        try:
+                            act_end_time = act_start_time + datetime.timedelta(minutes = float(act_duration))
+                        except:
+                            error = True
+                            self.redirect('/panel')
                     else:
                         self.redirect('/panel')
+                elif act_end_time:
+                    try:
+                        D, M, Y = [int(elem) for elem in act_end_day.split('/')]
+                        h, m    = [int(elem) for elem in act_end_time.split(':')]
+                        act_end_time = datetime.datetime(Y, M, D, h, m)
+                    except:
+                        error = True
+                        self.redirect('/panel')
+                    
+                    if act_duration:
+                        try:
+                            act_start_time = act_end_time - datetime.timedelta(hours = float(act_duration))
+                        except:
+                            error = True
+                            self.redirect('/panel')
+                    else:
+                        error = True
+                        self.redirect('/panel')
                 else:
-                    self.redirect('/login')
+                    error = True
+                    self.redirect('/panel')
+
+                if not error:
+                    new_timed_act = models.TimedActivityModel(userid = userid,
+                                                              name   = act_name,
+                                                              start  = act_start_time - datetime.timedelta(hours = user.timezone),
+                                                              end    = act_end_time - datetime.timedelta(hours = user.timezone))
+                    new_timed_act.put()
+                    user.last_seen = datetime.datetime.utcnow()
+                    user.put()
+                    self.redirect('/panel')
+                else:
+                    self.redirect('/panel')
             else:
-                self.redirect('/login')
+                self.redirect('/panel')
         else:
             self.redirect('/login')
 
@@ -697,6 +698,7 @@ class PostMealHandler(SuperHandler):
             meal_image    = self.request.get('meal_image')
 
             if meal_menu and meal_time:
+                error = False
                 try:
                     D, M, Y = [int(elem) for elem in meal_day.split('/')]
                     h, m    = [int(elem) for elem in meal_time.split(':')]
@@ -738,7 +740,12 @@ class PostMealHandler(SuperHandler):
                     user.put()
                     self.redirect('/panel')
                 except:
+                    error = True
                     self.redirect('/panel')
+                if error:
+                    self.redirect('/panel')
+            else:
+                self.redirect('/panel')
         else:
             self.redirect('/login')
 
@@ -1021,9 +1028,13 @@ class UserpageHandler(SuperHandler):
             books = list(db.GqlQuery('select * from BookLibraryModel where userid = :1 order by added desc limit 5', userid))
             active_books = [book for book in books if book.active]
             inactive_books = [book for book in books if not book.active]
+            if len(inactive_books) > 4:
+                inactive_books = inactive_books[0:4]
             games = list(db.GqlQuery('select * from GameLibraryModel where userid = :1 order by added desc limit 5', userid))
             active_games = [game for game in games if game.active]
             inactive_games = [game for game in games if not game.active]
+            if len(inactive_games) > 4:
+                inactive_games = inactive_games[0:4]
             
             user_messages = stats.user_messages(user, 5)
             guest_messages = stats.guest_messages(user)
