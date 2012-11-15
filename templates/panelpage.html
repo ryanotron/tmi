@@ -233,6 +233,15 @@
             <input type="submit">
         </form>
     </div>
+    
+    <div class="PanelWrapper" id="BatchMeal">
+        <h2 class="PanelCategory">Batch Meal</h2>
+        <p>user this format: [dd/mm/yyyy HH:MM]\t[category]\t[menu]</p>
+        <form method="post" action="/postbatchmeal">
+            <textarea name="meals"></textarea><br>
+            <input type="submit">
+        </form>
+    </div>
 </div>
 
 {% endblock %}

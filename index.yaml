@@ -74,6 +74,13 @@ indexes:
   - name: when
     direction: desc
 
+- kind: ImageModel
+  properties:
+  - name: category
+  - name: userid
+  - name: uploaded
+    direction: desc
+
 - kind: MealModel
   properties:
   - name: userid

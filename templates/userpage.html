@@ -53,7 +53,14 @@
         <div class="FullSubBlock" id="PhotoGallery">
             <div class="SubBlock">
                 <img src="../img?img_key={{user.photo_key}}">
+                <p class="Caption">Latest</p>
             </div>
+            {% for photo in old_photos -%}
+            <div class="SubBlock">
+                <img src="../img?img_key={{photo.key()}}">
+                <p class="Caption">{{(photo.uploaded + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y %H:%M')}}</p>
+            </div>
+            {% endfor -%}
         </div>
 
         {% if social_media %}

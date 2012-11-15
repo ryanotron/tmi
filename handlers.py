@@ -748,6 +748,41 @@ class PostMealHandler(SuperHandler):
                 self.redirect('/panel')
         else:
             self.redirect('/login')
+            
+class PostBatchMealHandler(SuperHandler):
+    def post(self):
+        userid = self.request.cookies.get('userid')
+        userid, user = utils.verify_user(userid)
+        if user:
+            meals = self.request.get('meals')
+            logging.error('got these:\n'+meals)
+            if meals:
+                meals = [m for m in meals.split('\n') if m != '']
+                for meal in meals:
+                    meal = [e.strip() for e in meal.split('\t')]
+                    error = False
+                    when = meal[0]
+                    cat = meal[1]
+                    menu = meal[2]
+                    try:
+                        #logging.error(when)
+                        d, m, y, H, M = [int(elem) for elem in constants.datetime_re.match(when).groups()]
+                        when = datetime.datetime(y, m, d, H, M) - datetime.timedelta(hours = user.timezone)
+                    except:
+                        error = True
+                        
+                    if not error:
+                        #logging.error('new meal! '+str(when)+' '+menu)
+                        new_meal = models.MealModel(userid = userid, 
+                                                    when = when,
+                                                    menu = menu,
+                                                    category = cat)
+                        new_meal.put()
+                self.redirect('/panel')
+            else:
+                self.redirect('/panel')
+        else:
+            self.redirect('/login')
 
 class PostBookHandler(SuperHandler):
     def post(self):
@@ -1024,6 +1059,11 @@ class UserpageHandler(SuperHandler):
             hygiene_stats = stats.hygiene_stats(user)
 
             userid = str(user.key().id())
+            old_photos = list(db.GqlQuery('select * from ImageModel where userid = :1 and category = :2 order by uploaded desc limit 5', userid, 'profile_img'))
+            if len(old_photos) > 1:
+                old_photos = old_photos[1:]
+            else:
+                old_photos = []
             social_media = db.GqlQuery('select * from SocialMediaModel where userid = :1', userid)
             books = list(db.GqlQuery('select * from BookLibraryModel where userid = :1 order by added desc limit 5', userid))
             active_books = [book for book in books if book.active]
@@ -1040,6 +1080,7 @@ class UserpageHandler(SuperHandler):
             guest_messages = stats.guest_messages(user)
             
             self.render('userpage.html', user = user,
+                                         old_photos = old_photos,
                                          coffee_stats = coffee_stats,
                                          social_media = social_media,
                                          sleep_stats = sleep_stats,
