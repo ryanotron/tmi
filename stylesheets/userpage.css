@@ -44,6 +44,28 @@ div#Headline {
     padding-left: 5px;
 }
 
+div#Navigation ul {
+    text-decoration: none;
+    display: inline;
+}
+
+div#Navigation li {
+    display: inline;
+    padding: 5px;
+    background-color: #000000;
+    color: #ffffff;
+    float: left;
+}
+
+div#Navigation li:hover {
+    background-color: #555555;
+}
+
+div#Navigation a {
+    text-decoration: none;
+    color: #ffffff;
+}
+
 div.Block {
     margin: 5px;
     width: 95%;
@@ -78,4 +100,28 @@ div.Message {
 div.BookWrapper {
     margin: 5px;
     border: 1px solid red;
+}
+
+div.Message {
+    background-color: #eeeeee;
+    margin: 1px;
+}
+
+blockquote {
+    /*background-color: #ffeeee;*/
+    margin: 1px;
+    padding: 5px;
+    padding-left: 10px;
+}
+
+form {
+    border: 0px solid blue;
+    /*display: inline;*/
+    margin: 5px;
+    padding: 5px;
+}
+
+textarea {
+    width: 70%;
+    height: 20%;
 }

@@ -2,36 +2,48 @@
 
 {% block head %}
 <title>Panel ({{user.username}}) - Too Much Information!</title>
+<link type="text/css" rel="stylesheet" href="/stylesheets/userpage.css">
 {% endblock %}
 
 {% block content %}
-<h1 class="Header" id="PanelHeader">What have you done, {{user.salutation}} {{user.realname}}?</h1>
-<div class="Wrapper" id="PanelOverWrapper">
-    <div class="PanelWrapper" id="Shortcuts">
+<div class="OverWrapper" id="PanelWrapper">
+    <h1 class="Header" id="PanelHeader">What have you done, {{user.salutation}} {{user.realname}}?</h1>
+    <div class="Block" id="Shortcuts">
         <h2 class="PanelCategory">Quick updates</h2>
-        <!--coffee-->
-        <form action="/inspostactivity" method="post">
-            <input type="hidden" name="activity_name" value="coffee">
-            <input type="submit" value="I just had coffee!">
-        </form>
-        <!--shower-->
-        <form action="/inspostactivity" method="post">
-            <input type="hidden" name="activity_name" value="shower">
-            <input type="submit" value="I just showered!">
-        </form>
-        <!--shave-->
-        <form action="/inspostactivity" method="post">
-            <input type="hidden" name="activity_name" value="shave">
-            <input type="submit" value="I just shaved!">
-        </form>
-        <!--haircut-->
-        <form action="/inspostactivity" method="post">
-            <input type="hidden" name="activity_name" value="cut hair">
-            <input type="submit" value="I just got a haircut!">
-        </form>
+        <div class="SubBlock">
+            <!--coffee-->
+            <form action="/inspostactivity" method="post">
+                <input type="hidden" name="activity_name" value="coffee">
+                <input type="submit" value="I just had coffee!">
+            </form>
+        </div>
+        
+        <div class="SubBlock">
+            <!--shower-->
+            <form action="/inspostactivity" method="post">
+                <input type="hidden" name="activity_name" value="shower">
+                <input type="submit" value="I just showered!">
+            </form>
+        </div>
+        
+        <div class="SubBlock">
+            <!--shave-->
+            <form action="/inspostactivity" method="post">
+                <input type="hidden" name="activity_name" value="shave">
+                <input type="submit" value="I just shaved!">
+            </form>
+        </div>
+        
+        <div class="SubBlock">
+            <!--haircut-->
+            <form action="/inspostactivity" method="post">
+                <input type="hidden" name="activity_name" value="cut hair">
+                <input type="submit" value="I just got a haircut!">
+            </form>
+        </div>
     </div>
     
-    <div class="PanelWrapper" id="UserMessage">
+    <div class="Block" id="UserMessage">
         <h2 class="PanelCategory">Tell your stalkers something!</h2>
         <form method="post" action="/postmessage">
             <textarea name="user_message"></textarea><br>
@@ -39,7 +51,8 @@
         </form>
     </div>
     
-    <div class="PanelWrapper" id="GeneralActivity">
+    <div class="Block" id="GeneralActivity">
+        <div class="FullSubBlock">
         <h2 class="PanelCategory">General Activity</h2>
         <form action="/postactivity" method="post">
             Name <input type="text" name="activity_name"><br>
@@ -47,56 +60,70 @@
             Time <input class="Time" type="text" name="activity_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}"><br>
             <input type="submit">
         </form>
+        </div>
     </div>
 
-    <div class="PanelWrapper" id="GeneralTimedActivity">
-        <h2 class="PanelCategory">General Timed Activity</h2>
-        <form action="/posttimedactivity" method="post">
-            Name <input type="text" name="act_name"><br>
-            Start time <input class="Date" type="text" name="act_start_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">
-            <input class="Time" type="text" name="act_start_time"><br>
-            End time <input class="Date" type="text" name="act_end_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">
-            <input class="Time" type="text" name="act_end_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}"><br>
-            (duration) <input type="text" name="act_duration"><br> hours
-            <input type="submit">
-        </form>
+    <div class="Block" id="GeneralTimedActivity">
+        <div class="FullSubBlock">
+            <h2 class="PanelCategory">General Timed Activity</h2>
+            <form action="/posttimedactivity" method="post">
+                Name <input type="text" name="act_name"><br>
+                Start time <input class="Date" type="text" name="act_start_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">
+                <input class="Time" type="text" name="act_start_time"><br>
+                End time <input class="Date" type="text" name="act_end_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">
+                <input class="Time" type="text" name="act_end_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}"><br>
+                (duration) <input type="text" name="act_duration"><br> hours
+                <input type="submit">
+            </form>
+        </div>
     </div>
 
-    <div class="PanelWrapper" id="Energy">
+    <div class="Block" id="Energy">
         <h2 class="PanelCategory">Energy</h2>
-        <form action="/inspostactivity" method="post">
-            <input type="hidden" name="activity_name" value="coffee">
-            <input type="submit" value="I just had coffee!">
-        </form><hr>
-        <form action="/posttimedactivity" method="post">
-            <input type="hidden" name="act_name" value="sleep">
-            Slept at <input class="Date" type="text" name="act_start_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone - 6.0)).strftime('%d/%m/%Y')}}">, 
-            <input class="Time" type="text" name="act_start_time"><br>
-            Woke up at <input class="Date" type="text" name="act_end_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">, 
-            <input class="Time" type="text" name="act_end_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}"><br>
-            for <input type="text" name="act_duration"> hours<br>
-            <input type="submit">
-        </form><hr>
-        <form action="/postmeal" method="post" enctype="multipart/form-data">
-            I had <select name="meal_category">
-                <option value="breakfast">Breakfast</option>
-                <option value="lunch">Lunch</option>
-                <option value="dinner">Dinner</option>
-                <option value="supper">Supper</option>
-                <option value="snack">Snack</option>
-            </select>
-            of <input type="text" name="meal_menu"><br>
-            at <input type="text" name="meal_place"><br>
-            at this time <input class="Date" type="text" name="meal_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">
-            <input class="Time" type="text" name="meal_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}"><br>
-            and it costed me <input type="text" name="meal_cost">
-            <input class="Currency" type="text" name="meal_currency" value="{{user.currency}}"><br>
-            Photo <input type="file" name="meal_image"><br>
-            <input type="submit">
-        </form>
+        <div class="FullSubBlock">
+            <h3>Coffee</h3>
+            <form action="/inspostactivity" method="post">
+                <input type="hidden" name="activity_name" value="coffee">
+                <input type="submit" value="I just had coffee!">
+            </form>
+        </div>
+        
+        <div class="FullSubBlock">
+            <h3>Sleep</h3>
+            <form action="/posttimedactivity" method="post">
+                <input type="hidden" name="act_name" value="sleep">
+                Slept at <input class="Date" type="text" name="act_start_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone - 6.0)).strftime('%d/%m/%Y')}}">, 
+                <input class="Time" type="text" name="act_start_time"><br>
+                Woke up at <input class="Date" type="text" name="act_end_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">, 
+                <input class="Time" type="text" name="act_end_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}"><br>
+                for <input type="text" name="act_duration"> hours<br>
+                <input type="submit">
+            </form>
+        </div>
+        
+        <div class="FullSubBlock">
+            <h3>Meal</h3>
+            <form action="/postmeal" method="post" enctype="multipart/form-data">
+                I had <select name="meal_category">
+                    <option value="breakfast">Breakfast</option>
+                    <option value="lunch">Lunch</option>
+                    <option value="dinner">Dinner</option>
+                    <option value="supper">Supper</option>
+                    <option value="snack">Snack</option>
+                </select>
+                of <input type="text" name="meal_menu"><br>
+                at <input type="text" name="meal_place"><br>
+                at this time <input class="Date" type="text" name="meal_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">
+                <input class="Time" type="text" name="meal_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}"><br>
+                and it costed me <input type="text" name="meal_cost">
+                <input class="Currency" type="text" name="meal_currency" value="{{user.currency}}"><br>
+                Photo <input type="file" name="meal_image"><br>
+                <input type="submit">
+            </form>
+        </div>
     </div>
     
-    <div class="PanelWrapper" id="Hygiene">
+    <div class="Block" id="Hygiene">
         <h2 class="PanelCategory">Hygiene</h2>
         <form action="/postactivity" method="post">
             Shower 
@@ -105,10 +132,9 @@
             <input type="hidden" name="activity_name" value="shower"><br>
             <input type="submit">
         </form><br>
-        </form>
     </div>
     
-    <div class="PanelWrapper" id="Expense">
+    <div class="Block" id="Expense">
         <h2 class="PanelCategory">Expense</h2>
         <form action="/postexpense" method="post">
             I bought <input type="text" name="exp_name">
@@ -120,19 +146,19 @@
         </form>
     </div>
     
-    <div class="PanelWrapper" id="ExpenseCategories">
+    <div class="Block" id="ExpenseCategories">
         <form action="/categorizeexpense" method="post">
             Recorded expense categories
             <ul>
-            {% for category in expense_categories %}
+            {% for category in expense_categories -%}
                 <li><input type="checkbox" name="public_category" value="{{category}}">{{category}}
-            {% endfor %}
+            {% endfor -%}
             </ul>
             <input type="submit">
         </form>
     </div>
 
-    <div class="PanelWrapper" id="Travel">
+    <div class="Block" id="Travel">
         <h2 class="PanelCategory">Travel</h2>
         <form method="post" action="/posttravel">
             I traveled from <input type="text" name="trv_origin">
@@ -146,102 +172,109 @@
         </form>
     </div>
     
-    <div class="PanelWrapper" id="Distractions">
+    <div class="Block" id="Distractions">
         <h2 class="PanelCategory">Distraction</h2>
-        <form method="post" action="/postbook" enctype="multipart/form-data">
+        <div class="FullSubBlock">
             <h3>Register a book</h3>
-            <table>
-                <tr>
-                    <td>title
-                    <td><input type="text" name="title">
-                <tr>
-                    <td>author
-                    <td><input type="text" name="author">
-                <tr>
-                    <td>isbn
-                    <td><input type="text" name="isbn">
-                <tr>
-                    <td>doi
-                    <td><input type="text" name="doi">
-                <tr>
-                    <td>start
-                    <td><input type="text" name="start" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}" class="date">
-                <tr>
-                    <td>finish
-                    <td><input type="text" name="finish" class="date">
-                <tr>
-                    <td>active
-                    <td><input type="checkbox" name="active" value="True">
-                <tr>
-                    <td>cover
-                    <td><input type="file" name="image">
-                <tr>
-                    <td><input type="submit">
-            </table>
-        </form>
+            <form method="post" action="/postbook" enctype="multipart/form-data">
+                <table>
+                    <tr>
+                        <td>title
+                        <td><input type="text" name="title">
+                    <tr>
+                        <td>author
+                        <td><input type="text" name="author">
+                    <tr>
+                        <td>isbn
+                        <td><input type="text" name="isbn">
+                    <tr>
+                        <td>doi
+                        <td><input type="text" name="doi">
+                    <tr>
+                        <td>start
+                        <td><input type="text" name="start" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}" class="date">
+                    <tr>
+                        <td>finish
+                        <td><input type="text" name="finish" class="date">
+                    <tr>
+                        <td>active
+                        <td><input type="checkbox" name="active" value="True">
+                    <tr>
+                        <td>cover
+                        <td><input type="file" name="image">
+                    <tr>
+                        <td><input type="submit">
+                </table>
+            </form>
+        </div>
         
-        <form method="post" action="/postgame" enctype="multipart/form-data">
+        <div class="FullSubBlock">
             <h3>Register a game</h3>
-            <table>
-                <tr>
-                    <td>title
-                    <td><input type="text" name="title">
-                <tr>
-                    <td>platform
-                    <td><input type="text" name="platform">
-                <tr>
-                    <td>start
-                    <td><input type="text" name="start" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}" class="date">
-                <tr>
-                    <td>finish
-                    <td><input type="text" name="finish" class="date">
-                <tr>
-                    <td>active
-                    <td><input type="checkbox" name="active" value="True">
-                <tr>
-                    <td>cover
-                    <td><input type="file" name="image">
-                <tr>
-                    <td><input type="submit">
-            </table>
-        </form>
+            <form method="post" action="/postgame" enctype="multipart/form-data">
+                <table>
+                    <tr>
+                        <td>title
+                        <td><input type="text" name="title">
+                    <tr>
+                        <td>platform
+                        <td><input type="text" name="platform">
+                    <tr>
+                        <td>start
+                        <td><input type="text" name="start" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}" class="date">
+                    <tr>
+                        <td>finish
+                        <td><input type="text" name="finish" class="date">
+                    <tr>
+                        <td>active
+                        <td><input type="checkbox" name="active" value="True">
+                    <tr>
+                        <td>cover
+                        <td><input type="file" name="image">
+                    <tr>
+                        <td><input type="submit">
+                </table>
+            </form>
+        </div>
     </div>
 
-    <div class="PanelWrapper" id="BatchExpense">
+    <div class="Block" id="BatchExpense">
         <h2 class="PanelCategory">Batch Expense</h2>
-        <p>use this format: [dd/mm/yyyy]\t[name]\t[amount]\t[category]</p>
-        <form method="post" action="/postbatchexpense">
-            <textarea name="batchexpense"></textarea><br>
-            <input type="submit">
-        </form>
+        <div class="CenterBlock"><p>use this format: [dd/mm/yyyy]\t[name]\t[amount]\t[category]</p>
+            <form method="post" action="/postbatchexpense">
+                <textarea name="batchexpense"></textarea><br>
+                <input type="submit">
+            </form>
+        </div>
     </div>
 
-    <div class="PanelWrapper" id="BatchActivity">
+    <div class="Block" id="BatchActivity">
         <h2 class="PanelCategory">Batch Activity</h2>
-        <p>use this format: [name]\t[dd/mm/yyyy HH:MM]</p>
-        <form method="post" action="/postbatchactivity">
-            <textarea name="activities"></textarea><br>
-            <input type="submit">
-        </form>
+        <div class="CenterBlock"><p>use this format: [name]\t[dd/mm/yyyy HH:MM]</p>
+            <form method="post" action="/postbatchactivity">
+                <textarea name="activities"></textarea><br>
+                <input type="submit">
+            </form>
+        </div>
     </div>
 
-    <div class="PanelWrapper" id="BatchTimedActivity">
+    <div class="Block" id="BatchTimedActivity">
         <h2 class="PanelCategory">Batch Timed Activity</h2>
-        <p>use this format: [name]\t[dd/mm/yyyy HH:MM (start)]\t[dd/mm/yyyy HH:MM (end)]</p>
-        <form method="post" action="/postbatchtimedactivity">
-            <textarea name="batchactivities"></textarea><br>
-            <input type="submit">
-        </form>
+        <div class="CenterBlock"><p>use this format: [name]\t[dd/mm/yyyy HH:MM (start)]\t[dd/mm/yyyy HH:MM (end)]</p>
+            <form method="post" action="/postbatchtimedactivity">
+                <textarea name="batchactivities"></textarea><br>
+                <input type="submit">
+            </form>
+        </div>
     </div>
     
-    <div class="PanelWrapper" id="BatchMeal">
+    <div class="Block" id="BatchMeal">
         <h2 class="PanelCategory">Batch Meal</h2>
-        <p>user this format: [dd/mm/yyyy HH:MM]\t[category]\t[menu]</p>
-        <form method="post" action="/postbatchmeal">
-            <textarea name="meals"></textarea><br>
-            <input type="submit">
-        </form>
+        <div class="CenterBlock"><p>user this format: [dd/mm/yyyy HH:MM]\t[category]\t[menu]</p>
+            <form method="post" action="/postbatchmeal">
+                <textarea name="meals"></textarea><br>
+                <input type="submit">
+            </form>
+        </div>
     </div>
-</div>
-
+</div> <!-- close OverWrapper -->
 {% endblock %}

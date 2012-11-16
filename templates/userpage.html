@@ -27,15 +27,15 @@
 {% endif %}
 {% if sleep_stats -%}
 {% set dataset = sleep_stats['sleep_list'] -%}
-{% set chart = {'y_label': 'hours', 'div_name': 'sleep_chart', 'xspace':'con', 'title': 'Sleep Timeline'} -%}
+{% set chart = {'y_label': 'hours', 'div_name': 'sleep_chart', 'xspace':'con', 'title': 'Sleep hours timeline'} -%}
 {% include 'js_timeline_chart.html' %}
 {% set dataset = sleep_stats['sleep_histogram'] -%}
-{% set chart = {'y_label': 'frequency', 'div_name': 'sleep_histogram', 'title': 'Sleep Histogram', 'xspace':'con'} -%}
+{% set chart = {'y_label': 'frequency', 'div_name': 'sleep_histogram', 'title': 'Sleep hours histogram', 'xspace':'con'} -%}
 {% include 'js_histogram_chart.html' %}
 {% endif %}
 {% if hygiene_stats['shower']['histogram'] -%}
 {% set dataset = hygiene_stats['shower']['histogram'] -%}
-{% set chart = {'y_label': 'frequency', 'div_name': 'shower_histogram', 'title': 'Shower Histogram', 'xspace':'con'} -%}
+{% set chart = {'y_label': 'frequency', 'div_name': 'shower_histogram', 'title': 'Hours between showers Histogram', 'xspace':'con'} -%}
 {% include 'js_histogram_chart.html' %}
 {% endif -%}
 </head>
@@ -44,6 +44,14 @@
     <div class="Block" id="Headline">
         Like what you see? Want one? Ask <a href="/u/ryanotron">Subject Ryan</a> for one!
     </div>
+    
+    <div class="Block" id="Navigation">
+        <ul>
+            <a href="/u/{{user.username}}/library?type=book"><li>Books</a>
+            <a href="/u/{{user.username}}/library?type=game"><li>Games</a>
+        </ul>
+    </div>
+    
     <div class="Block" id="PersonalInformation">
         <h2>You are now stalking:</h2>
         <h1>{{user.salutation}} {{user.realname}}</h1>
