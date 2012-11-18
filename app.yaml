@@ -11,9 +11,18 @@ handlers:
 
 - url: /stylesheets
   static_dir: stylesheets
-  
+
+- url: /login/?
+  script: main.app
+  secure: always
+
+- url: /signup/?
+  script: main.app
+  secure: always
+    
 - url: /.*
   script: main.app
+  secure: optional
 
 libraries:
 - name: webapp2

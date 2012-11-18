@@ -34,4 +34,4 @@ app = webapp2.WSGIApplication([('/', h.MainpageHandler),
                                ('/u/' + r'([a-zA-Z0-9_-]{4,20})/public/?', h.PublicUserpageHandler),
                                ('/u/' + r'([a-zA-Z0-9_-]{4,20})/?', h.UserpageHandler),
                                ('/toys/simplechart/?', t.SimpleChartHandler),],
-                               debug = True)
+                               debug = False)
