@@ -1,7 +1,14 @@
 ﻿{% extends 'basepage.html' %}
 
+{% block head -%}
+<title>Sign Up - Too Much Information!</title>
+<link type="text/css" rel="stylesheet" href="/stylesheets/userpage.css">
+{% endblock -%}
+
 {% block content %}
     <!--<h2>Sign up to tell people Too Much Information about yourself!</h2>-->
+<h2>Sign up and tell people all sorts of things!</h2>
+<div class="Block">
     <form method="post">
         <table>
             <tr>
@@ -28,5 +35,6 @@
                 <td><input type="submit" value="sign up!">
         </table>
     </form>
+</div>
 
 {% endblock %}

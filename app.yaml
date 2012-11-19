@@ -19,6 +19,10 @@ handlers:
 - url: /signup/?
   script: main.app
   secure: always
+  
+- url: /panel/?
+  script: main.app
+  secure: always
     
 - url: /.*
   script: main.app

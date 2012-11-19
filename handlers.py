@@ -3,6 +3,7 @@ from google.appengine.ext import db
 from google.appengine.api import images
 import webapp2
 import datetime, logging
+import json
 
 class SuperHandler(webapp2.RequestHandler):
     def write(self, *a, **kw):
@@ -605,10 +606,27 @@ class PostBatchExpenseHandler(SuperHandler):
 
 class CategorizeExpenseHandler(SuperHandler):
     def post(self):
-        public_categories = self.request.get('public_category', allow_multiple = True)
-        for cat in public_categories:
-            logging.error(cat)
-        self.redirect('/panel')
+        userid = self.request.cookies.get('userid')
+        userid, user = utils.verify_user(userid)
+        if user:
+            public_categories = self.request.get('public_category', allow_multiple = True)
+            public_categories = [cat.strip() for cat in public_categories]
+            userconf = {}
+            try:
+                userconf = json.loads(user.confstring)
+            except:
+                userconf = {}
+                
+            userconf['public_expense_categories'] = public_categories
+            user.confstring = json.dumps(userconf)
+            user.last_seen = datetime.datetime.now()
+            user.put()
+                
+            for cat in public_categories:
+                logging.error(cat.strip())
+            self.redirect('/panel')
+        else:
+            self.redirect('/login')
             
 class PostTravelHandler(SuperHandler):
     def post(self):
@@ -1040,8 +1058,16 @@ class PanelHandler(SuperHandler):
         userid = self.request.cookies.get('userid')
         userid, user = utils.verify_user(userid)
         if user:
+            userconf = {}
+            try:
+                userconf = json.loads(user.confstring)
+            except:
+                userconf = {}
+                user.confstring = json.dumps(userconf)
+                user.put()
+            logging.error('user configuration: ' + str(userconf))
             expenses = list(db.GqlQuery('select * from ExpenseModel where userid = :1', userid))
-            expense_categories = list(set(e.category for e in expenses))
+            expense_categories = list(set(e.category.strip() for e in expenses))
             self.render('panelpage.html', user = user,
                                           expense_categories = expense_categories)
         else:

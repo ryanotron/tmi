@@ -121,6 +121,10 @@ form {
     padding: 5px;
 }
 
+div#ExpenseCategories ul {
+    text-decoration: none;
+}
+
 textarea {
     width: 70%;
     height: 20%;

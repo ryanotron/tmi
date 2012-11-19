@@ -11,10 +11,12 @@ class UserModel(db.Model):
     salutation = db.StringProperty()
     last_seen  = db.DateTimeProperty(required = True)
     gender     = db.StringProperty()
-    pos_pronoun = db.StringProperty() # possessive pronoun
-    nom_pronoun = db.StringProperty() # nominative pronoun
-    pos_determi = db.StringProperty() # possessive determinant
+    pos_pronoun = db.StringProperty() # possessive pronoun (his, hers, its)
+    nom_pronoun = db.StringProperty() # nominative pronoun (he, she, it)
+    acc_pronoun = db.StringProperty() # accusative pronoun (him, her, it)
+    pos_determi = db.StringProperty() # possessive determinant (his, her, its)
     photo_key   = db.StringProperty()
+    confstring  = db.StringProperty() # configuration string, a json string dump
     
 class SocialMediaModel(db.Model):
     userid = db.StringProperty(required = True)

@@ -1,6 +1,11 @@
 ﻿import datetime, logging, numpy
 from google.appengine.ext import db
 
+def filter_outliers(data, min_pct, max_pct):
+    min_val = numpy.percentile(data, min_pct)
+    max_val = numpy.percentile(data, max_pct)
+    return [d for d in data if d < max_val and d > min_val]
+    
 def get_timed_activities(user, act_name, orderby = 'end', order = 'desc', number = 0):
     userid = str(user.key().id())
     query = 'select * from TimedActivityModel where userid = \'%s\' and name = \'%s\' order by %s %s' % (userid, act_name, orderby, order)
@@ -36,7 +41,7 @@ def sleep_stats(user):
         alltime_total  = 0.0
         lastweek_start = today - datetime.timedelta(days = (today.weekday() + 7), hours = today.hour + today.minute/60.0)
         lastweek_end   = today - datetime.timedelta(days = today.weekday(), hours = today.hour + today.minute/60.0)
-        logging.error(lastweek_end)
+        #logging.error(lastweek_end)
         
         sleep_list = []
         
@@ -200,9 +205,9 @@ def meal_stats(user):
     status['latest_hours_ago'] = (now - proper_meals[-1].when).total_seconds() / 3600.0
     
     getminutes = lambda meal: meal.when.hour + meal.when.minute/60.0
-    brlist = [getminutes(meal) for meal in proper_meals if meal.category == 'breakfast']
-    lulist = [getminutes(meal) for meal in proper_meals if meal.category == 'lunch']
-    dilist = [getminutes(meal) for meal in proper_meals if meal.category == 'dinner']
+    brlist = filter_outliers([getminutes(meal) for meal in proper_meals if meal.category == 'breakfast'], 5, 95)
+    lulist = filter_outliers([getminutes(meal) for meal in proper_meals if meal.category == 'lunch'], 5, 95)
+    dilist = filter_outliers([getminutes(meal) for meal in proper_meals if meal.category == 'dinner'], 5, 95)
     
     gethours = lambda x: '%02d:%02d' % (abs(x), abs(60*(x - abs(x))))
     h, b = numpy.histogram(brlist, bins = numpy.ceil(numpy.sqrt(len(brlist))))
