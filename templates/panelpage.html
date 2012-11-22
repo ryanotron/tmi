@@ -51,6 +51,15 @@
         </form>
     </div>
     
+    <div class="Block" id="UserPhoto">
+        <h2 class="PanelCategory">Show your face to your stalkers</h2>
+        <form method="post" enctype="multipart/form-data" action="/postimage">
+            <input type="file" name="imagefile">
+            <input type="hidden" name="img_category" value="profile_img">
+            <input type="submit">
+        </form>
+    </div>
+    
     <div class="Block" id="GeneralActivity">
         <div class="FullSubBlock">
         <h2 class="PanelCategory">General Activity</h2>

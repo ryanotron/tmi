@@ -220,14 +220,17 @@ class ProfileHandler(SuperHandler):
                         user.pos_pronoun = 'his'
                         user.pos_determi = 'his'
                         user.nom_pronoun = 'he'
+                        user.acc_pronoun = 'him'
                     elif new_gender == 'female':
                         user.pos_pronoun = 'her'
                         user.pos_determi = 'hers'
                         user.nom_pronoun = 'she'
+                        user.acc_pronoun = 'her'
                     else:
                         user.pos_pronoun = 'its'
                         user.pos_determi = 'its'
                         user.nom_pronoun = 'it'
+                        user.acc_pronoun = 'it'
                     updated = True
 
                 if new_photo:
@@ -277,6 +280,31 @@ class ImageHandler(SuperHandler):
             self.response.out.write(image.image)
         else:
             logging.error('image not found')
+            
+class PostImageHandler(SuperHandler):
+    def post(self):
+        userid = self.request.cookies.get('userid')
+        userid, user = utils.verify_user(userid)
+        if user:
+            cat = self.request.get('img_category')
+            img = self.request.get('imagefile')
+            if img:
+                img = images.resize(img, height = 150)
+                img = models.ImageModel(userid = userid,
+                                        image = img,
+                                        uploaded = datetime.datetime.utcnow(),
+                                        category = cat)
+                img.put()
+                imgkey = str(img.key())
+                user.photo_key = imgkey
+                user.last_seen = datetime.datetime.utcnow()
+                user.put()
+                self.redirect('/panel')
+            else:
+                self.redirect('/panel')
+        else:
+            self.redirect('/login')
+        
 
 class PostActivityHandler(SuperHandler):
     def post(self):
