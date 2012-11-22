@@ -5,6 +5,7 @@ import constants
 
 app = webapp2.WSGIApplication([('/', h.MainpageHandler),
                                ('/tmi/?', h.MainpageHandler),
+                               ('/about/?', h.AboutHandler),
                                ('/signup/?', h.SignupHandler),
                                ('/login/?', h.LoginHandler),
                                ('/logout/?', h.LogoutHandler),

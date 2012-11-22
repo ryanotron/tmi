@@ -1066,8 +1066,13 @@ class PanelHandler(SuperHandler):
                 user.confstring = json.dumps(userconf)
                 user.put()
             logging.error('user configuration: ' + str(userconf))
-            expenses = list(db.GqlQuery('select * from ExpenseModel where userid = :1', userid))
-            expense_categories = list(set(e.category.strip() for e in expenses))
+            expense_categories = []
+            if userconf.has_key('expense_categories'):
+                expense_categories = userconf['expense_categories']
+            else:
+                expenses = list(db.GqlQuery('select * from ExpenseModel where userid = :1', userid))
+                expense_categories = list(set(e.category.strip() for e in expenses))
+                
             self.render('panelpage.html', user = user,
                                           expense_categories = expense_categories)
         else:
@@ -1120,7 +1125,11 @@ class UserpageHandler(SuperHandler):
                                          guest_messages = guest_messages)
         else:
             self.redirect('/') # go to user not found page
-            
+
+class AboutHandler(SuperHandler):
+    def get(self):
+        self.render('aboutpage.html')
+
 class PublicUserpageHandler(SuperHandler):
     def get(self, username):
         users = db.GqlQuery('select * from UserModel where username = :1 limit 1', username)
@@ -1135,7 +1144,8 @@ class HackHandler(SuperHandler):
     def get(self):
         userid = self.request.cookies.get('userid')
         userid, user = utils.verify_user(userid)
-        if user:
+        if user and user.username == 'ryanotron':
+            betakeys = list(db.GqlQuery('select * from BetaKeyModel'))
             self.render('hackpage.html', user = user)
         else:
             self.redirect('/login')
@@ -1143,9 +1153,9 @@ class HackHandler(SuperHandler):
     def post(self):
         userid = self.request.cookies.get('userid')
         userid, user = utils.verify_user(userid)
-        if user:
-            betakey = models.BetaKeyModel(keystring = 'humpty dumpty',
-                                          used = False)
+        if user and user.username == 'ryanotron':
+            keystring = self.request.get('betakey')
+            betakey = models.BetaKeyModel(keystring = 'keystring', used = False)
             betakey.put()
             # meals = db.GqlQuery('select * from MealModel where userid = :1', userid)
             # meals = list(meals)
@@ -1153,6 +1163,6 @@ class HackHandler(SuperHandler):
                 # if meal.when < datetime.datetime(2012, 10, 31):
                     # meal.when = meal.when + datetime.timedelta(days = 8, hours = -8)
                     # meal.put()
-            self.redirect('/panel')
+            # self.redirect('/panel')
         else:
             self.redirect('/login')

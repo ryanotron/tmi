@@ -23,6 +23,10 @@ handlers:
 - url: /panel/?
   script: main.app
   secure: always
+  
+- url: /hack/?
+  script: main.app
+  secure: always
     
 - url: /.*
   script: main.app

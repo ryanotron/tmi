@@ -151,7 +151,7 @@
             Recorded expense categories
             <ul>
             {% for category in expense_categories -%}
-                <li><input type="checkbox" name="public_category" value="{{category}}">{{category}}
+                <li><input type="checkbox" name="public_category" value="{{category}}" {{checked}}>{{category}}
             {% endfor -%}
             </ul>
             <input type="submit">
