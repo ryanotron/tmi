@@ -304,7 +304,6 @@ class PostImageHandler(SuperHandler):
                 self.redirect('/panel')
         else:
             self.redirect('/login')
-        
 
 class PostActivityHandler(SuperHandler):
     def post(self):
@@ -1157,6 +1156,74 @@ class UserpageHandler(SuperHandler):
 class AboutHandler(SuperHandler):
     def get(self):
         self.render('aboutpage.html')
+        
+class Blog_NewPostHandler(SuperHandler):
+    def get(self, username):
+        userid = self.request.cookies.get('userid')
+        userid, user = utils.verify_user(userid)
+        if user:
+            self.render('blog_newpostpage.html', user = user)
+        else:
+            self.redirect('/login')
+            
+    def post(self, username):
+        userid = self.request.cookies.get('userid')
+        userid, user = utils.verify_user(userid)
+        if user:
+            if username == user.username:
+                title = self.request.get('title')
+                content = self.request.get('content')
+                privacy = self.request.get('privacy')
+                try:
+                    privacy = int(privacy)
+                except:
+                    privacy = 3
+                uploaded = datetime.datetime.utcnow()
+                if title and content:
+                    if not privacy:
+                        privacy = 3 # 0: self, 1: approved, 2: logged in, 3: world
+                    newpost = models.BlogPostModel(userid = userid,
+                                                   title = title,
+                                                   content = content,
+                                                   posted = uploaded,
+                                                   updated = uploaded,
+                                                   privacy = privacy)
+                    newpost.put()
+                    user.last_seen = datetime.datetime.utcnow()
+                    user.put()
+                    self.redirect('/u/' + user.username + '/blog')
+                else:
+                    self.redirect('/u/' + user.username + '/blog/newpost')
+            else:
+                self.redirect('/u/' + user.username + '/blog/newpost')
+        else:
+            self.redirect('/login')
+            
+class Blog_ShowPostsHandler(SuperHandler):
+    def get(self, username):
+        subject = list(db.GqlQuery('select * from UserModel where username = :1 limit 1', username))
+        subject_id = ''
+        if subject:
+            subject_id = str(subject[0].key().id())
+        else:
+            self.redirect('/') # user not found, must find better redirect destination
+        userid = self.request.cookies.get('userid')
+        userid, user = utils.verify_user(userid)
+        owner = False
+        approved = False
+        logged_in = False
+        privilege = 3
+        if user:
+            if user.username == username:
+                owner = True
+                privilege = 0
+            else:
+                logged_in = True
+                privilege = 2
+                
+        posts = list(db.GqlQuery('select * from BlogPostModel where userid = :1 and privacy >= :2', subject_id, privilege))
+        self.render('blog_showpostspage.html', user = subject[0],
+                                               posts = posts)
 
 class PublicUserpageHandler(SuperHandler):
     def get(self, username):

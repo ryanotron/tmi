@@ -1,0 +1,17 @@
+﻿{% extends 'basepage.html' -%}
+{% block head -%}
+<title>Blog - New Post- {{user.salutation}} {{user.realname}}</title>
+{% endblock -%}
+
+{% block content -%}
+<div>
+    <h2>{{user.salutation}} {{user.realname}}</h2>
+    <form method="post">
+        Title<input type="text" name="title"><br>
+        Text<br>
+        <textarea name="content"></textarea><br>
+        Privacy<input type="text" name="privacy" value="3"><br>
+        <input type="submit">
+    </form>
+</div>
+{% endblock -%}

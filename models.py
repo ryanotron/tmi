@@ -102,3 +102,11 @@ class BetaKeyModel(db.Model):
     keystring = db.StringProperty()
     used = db.BooleanProperty()
     whenused = db.DateTimeProperty()
+    
+class BlogPostModel(db.Model):
+    userid = db.StringProperty()
+    posted = db.DateTimeProperty()
+    updated = db.DateTimeProperty()
+    title = db.StringProperty()
+    content = db.TextProperty()
+    privacy = db.IntegerProperty()

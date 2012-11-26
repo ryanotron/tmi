@@ -30,6 +30,11 @@ indexes:
   - name: when
     direction: desc
 
+- kind: BlogPostModel
+  properties:
+  - name: userid
+  - name: privacy
+
 - kind: BookLibraryModel
   properties:
   - name: active

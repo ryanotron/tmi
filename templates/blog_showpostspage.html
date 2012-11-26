@@ -1,0 +1,21 @@
+﻿{% extends 'basepage.html' -%}
+{% block head -%}
+<title>Blog - {{user.salutation}} {{user.realname}}</title>
+{% endblock -%}
+
+{% block content -%}
+<div>
+    <h2>{{user.salutation}} {{user.realname}}</h2>
+    {% if posts -%}
+        {% for post in posts -%}
+            <div class="PostBlock">
+                <h3>{{post.title}}</h3>
+                <p>posted on {{post.posted.strftime('%d/%m/%Y - %H:%M')}} UTC</p>
+                {{post.content}}
+            </div>
+        {% endfor -%}
+    {% else -%}
+        <p>{{user.salutation}} {{user.realname}} has not posted anything yet</p>
+    {% endif -%}
+</div>
+{% endblock -%}
