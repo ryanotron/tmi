@@ -357,7 +357,7 @@ class InsPostActivityHandler(SuperHandler):
         userid, user = utils.verify_user(userid)
         if user:
             act_name = self.request.get('activity_name')
-            logging.error('posted '+act_name+' from instant, with new user verification method')
+            l#ogging.error('posted '+act_name+' from instant, with new user verification method')
             new_act = models.ActivityModel(userid = userid,
                                            name   = act_name,
                                            when   = datetime.datetime.utcnow())
@@ -616,7 +616,7 @@ class PostBatchExpenseHandler(SuperHandler):
                                                                   amount   = float(expense.group('amount')),
                                                                   when     = utils.str_to_datetime(expense.group('when')),
                                                                   currency = user.currency)
-                                logging.error(expense.groups())
+                                #logging.error(expense.groups())
                                 new_expense.put()
                                 user.last_seen = datetime.datetime.utcnow()
                                 user.put()
@@ -800,7 +800,7 @@ class PostBatchMealHandler(SuperHandler):
         userid, user = utils.verify_user(userid)
         if user:
             meals = self.request.get('meals')
-            logging.error('got these:\n'+meals)
+           #logging.error('got these:\n'+meals)
             if meals:
                 meals = [m for m in meals.split('\n') if m != '']
                 for meal in meals:
@@ -853,14 +853,14 @@ class PostBookHandler(SuperHandler):
                         D, M, Y = [int(elem) for elem in start.split('/')]
                         start = datetime.datetime(Y, M, D)
                     except:
-                        logging.error('failed parsing datetime')
+                       #logging.error('failed parsing datetime')
                         self.redirect('/panel')
                 if finish:
                     try:
                         D, M, Y = [int(elem) for elem in finish.split('/')]
                         finish = datetime.datetime(Y, M, D)
                     except:
-                        logging.error('failed parsing datetime')
+                       #logging.error('failed parsing datetime')
                         self.redirect('/panel')
                 if not start and bool(active):
                     start = datetime.datetime.utcnow()
@@ -913,14 +913,14 @@ class PostGameHandler(SuperHandler):
                         D, M, Y = [int(elem) for elem in start.split('/')]
                         start = datetime.datetime(Y, M, D)
                     except:
-                        logging.error('failed parsing datetime')
+                       #logging.error('failed parsing datetime')
                         self.redirect('/panel')
                 if finish:
                     try:
                         D, M, Y = [int(elem) for elem in finish.split('/')]
                         finish = datetime.datetime(Y, M, D)
                     except:
-                        logging.error('failed parsing datetime')
+                       #logging.error('failed parsing datetime')
                         self.redirect('/panel')
                 if not start and bool(active):
                     start = datetime.datetime.utcnow()
@@ -1092,7 +1092,7 @@ class PanelHandler(SuperHandler):
                 userconf = {}
                 user.confstring = json.dumps(userconf)
                 user.put()
-            logging.error('user configuration: ' + str(userconf))
+           #logging.error('user configuration: ' + str(userconf))
             expense_categories = []
             if userconf.has_key('expense_categories'):
                 expense_categories = userconf['expense_categories']

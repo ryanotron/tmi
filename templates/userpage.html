@@ -19,7 +19,7 @@
 {% endif -%}
 {% if coffee_stats -%}
 {% set dataset = coffee_stats['daily_cups'] -%}
-{% set chart = {'y_label': 'cups', 'div_name': 'coffee_chart', 'xspace':'con', 'title': 'Coffee Timeline'} -%}
+{% set chart = {'y_label': 'cups', 'div_name': 'coffee_chart', 'xspace':'con', 'title': 'Coffee Timeline', 'datalen': 1} -%}
 {% include 'js_timeline_chart.html' %}
 {% set dataset = coffee_stats['coffee_histogram'] -%}
 {% set chart = {'y_label': 'frequency', 'div_name': 'coffee_histogram', 'title':'Coffee Histogram', 'xspace':'dis'} -%}
@@ -27,8 +27,13 @@
 {% endif %}
 {% if sleep_stats -%}
 {% set dataset = sleep_stats['sleep_list'] -%}
-{% set chart = {'y_label': 'hours', 'div_name': 'sleep_chart', 'xspace':'con', 'title': 'Sleep hours timeline'} -%}
+{% set chart = {'y_label': 'hours', 'div_name': 'sleep_chart', 'xspace':'con', 'title': 'Sleep hours timeline', 'datalen': 2} -%}
 {% include 'js_timeline_chart.html' %}
+{% if sleep_stats['debt_list'] -%}
+{% set dataset = sleep_stats['debt_list'] -%}
+{% set chart = {'y_label': 'hours', 'div_name': 'sleep_debt_chart', 'xspace':'con', 'title': 'Sleep debt timeline', 'datalen': 1} -%}
+{% include 'js_timeline_chart.html' -%}
+{% endif -%}
 {% set dataset = sleep_stats['sleep_histogram'] -%}
 {% set chart = {'y_label': 'frequency', 'div_name': 'sleep_histogram', 'title': 'Sleep hours histogram', 'xspace':'con'} -%}
 {% include 'js_histogram_chart.html' %}
@@ -107,6 +112,7 @@
             <p>{{user.salutation}} {{user.realname}} woke up at {{sleep_stats['latest_waketime'].strftime('%H:%M')}} after {{'%2.2f' % sleep_stats['latest_duration']}} hours of sleep. {{user.nom_pronoun}} slept for, on average, {{'%2.2f' % sleep_stats['lastweek_average']}} hours per day last week, and for {{'%2.2f' % sleep_stats['alltime_average']}} hours all time. To maintain {{user.pos_determi}} all time average {{user.salutation}} {{user.realname}} has a sleep debt of {{'%2.2f' % sleep_stats['debt_by_alltime']}} hours.</p>
             <div class="ChartWrapper">
             <div id="sleep_chart"></div>
+            <div id="sleep_debt_chart"></div>
             <div id="sleep_histogram"></div>
             </div>
             {% else -%}

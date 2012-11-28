@@ -84,10 +84,13 @@ def sleep_stats(user):
         status['sleep_list'] = sleep_list
                 
         totalday = (today - sleeps[-1].end).days
+        alltime_average = 0
         if totalday > 0:
-            status['alltime_average'] = alltime_total / totalday
+            alltime_average = alltime_total / totalday
+            #logging.error('alltime_average is %2.2f' % alltime_average)
+            status['alltime_average'] = alltime_average
         else:
-            status['alltime_average'] = 0
+            status['alltime_average'] = alltime_average
             
         if (today - sleeps[-1].end).days < 7:
             status['lastweek_average'] = 0
@@ -97,8 +100,24 @@ def sleep_stats(user):
         # sleep debts
         status['debt_by_lastweek'] = max(0, status['lastweek_average'] * (today.weekday() + 1) - thisweek_total)
         status['debt_by_alltime']  = max(0, status['alltime_average'] * (today.weekday() + 1) - thisweek_total)
+        
+        debt_list = []
+        if alltime_average > 0:
+            prev_debt = 0.0
+            for sleep in sleep_list:
+                if not debt_list:
+                    debt_list.append([sleep[0], max(0.0, alltime_average - sleep[1])])
+                else:
+                    debt_list.append([sleep[0], max(0.0, prev_debt + alltime_average - sleep[1])])
+                prev_debt = debt_list[-1][1]
+                #logging.error('at date ' + sleep[0].strftime('%d/%m/%Y') + ' duration: %2.2f' %sleep[1] +' accumulated debt: %2.2f' % prev_debt)
+                
+        status['debt_list'] = debt_list
         #logging.error('total days this week %d' % (today.weekday() + 1))
         #logging.error('total hours of sleep this week %d' % thisweek_total)
+        
+        sleep_list = [[a[0], a[1], b[1]] for a, b in zip(sleep_list, debt_list)]
+        status['sleep_list'] = sleep_list
         
         # sleep histogram
         h, b = numpy.histogram([elem[1] for elem in sleep_list], bins = numpy.ceil(numpy.sqrt(len(sleep_list))))
