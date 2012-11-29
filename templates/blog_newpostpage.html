@@ -1,10 +1,11 @@
 ﻿{% extends 'basepage.html' -%}
 {% block head -%}
 <title>Blog - New Post- {{user.salutation}} {{user.realname}}</title>
+<link type="text/css" rel="stylesheet" href="/stylesheets/blog.css">
 {% endblock -%}
 
 {% block content -%}
-<div>
+<div id="BlogNewpostOverWrapper" class="FullWrapper">
     <h2>{{user.salutation}} {{user.realname}}</h2>
     <form method="post">
         Title<input type="text" name="title"><br>

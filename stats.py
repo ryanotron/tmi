@@ -228,7 +228,7 @@ def meal_stats(user):
     lulist = filter_outliers([getminutes(meal) for meal in proper_meals if meal.category == 'lunch'], 5, 95)
     dilist = filter_outliers([getminutes(meal) for meal in proper_meals if meal.category == 'dinner'], 5, 95)
     
-    gethours = lambda x: '%02d:%02d' % (abs(x), abs(60*(x - abs(x))))
+    gethours = lambda x: '%02d:%02d' % (abs(x), abs(60*(x - int(x))))
     h, b = numpy.histogram(brlist, bins = numpy.ceil(numpy.sqrt(len(brlist))))
     b = [gethours(e) for e in b]
     status['br_histogram'] = zip(b, b[1:], h)

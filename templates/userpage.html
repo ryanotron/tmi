@@ -19,7 +19,7 @@
 {% endif -%}
 {% if coffee_stats -%}
 {% set dataset = coffee_stats['daily_cups'] -%}
-{% set chart = {'y_label': 'cups', 'div_name': 'coffee_chart', 'xspace':'con', 'title': 'Coffee Timeline', 'datalen': 1} -%}
+{% set chart = {'v_label': 'cups', 'y_label': ['cups'], 'div_name': 'coffee_chart', 'xspace':'con', 'title': 'Coffee Timeline', 'datalen': 1} -%}
 {% include 'js_timeline_chart.html' %}
 {% set dataset = coffee_stats['coffee_histogram'] -%}
 {% set chart = {'y_label': 'frequency', 'div_name': 'coffee_histogram', 'title':'Coffee Histogram', 'xspace':'dis'} -%}
@@ -27,13 +27,8 @@
 {% endif %}
 {% if sleep_stats -%}
 {% set dataset = sleep_stats['sleep_list'] -%}
-{% set chart = {'y_label': 'hours', 'div_name': 'sleep_chart', 'xspace':'con', 'title': 'Sleep hours timeline', 'datalen': 2} -%}
+{% set chart = {'v_label':'hours', 'y_label': ['sleep hours', 'debt hours'], 'div_name': 'sleep_chart', 'xspace':'con', 'title': 'Sleep hours timeline', 'datalen': 2} -%}
 {% include 'js_timeline_chart.html' %}
-{% if sleep_stats['debt_list'] -%}
-{% set dataset = sleep_stats['debt_list'] -%}
-{% set chart = {'y_label': 'hours', 'div_name': 'sleep_debt_chart', 'xspace':'con', 'title': 'Sleep debt timeline', 'datalen': 1} -%}
-{% include 'js_timeline_chart.html' -%}
-{% endif -%}
 {% set dataset = sleep_stats['sleep_histogram'] -%}
 {% set chart = {'y_label': 'frequency', 'div_name': 'sleep_histogram', 'title': 'Sleep hours histogram', 'xspace':'con'} -%}
 {% include 'js_histogram_chart.html' %}
@@ -67,12 +62,12 @@
         </div>
         <div class="FullSubBlock" id="PhotoGallery">
             <div class="SubBlock">
-                <img src="../img?img_key={{user.photo_key}}">
+                <img src="/img?img_key={{user.photo_key}}">
                 <p class="Caption">Latest</p>
             </div>
             {% for photo in old_photos -%}
             <div class="SubBlock">
-                <img src="../img?img_key={{photo.key()}}">
+                <img src="/img?img_key={{photo.key()}}">
                 <p class="Caption">{{(photo.uploaded + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y %H:%M')}}</p>
             </div>
             {% endfor -%}
@@ -125,7 +120,7 @@
             {% if meal_stats -%}
             {% if meal_stats['latest_meal'].image -%}
             <div class="SubBlock">
-                <img src="../img?img_key={{meal_stats['latest_meal'].image}}">
+                <img src="/img?img_key={{meal_stats['latest_meal'].image}}">
             </div>
             {% endif -%}
             <div class="SubBlock">
@@ -222,7 +217,7 @@
             <div class="BookWrapper">
                 {% if book.image -%}
                 <div class="SubBlock">
-                    <img src="../img?img_key={{book.image}}">
+                    <img src="/img?img_key={{book.image}}">
                 </div>
                 {% endif -%}
                 <div class="SubBlock">
@@ -243,7 +238,7 @@
             <div class="BookWrapper">
                 {% if book.image -%}
                 <div class="SubBlock">
-                    <img src="../img?img_key={{book.image}}">
+                    <img src="/img?img_key={{book.image}}">
                 </div>
                 {% endif -%}
                 <div class="SubBlock">
@@ -267,7 +262,7 @@
             <div class="BookWrapper">
                 {% if game.image -%}
                 <div class="SubBlock">
-                    <img src="../img?img_key={{game.image}}">
+                    <img src="/img?img_key={{game.image}}">
                 </div>
                 {% endif -%}
                 <div class="SubBlock">
@@ -288,7 +283,7 @@
             <div class="BookWrapper">
                 {% if game.image -%}
                 <div class="SubBlock">
-                    <img src="../img?img_key={{game.image}}">
+                    <img src="/img?img_key={{game.image}}">
                 </div>
                 {% endif -%}
                 <div class="SubBlock">

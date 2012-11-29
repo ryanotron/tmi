@@ -1,17 +1,20 @@
 ﻿{% extends 'basepage.html' -%}
 {% block head -%}
 <title>Blog - {{user.salutation}} {{user.realname}}</title>
+<link type="text/css" rel="stylesheet" href="/stylesheets/blog.css">
 {% endblock -%}
 
 {% block content -%}
-<div>
+<div id="BlogOverWrapper">
     <h2>{{user.salutation}} {{user.realname}}</h2>
     {% if posts -%}
         {% for post in posts -%}
             <div class="PostBlock">
-                <h3>{{post.title}}</h3>
+                <div class="PostHead">
+                    <h3>{{post.title}}</h3>
+                </div>
                 <p>posted on {{post.posted.strftime('%d/%m/%Y - %H:%M')}} UTC</p>
-                {{post.content}}
+                {{post.content|safe}}
             </div>
         {% endfor -%}
     {% else -%}
