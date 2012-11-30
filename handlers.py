@@ -1086,22 +1086,45 @@ class PanelHandler(SuperHandler):
         userid, user = utils.verify_user(userid)
         if user:
             userconf = {}
+            config_updated = False
             try:
                 userconf = json.loads(user.confstring)
             except:
                 userconf = {}
                 user.confstring = json.dumps(userconf)
                 user.put()
-           #logging.error('user configuration: ' + str(userconf))
+            
+            if not userconf.has_key('activities'):
+                activities = db.GqlQuery('select * from ActivityModel where userid = :1', userid)
+                activity_categories = list(set(a.name.strip() for a in activities))
+                userconf['activities'] = activity_categories
+                config_updated = True
+                
+            if not userconf.has_key('timed_activities'):
+                timed_activities = db.GqlQuery('select * from TimedActivityModel where userid = :1', userid)
+                timed_activity_categories = list(set(ta.name for ta in timed_activities))
+                userconf['timed_activities'] = timed_activity_categories
+                config_updated = True
+                
+            #logging.error('user configuration: ' + str(userconf))
             expense_categories = []
             if userconf.has_key('expense_categories'):
                 expense_categories = userconf['expense_categories']
             else:
                 expenses = list(db.GqlQuery('select * from ExpenseModel where userid = :1', userid))
                 expense_categories = list(set(e.category.strip() for e in expenses))
+                userconf['expense_categories'] = expense_categories
+                config_updated = True
+                
+            if config_updated:
+                user.confstring = json.dumps(userconf)
+                user.put()
                 
             self.render('panelpage.html', user = user,
-                                          expense_categories = expense_categories)
+                                          expense_categories = expense_categories,
+                                          activity_categories = userconf['activities'],
+                                          timed_activity_categories = userconf['timed_activities']
+                                          )
         else:
             self.redirect('/login')
             
@@ -1162,7 +1185,16 @@ class Blog_NewPostHandler(SuperHandler):
         userid = self.request.cookies.get('userid')
         userid, user = utils.verify_user(userid)
         if user:
-            self.render('blog_newpostpage.html', user = user)
+            userconf = json.loads(user.confstring)
+            if not userconf.has_key('blog_categories'):
+                blogposts = db.GqlQuery('select * from BlogPostModel where userid = :1', userid)
+                blog_categories = list(set(post.category for post in blogposts))
+                userconf['blog_categories'] = blog_categories
+                user.confstring = json.dumps(userconf)
+                user.put()
+                
+            self.render('blog_newpostpage.html', user = user,
+                                                 blog_categories = userconf['blog_categories'])
         else:
             self.redirect('/login')
             
@@ -1174,6 +1206,7 @@ class Blog_NewPostHandler(SuperHandler):
                 title = self.request.get('title')
                 content = self.request.get('content')
                 privacy = self.request.get('privacy')
+                category = self.request.get('category')
                 try:
                     privacy = int(privacy)
                 except:
@@ -1182,12 +1215,15 @@ class Blog_NewPostHandler(SuperHandler):
                 if title and content:
                     if not privacy:
                         privacy = 3 # 0: self, 1: approved, 2: logged in, 3: world
+                    if not category:
+                        category = 'unspecified'
                     newpost = models.BlogPostModel(userid = userid,
                                                    title = title,
                                                    content = content,
                                                    posted = uploaded,
                                                    updated = uploaded,
-                                                   privacy = privacy)
+                                                   privacy = privacy,
+                                                   category = category)
                     newpost.put()
                     user.last_seen = datetime.datetime.utcnow()
                     user.put()
@@ -1221,7 +1257,8 @@ class Blog_ShowPostsHandler(SuperHandler):
                 logged_in = True
                 privilege = 2
                 
-        posts = list(db.GqlQuery('select * from BlogPostModel where userid = :1 and privacy >= :2', subject_id, privilege))
+        posts = list(db.GqlQuery('select * from BlogPostModel where userid = :1 order by posted desc', subject_id))
+        posts = [p for p in posts if p.privacy >= privilege]
         self.render('blog_showpostspage.html', user = subject[0],
                                                posts = posts)
 

@@ -8,7 +8,7 @@ email_re    = re.compile(r'^[\S]+@[\S]+.[\S]+$')
 batchexpense_re = re.compile(r'[^\d]+(?P<when>\d{1,2}/\d{1,2}/\d{4})\t(?P<name>[^\t]+)\t(?P<amount>\d+.\d+)\t(?P<cat>[^\t]+)')
 datetime_re = re.compile(r'\s*(\d{1,2})/(\d{1,2})/(\d{4})\s+(\d{1,2}):(\d{2})')
 
-COOKIESECRET = 'Fire and Blood!'
+COOKIESECRET = 'Shits and Giggles'
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinjaenv = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir), autoescape = True)

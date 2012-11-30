@@ -110,3 +110,4 @@ class BlogPostModel(db.Model):
     title = db.StringProperty()
     content = db.TextProperty()
     privacy = db.IntegerProperty()
+    category = db.StringProperty()

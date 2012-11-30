@@ -107,6 +107,26 @@ div.Message {
     margin: 1px;
 }
 
+div.CategoryListing {
+    width: 100%;
+    margin-top: 1px;
+    margin-bottom: 1px;
+    //border: 1px solid black;
+}
+
+div.CategoryListing ul {
+    text-decoration: none;
+    display: inline;
+}
+
+div.CategoryListing li {
+    display: inline;
+    margin: 5px;
+    padding: 5px;
+    background-color: #dddddd;
+    float: left;
+}
+
 blockquote {
     /*background-color: #ffeeee;*/
     margin: 1px;

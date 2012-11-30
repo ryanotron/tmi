@@ -13,7 +13,8 @@
                 <div class="PostHead">
                     <h3>{{post.title}}</h3>
                 </div>
-                <p>posted on {{post.posted.strftime('%d/%m/%Y - %H:%M')}} UTC</p>
+                <p>posted on {{post.posted.strftime('%d/%m/%Y - %H:%M')}} UTC
+                {%- if post.updated > post.posted -%}, updated on {{post.updated.strftime('%d/%m/%Y - %H:%M')}}{%- endif -%}</p>
                 {{post.content|safe}}
             </div>
         {% endfor -%}

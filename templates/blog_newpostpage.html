@@ -12,6 +12,15 @@
         Text<br>
         <textarea name="content"></textarea><br>
         Privacy<input type="text" name="privacy" value="3"><br>
+        Category<input type="text" name="category"><br>
+        <div class="CategoryListing">
+            <p>Previous categories:</p>
+            <ul>
+                {% for cat in blog_categories -%}
+                <li>{{cat}}
+                {% endfor -%}
+            </ul>
+        </div>
         <input type="submit">
     </form>
 </div>

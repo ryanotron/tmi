@@ -33,6 +33,12 @@ indexes:
 - kind: BlogPostModel
   properties:
   - name: userid
+  - name: posted
+    direction: desc
+
+- kind: BlogPostModel
+  properties:
+  - name: userid
   - name: privacy
 
 - kind: BookLibraryModel
