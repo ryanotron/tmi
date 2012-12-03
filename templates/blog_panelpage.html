@@ -1,0 +1,33 @@
+﻿{% extends 'basepage.html' -%}
+
+{% block head -%}
+<title>Blog Panel - {{user.salutation}} {{user.realname}}</title>
+<link type="text/css" rel="stylesheet" href="/stylesheets/blog.css">
+{% endblock -%}
+
+{% block content -%}
+<div class="FullWrapper">
+{% if posts -%}
+    <table>
+        <tr>
+            <th>title
+            <th>posted
+            <th>updated
+            <th>privacy
+            <th>category
+            <th>edit
+    {% for post in posts -%}
+        <tr>
+            <td>{{post.title}}
+            <td>{{post.posted.strftime('%d/%m/%Y - %H:%M')}}
+            <td>{{post.posted.strftime('%d/%m/%Y - %H:%M')}}
+            <td>{{post.privacy}}
+            <td>{{post.category}}
+            <td><a href="/u/{{user.username}}/blog/{{post.key().id()}}/edit">edit</a>
+    {% endfor -%}
+    </table>
+{% else -%}
+    <p>You have not posted anything yet</p>
+{% endif -%}
+</div>
+{% endblock -%}

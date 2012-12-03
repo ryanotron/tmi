@@ -1261,6 +1261,42 @@ class Blog_ShowPostsHandler(SuperHandler):
         posts = [p for p in posts if p.privacy >= privilege]
         self.render('blog_showpostspage.html', user = subject[0],
                                                posts = posts)
+                                               
+class Blog_PanelHandler(SuperHandler):
+    def get(self, username):
+        subject = list(db.GqlQuery('select * from UserModel where username = :1 limit 1', username))
+        subject_id = ''
+        if subject:
+            subject_id = str(subject[0].key().id())
+        else:
+            self.redirect('/') # user not found, must find better redirect destination
+        userid = self.request.cookies.get('userid')
+        userid, user = utils.verify_user(userid)
+        if user and user.username == username:
+            posts = list(db.GqlQuery('select * from BlogPostModel where userid = :1 order by posted desc', subject_id))
+            self.render('blog_panelpage.html', user = user,
+                                                   posts = posts)
+        else:
+            self.redirect('/login') # logged in as different person than requested page
+            
+class Blog_ShowSinglePostHandler(SuperHandler):
+    def get(self, username, postid):
+        subject = list(db.GqlQuery('select * from UserModel where username = :1 limit 1', username))
+        subject_id = ''
+        if subject:
+            subject_id = str(subject[0].key().id())
+        else:
+            self.redirect('/') # user not found, must find better redirect destination
+        
+        postkey = db.Key.from_path('BlogPostModel', int(postid))
+        post = db.get(postkey)
+        self.render('blog_showsinglepostpage.html', user = subject[0],
+                                               post = post)
+                                               
+class Blog_EditPostHandler(SuperHandler):
+    def get(self, username, postid):
+        self.redirect('/u/' + username + '/blog/' + postid)
+        # stub
 
 class PublicUserpageHandler(SuperHandler):
     def get(self, username):

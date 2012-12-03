@@ -1,0 +1,26 @@
+﻿{% extends 'basepage.html' -%}
+{% block head -%}
+<title>Blog - {{user.salutation}} {{user.realname}}</title>
+<link type="text/css" rel="stylesheet" href="/stylesheets/blog.css">
+{% endblock -%}
+
+{% block content -%}
+<div id="BlogOverWrapper">
+    <h2>{{user.salutation}} {{user.realname}}</h2>
+    {% if post -%}
+    <div class="PostBlock">
+        <div class="PostHead">
+            <h3>{{post.title}}</h3>
+        </div>
+        <p>posted on {{post.posted.strftime('%d/%m/%Y - %H:%M')}} UTC
+        {%- if post.updated > post.posted -%}, updated on {{post.updated.strftime('%d/%m/%Y - %H:%M')}}{%- endif -%}</p>
+        {{post.content|safe}}
+        <div class="PostFooter">
+            <a href="/u/{{user.username}}/blog/{{post.key().id()}}">Permalink</a>
+        </div>
+    </div>
+    {% else -%}
+    <p>{{user.salutation}} {{user.realname}} has not posted anything yet</p>
+    {% endif -%}
+</div>
+{% endblock -%}

@@ -13,9 +13,14 @@
                 <div class="PostHead">
                     <h3>{{post.title}}</h3>
                 </div>
-                <p>posted on {{post.posted.strftime('%d/%m/%Y - %H:%M')}} UTC
-                {%- if post.updated > post.posted -%}, updated on {{post.updated.strftime('%d/%m/%Y - %H:%M')}}{%- endif -%}</p>
+                <div class="PostSubHead">
+                    posted on {{post.posted.strftime('%d/%m/%Y - %H:%M')}} UTC
+                    {%- if post.updated > post.posted -%}, updated on {{post.updated.strftime('%d/%m/%Y - %H:%M')}}{%- endif -%}
+                </div>
                 {{post.content|safe}}
+                <div class="PostFooter">
+                    <a href="/u/{{user.username}}/blog/{{post.key().id()}}">Permalink</a>
+                </div>
             </div>
         {% endfor -%}
     {% else -%}

@@ -39,6 +39,16 @@ div.PostHead {
     border: none;
 }
 
+div.PostFooter, div.PostSubHead {
+    width: 100%;
+    border: none;
+    background-color: #cccccc;
+    color: #333333;
+    text-align: right;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
 textarea {
     width: 80%;
     height: 50%;
@@ -65,4 +75,20 @@ div.CategoryListing li {
     background-color: #dddddd;
     float: left;
 }
-    
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+table, th, td {
+    border: 1px dotted blue;
+}
+
+th {
+    padding: 10px;
+}
+
+td {
+    padding: 3px;
+}
