@@ -357,7 +357,7 @@ class InsPostActivityHandler(SuperHandler):
         userid, user = utils.verify_user(userid)
         if user:
             act_name = self.request.get('activity_name')
-            l#ogging.error('posted '+act_name+' from instant, with new user verification method')
+            #logging.error('posted '+act_name+' from instant, with new user verification method')
             new_act = models.ActivityModel(userid = userid,
                                            name   = act_name,
                                            when   = datetime.datetime.utcnow())
