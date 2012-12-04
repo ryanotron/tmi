@@ -44,7 +44,6 @@
     <div class="Block" id="Headline">
         Like what you see? Want one? Ask <a href="/u/ryanotron">Subject Ryan</a> for one!
     </div>
-    
     <div class="Block" id="Navigation">
         <ul>
             <a href="/u/{{user.username}}/library?type=book"><li>Books</a>
@@ -73,7 +72,7 @@
             {% endfor -%}
         </div>
 
-        {% if social_media %}
+        {% if social_media -%}
         <div class="FullSubBlock">
             <h3>Find {{user.salutation}} {{user.realname}} elsewhere:</h3>
             <ul>
@@ -82,21 +81,21 @@
             {% endfor %}
             </ul>
         </div>
-        {% endif %}
+        {% endif -%}
 
-        {% if user_messages %}
+        {% if user_messages -%}
         <div class="FullSubBlock">
             <h3>Latest messages from {{user.salutation}} {{user.realname}}</h3>
-            {% for message in user_messages %}
+            {% for message in user_messages -%}
             <div class="Message">
                 {{'%2.2f' % ((datetime.datetime.utcnow() - message.when).total_seconds() / 3600)}} hours ago, on {{(message.when + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y %H:%M')}} UTC{{'%+2.1f' % user.timezone}}
                 <blockquote>
                 {{message.message}}
                 </blockquote>
             </div>
-            {% endfor %}
+            {% endfor -%}
         </div>
-        {% endif %}
+        {% endif -%}
     </div> <!-- End of PersonalInformation -->
 
     <div class="Block" id="Energy">

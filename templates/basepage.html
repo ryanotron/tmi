@@ -2,11 +2,22 @@
 <html>
 <head>
 <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+<link type="text/css" rel="stylesheet" href="/stylesheets/navi.css">
 {% block head -%}
 <title>Too Much Information!</title>
 {% endblock -%}
 </head>
 <body>
+{% if user -%}
+<div class="Block" id="Navigation">
+    <ul>
+        <a href="/u/{{user.username}}/library?type=book"><li>Books</a>
+        <a href="/u/{{user.username}}/library?type=game"><li>Games</a>
+        <a href="/u/{{user.username}}/blog"><li>Blog</a>
+        <a href="/about"><li>About</a>
+    </ul>
+</div>
+{% endif -%}
 {% block content %}
 {% endblock %}
 </body>

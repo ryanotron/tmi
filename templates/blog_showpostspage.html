@@ -6,7 +6,12 @@
 
 {% block content -%}
 <div id="BlogOverWrapper">
-    <h2>{{user.salutation}} {{user.realname}}</h2>
+    {% if userconf['blog_headline'] -%}
+    <h2>{{userconf['blog_headline']}}</h2>
+    {% else -%}
+    <h2>Blog</h2>
+    {% endif -%}
+    <h3>{{user.salutation}} {{user.realname}}</h3>
     {% if posts -%}
         {% for post in posts -%}
             <div class="PostBlock">
@@ -19,6 +24,7 @@
                 </div>
                 {{post.content|safe}}
                 <div class="PostFooter">
+                    Posted under: {{post.category}}, 
                     <a href="/u/{{user.username}}/blog/{{post.key().id()}}">Permalink</a>
                 </div>
             </div>

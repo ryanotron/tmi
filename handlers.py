@@ -1260,7 +1260,8 @@ class Blog_ShowPostsHandler(SuperHandler):
         posts = list(db.GqlQuery('select * from BlogPostModel where userid = :1 order by posted desc', subject_id))
         posts = [p for p in posts if p.privacy >= privilege]
         self.render('blog_showpostspage.html', user = subject[0],
-                                               posts = posts)
+                                               posts = posts,
+                                               userconf = json.loads(subject[0].confstring))
                                                
 class Blog_PanelHandler(SuperHandler):
     def get(self, username):
@@ -1273,11 +1274,37 @@ class Blog_PanelHandler(SuperHandler):
         userid = self.request.cookies.get('userid')
         userid, user = utils.verify_user(userid)
         if user and user.username == username:
+            userconf = json.loads(user.confstring)
+            if not userconf.has_key('blog_headline'):
+                userconf['blog_headline'] = '%s %s\'s Blog' % (user.salutation, user.realname)
+                user.confstring = json.dumps(userconf)
+                user.put()
             posts = list(db.GqlQuery('select * from BlogPostModel where userid = :1 order by posted desc', subject_id))
             self.render('blog_panelpage.html', user = user,
-                                                   posts = posts)
+                                               userconf = userconf,
+                                               posts = posts)
         else:
             self.redirect('/login') # logged in as different person than requested page
+            
+    def post(self, username):
+        subject = list(db.GqlQuery('select * from UserModel where username = :1 limit 1', username))
+        subject_id = ''
+        if subject:
+            subject_id = str(subject[0].key().id())
+        else:
+            self.redirect('/') # user not found, must find better redirect destination
+        userid = self.request.cookies.get('userid')
+        userid, user = utils.verify_user(userid)
+        if user and user.username == username:
+            new_headline = self.request.get('blog_headline')
+            userconf = json.loads(user.confstring)
+            if new_headline != userconf['blog_headline']:
+                userconf['blog_headline'] = new_headline
+                user.confstring = json.dumps(userconf)
+                user.put()
+            self.redirect('/u/' + username + '/blog/panel')
+        else:
+            self.redirect('/login')
             
 class Blog_ShowSinglePostHandler(SuperHandler):
     def get(self, username, postid):
@@ -1291,12 +1318,74 @@ class Blog_ShowSinglePostHandler(SuperHandler):
         postkey = db.Key.from_path('BlogPostModel', int(postid))
         post = db.get(postkey)
         self.render('blog_showsinglepostpage.html', user = subject[0],
-                                               post = post)
+                                                    userconf = json.loads(subject[0].confstring),
+                                                    post = post)
                                                
 class Blog_EditPostHandler(SuperHandler):
     def get(self, username, postid):
-        self.redirect('/u/' + username + '/blog/' + postid)
-        # stub
+        subject = list(db.GqlQuery('select * from UserModel where username = :1 limit 1', username))
+        subject_id = ''
+        if subject:
+            subject_id = str(subject[0].key().id())
+        else:
+            self.redirect('/') # user not found, must find better redirect destination
+        userid = self.request.cookies.get('userid')
+        userid, user = utils.verify_user(userid)
+        if user and user.username == username:
+            userconf = json.loads(user.confstring)
+            postkey = db.Key.from_path('BlogPostModel', int(postid))
+            post = db.get(postkey)
+            if post:
+                self.render('blog_newpostpage.html', user = user,
+                                                     post = post,
+                                                     blog_categories = userconf['blog_categories'])
+            else:
+                self.redirect('/u/' + username + '/blog/newpost')
+        else:
+            self.redirect('/login')
+            
+    def post(self, username, postid):
+        subject = list(db.GqlQuery('select * from UserModel where username = :1 limit 1', username))
+        subject_id = ''
+        if subject:
+            subject_id = str(subject[0].key().id())
+        else:
+            self.redirect('/') # user not found, must find better redirect destination
+        userid = self.request.cookies.get('userid')
+        userid, user = utils.verify_user(userid)
+        if user and user.username == username:
+            title = self.request.get('title')
+            content = self.request.get('content')
+            category = self.request.get('category')
+            privacy = self.request.get('privacy')
+            try:
+                privacy = int(privacy)
+            except:
+                privacy = 0
+            postkey = db.Key.from_path('BlogPostModel', int(postid))
+            post = db.get(postkey)
+            
+            changed = False
+            if title != post.title:
+                post.title = title
+                changed = True
+            if content != post.content:
+                post.content = content
+                changed = True
+            if privacy != post.privacy:
+                post.privacy = post.privacy
+                changed = True
+            if category != post.category:
+                post.category = category
+                changed = True
+                
+            if changed:
+                post.updated = datetime.datetime.utcnow()
+                post.put()
+                user.last_seen = datetime.datetime.utcnow()
+                user.put()
+                
+            self.redirect('/u/' + username + '/blog/' + postid)
 
 class PublicUserpageHandler(SuperHandler):
     def get(self, username):
