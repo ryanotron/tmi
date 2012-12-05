@@ -167,3 +167,25 @@ div#aboutpage {
     margin-bottom: 2px;
     margin-top: 0px;
 }
+
+table {
+    border-collapse: collapse;
+}
+
+table, th, td {
+    border: 1px dotted blue;
+}
+
+th {
+    padding: 10px;
+}
+
+td {
+    padding: 3px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+td.Number {
+    text-align: right;
+}

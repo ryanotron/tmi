@@ -83,7 +83,7 @@ def sleep_stats(user):
                         sleep_list.append([sleep.end, duration])
         status['sleep_list'] = sleep_list
                 
-        totalday = (today - sleeps[-1].end).days
+        totalday = (sleep_list[0][0] - sleep_list[-1][0]).days + 1
         alltime_average = 0
         if totalday > 0:
             alltime_average = alltime_total / totalday
@@ -104,7 +104,7 @@ def sleep_stats(user):
         debt_list = []
         if alltime_average > 0:
             prev_debt = 0.0
-            for sleep in sleep_list:
+            for sleep in reversed(sleep_list):
                 if not debt_list:
                     debt_list.append([sleep[0], max(0.0, alltime_average - sleep[1])])
                 else:
@@ -112,6 +112,7 @@ def sleep_stats(user):
                 prev_debt = debt_list[-1][1]
                 #logging.error('at date ' + sleep[0].strftime('%d/%m/%Y') + ' duration: %2.2f' %sleep[1] +' accumulated debt: %2.2f' % prev_debt)
                 
+        debt_list.reverse()
         status['debt_list'] = debt_list
         #logging.error('total days this week %d' % (today.weekday() + 1))
         #logging.error('total hours of sleep this week %d' % thisweek_total)

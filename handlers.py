@@ -1029,6 +1029,34 @@ class PresentTimedActivityHandler(SuperHandler):
                 self.redirect('/login')
         else:
             self.redirect('/login')
+            
+class PresentExpenseHandler(SuperHandler):
+    def get(self, username):
+        userid = self.request.cookies.get('userid')
+        userid, user = utils.verify_user(userid)
+        subject = list(db.GqlQuery('select * from UserModel where username = :1 limit 1', username))
+        # if the request is for a real person
+        if subject:
+            subject = subject[0]
+            subject_conf = json.loads(subject.confstring)
+            
+            # if the requester is the same person as requested, mark it
+            owner = False
+            if user and user.username == username:
+                owner = True
+                
+            # get expenses from db, then filter it if requester isn't owner
+            expenses = list(db.GqlQuery('select * from ExpenseModel where userid = :1 order by when desc', str(subject.key().id())))
+            if not owner:
+                if subject_conf.has_key('public_expense_categories'):
+                    expenses = [e for e in expenses if e.category in subject_conf['public_expense_categories']]
+                else:
+                    expenses = []
+                    
+            self.render('showexpensepage.html', user = subject,
+                                                expenses = expenses)
+        else:
+            self.redirect('/') # requesting inexsistent user
 
 class LibraryHandler(SuperHandler):
     def get(self, username):

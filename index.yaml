@@ -66,6 +66,12 @@ indexes:
   - name: when
     direction: desc
 
+- kind: ExpenseModel
+  properties:
+  - name: userid
+  - name: when
+    direction: desc
+
 - kind: GameLibraryModel
   properties:
   - name: active
@@ -107,6 +113,12 @@ indexes:
   properties:
   - name: userid
   - name: when
+    direction: desc
+
+- kind: TimedActivityModel
+  properties:
+  - name: name
+  - name: end
     direction: desc
 
 - kind: TimedActivityModel
