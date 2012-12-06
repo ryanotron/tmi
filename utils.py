@@ -51,3 +51,15 @@ def verify_user(userid_cookie):
 def str_to_datetime(datestr):
     d,m,y = [int(elem) for elem in datestr.split('/')]
     return datetime.datetime(y, m, d)
+    
+def update_config(userconfig, key, data):
+    #logging.error(str(userconfig) + str(key) + str(data))
+    if not userconfig.has_key(key):
+        userconfig[key] = [data]
+    else:
+        if not data in userconfig[key]:
+            userconfig[key].append(data)
+        else:
+            return False
+    #logging.error(userconfig)
+    return userconfig

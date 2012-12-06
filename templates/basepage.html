@@ -11,6 +11,7 @@
 {% if user -%}
 <div class="Block" id="Navigation">
     <ul>
+        <a href="/u/{{user.username}}"><li>TMI</a>
         <a href="/u/{{user.username}}/library?type=book"><li>Books</a>
         <a href="/u/{{user.username}}/library?type=game"><li>Games</a>
         <a href="/u/{{user.username}}/blog"><li>Blog</a>

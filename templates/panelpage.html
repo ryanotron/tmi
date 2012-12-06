@@ -201,6 +201,13 @@
             and arrived at <input class="Date" type="text" name="trv_finish_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">
             <input class="Time" type="text" name="trv_finish_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}"><br>
             (it took me <input type="text" name="trv_duration"> minutes)<br>
+            {% if places -%}
+            <div class="CategoryListing"><ul>
+                {% for place in places -%}
+                <li>{{place}}
+                {% endfor -%}
+            </ul></div>
+            {% endif -%}
             <input type="submit">
         </form>
     </div>

@@ -304,6 +304,24 @@ class PostImageHandler(SuperHandler):
                 self.redirect('/panel')
         else:
             self.redirect('/login')
+            
+class ImageGalleryHandler(SuperHandler):
+    def get(self, username):
+        subject = list(db.GqlQuery('select * from UserModel where username = :1 limit 1', username))
+        if subject:
+            subject = subject[0]
+            subject_id = str(subject.key().id())
+            images = list(db.GqlQuery('select * from ImageModel where userid = :1', subject_id))
+            catset = set([im.category for im in images])
+            imdict = {}
+            imdict['unspecified'] = [im for im in images if not im.category]
+            for cat in catset:
+                imdict[cat] = [im for im in images if im.category == cat]
+            #logging.error(str(imdict))
+            self.render('imagegallerypage.html', user = subject,
+                                                 imdict = imdict)
+        else:
+            self.redirect('/') #no such user
 
 class PostActivityHandler(SuperHandler):
     def post(self):
@@ -333,6 +351,10 @@ class PostActivityHandler(SuperHandler):
                             new_activity = models.ActivityModel(userid = userid,
                                                                 name   = activity_name,
                                                                 when   = datetime.datetime(Y, M, D, h, m) - datetime.timedelta(hours = user.timezone))
+                                                                
+                            newconf = utils.update_config(json.loads(user.confstring), 'activities', activity_name)
+                            if newconf:
+                                user.confstring = json.dumps(newconf)
                                                                 
                             user.last_seen = datetime.datetime.utcnow()
                             user.put()
@@ -484,6 +506,11 @@ class PostTimedActivityHandler(SuperHandler):
                                                               start  = act_start_time - datetime.timedelta(hours = user.timezone),
                                                               end    = act_end_time - datetime.timedelta(hours = user.timezone))
                     new_timed_act.put()
+                    
+                    newconf = utils.update_config(json.loads(user.confstring), 'timed_activities', act_name)
+                    if newconf:
+                        user.confstring = json.dumps(newconf)
+                        
                     user.last_seen = datetime.datetime.utcnow()
                     user.put()
                     self.redirect('/panel')
@@ -716,6 +743,23 @@ class PostTravelHandler(SuperHandler):
                                                         whenfinish  = trv_finish_time - datetime.timedelta(user.timezone))
                                                         
                         new_travel.put()
+                        
+                        userconf = json.loads(user.confstring)
+                        config_updated = False
+                        if userconf.has_key('places'):
+                            if not trv_origin in userconf['places']:
+                                userconf['places'].append(trv_origin)
+                                config_updated = True
+                            if not trv_destination in userconf['places']:
+                                userconf['places'].append(trv_destination)
+                                config_updated = True
+                        else:
+                            userconf['places'] = [trv_origin, trv_destination]
+                            config_updated = True
+                            
+                        if config_updated:
+                            user.confstring = json.dumps(userconf)
+                                
                         user.last_seen = datetime.datetime.utcnow()
                         user.put()
                         self.redirect('/panel')
@@ -1096,9 +1140,13 @@ class LibraryHandler(SuperHandler):
             image = self.request.get('new_img')
             if image:
                 image = images.resize(image, height = 150)
+                cat = 'book_img'
+                if hasattr(book, 'platform'):
+                    cat = 'game_img'
                 image = models.ImageModel(userid = book.userid,
                                           image = db.Blob(image),
-                                          uploaded = datetime.datetime.utcnow())
+                                          uploaded = datetime.datetime.utcnow(),
+                                          category = cat)
                 image.put()
                 imkey = str(image.key())
                 book.image = imkey
@@ -1121,7 +1169,10 @@ class PanelHandler(SuperHandler):
                 userconf = {}
                 user.confstring = json.dumps(userconf)
                 user.put()
-            
+            # logging.error('user configuration')
+            # for key in userconf.keys():
+                # logging.error(key + str(userconf[key]))
+                
             if not userconf.has_key('activities'):
                 activities = db.GqlQuery('select * from ActivityModel where userid = :1', userid)
                 activity_categories = list(set(a.name.strip() for a in activities))
@@ -1132,6 +1183,13 @@ class PanelHandler(SuperHandler):
                 timed_activities = db.GqlQuery('select * from TimedActivityModel where userid = :1', userid)
                 timed_activity_categories = list(set(ta.name for ta in timed_activities))
                 userconf['timed_activities'] = timed_activity_categories
+                config_updated = True
+                
+            if not userconf.has_key('places'):
+                travels = list(db.GqlQuery('select * from TravelModel where userid = :1', userid))
+                places = list(set([p.origin for p in travels] + [p.destination for p in travels]))
+                logging.error(places)
+                userconf['places'] = places
                 config_updated = True
                 
             #logging.error('user configuration: ' + str(userconf))
@@ -1151,8 +1209,8 @@ class PanelHandler(SuperHandler):
             self.render('panelpage.html', user = user,
                                           expense_categories = expense_categories,
                                           activity_categories = userconf['activities'],
-                                          timed_activity_categories = userconf['timed_activities']
-                                          )
+                                          timed_activity_categories = userconf['timed_activities'],
+                                          places = userconf['places'])
         else:
             self.redirect('/login')
             
