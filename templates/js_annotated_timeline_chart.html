@@ -1,0 +1,20 @@
+﻿<script type="text/javascript">
+google.setOnLoadCallback(drawChart);
+function drawChart() {
+    var data = new google.visualization.DataTable();
+    data.addColumn('date', 'Date');
+    {% for i in range(chart["datalen"]) -%}
+    data.addColumn('number', '{{chart["y_label"][i]}}');
+    {% endfor -%}
+    {% for point in dataset -%}
+    data.addRow([new Date({{point[0].year}}, {{point[0].month - 1}}, {{point[0].day}}), 
+    {%- for i in range(chart["datalen"]) -%}
+    {{'%2.2f' % point[i + 1]}},
+    {%- endfor -%}
+    ]);
+    {%- endfor -%}
+    var options = {'height': 300, 'width': 600, 'lineWidth': 1, 'pointSize': 5, vAxis: {format: '##', title: '{{chart["v_label"]}}'}, 'title': '{{chart["title"]}}'};
+    var chart = new google.visualization.AnnotatedTimeLine(document.getElementById('{{chart["div_name"]}}'));
+    chart.draw(data, options);
+    }
+</script>

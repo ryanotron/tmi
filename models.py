@@ -16,7 +16,7 @@ class UserModel(db.Model):
     acc_pronoun = db.StringProperty() # accusative pronoun (him, her, it)
     pos_determi = db.StringProperty() # possessive determinant (his, her, its)
     photo_key   = db.StringProperty()
-    confstring  = db.StringProperty() # configuration string, a json string dump
+    confstring  = db.TextProperty() # configuration string, a json string dump
     
 class SocialMediaModel(db.Model):
     userid = db.StringProperty(required = True)

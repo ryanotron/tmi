@@ -421,6 +421,9 @@ class PostBatchActivityHandler(SuperHandler):
                                                                name = name,
                                                                when = when - datetime.timedelta(hours = user.timezone))
                                 new_act.put()
+                                new_conf = utils.update_config(json.loads(user.confstring), 'activities', name)
+                                if new_conf:
+                                    user.confstring = json.dumps(new_conf)
 
                                 user.last_seen = datetime.datetime.now()
                                 user.put()
@@ -560,6 +563,11 @@ class PostBatchTimedActivityHandler(SuperHandler):
                                                                 start = start - datetime.timedelta(hours = user.timezone),
                                                                 end = end - datetime.timedelta(hours = user.timezone))
                                 new_act.put()
+                                
+                                new_conf = utils.update_config(json.loads(user.confstring), 'timed_activities', name)
+                                if new_conf:
+                                    user.confstring = json.dumps(new_conf)
+                                    
                                 #logging.error('put act into database')
                                 user.last_seen = datetime.datetime.utcnow()
                                 user.put()
@@ -607,6 +615,19 @@ class PostExpenseHandler(SuperHandler):
                                                               when = datetime.datetime(Y, M, D))
                             #logging.error('new expense object created')
                             new_expense.put()
+                            userconf = json.loads(user.confstring)
+                            conf_updated = False
+                            if not userconf.has_key('expense_categories'):
+                                userconf['expense_categories'] = [exp_category]
+                                conf_updated = True
+                            else:
+                                if not exp_category in userconf['expense_categories']:
+                                    userconf['expense_categories'].append(exp_category)
+                                    conf_updated = True
+                                    
+                            if conf_updated:
+                                user.confstring = json.dumps(userconf)
+                            
                             user.last_seen = datetime.datetime.utcnow()
                             user.put()
                             self.redirect('/panel')
@@ -626,35 +647,31 @@ class PostExpenseHandler(SuperHandler):
 class PostBatchExpenseHandler(SuperHandler):
     def post(self):
         userid = self.request.cookies.get('userid')
-        if userid:
-            userid = utils.verify_cookie(userid)
-            if userid:
-                user = utils.validate_user(userid)
-                if user:
-                    expenses = self.request.get('batchexpense')
-                    if expenses:
-                        expenses = expenses.split('\n')
-                        for elem in expenses:
-                            expense = constants.batchexpense_re.match(elem)
-                            if expense:
-                                new_expense = models.ExpenseModel(userid   = str(userid),
-                                                                  name     = expense.group('name'),
-                                                                  category = expense.group('cat'),
-                                                                  amount   = float(expense.group('amount')),
-                                                                  when     = utils.str_to_datetime(expense.group('when')),
-                                                                  currency = user.currency)
-                                #logging.error(expense.groups())
-                                new_expense.put()
-                                user.last_seen = datetime.datetime.utcnow()
-                                user.put()
-                                self.redirect('/panel')
+        userid, user = utils.verify_user(userid)
+        if user:
+            expenses = self.request.get('batchexpense')
+            if expenses:
+                expenses = expenses.split('\n')
+                for elem in expenses:
+                    expense = constants.batchexpense_re.match(elem)
+                    if expense:
+                        new_expense = models.ExpenseModel(userid   = str(userid),
+                                                          name     = expense.group('name'),
+                                                          category = expense.group('cat'),
+                                                          amount   = float(expense.group('amount')),
+                                                          when     = utils.str_to_datetime(expense.group('when')),
+                                                          currency = user.currency)
+                        #logging.error(expense.groups())
+                        new_expense.put()
+                        new_conf = utils.update_config(json.loads(user.confstring), 'expense_categories', expense.group('cat'))
+                        if new_conf:
+                            user.confstring = json.dumps(new_conf)
+                        user.last_seen = datetime.datetime.utcnow()
+                        user.put()
                         self.redirect('/panel')
-                    else:
-                        self.redirect('/panel')
-                else:
-                    self.redirect('login')
+                self.redirect('/panel')
             else:
-                self.redirect('login')
+                self.redirect('/panel')
         else:
             self.redirect('login')
 
@@ -1169,9 +1186,9 @@ class PanelHandler(SuperHandler):
                 userconf = {}
                 user.confstring = json.dumps(userconf)
                 user.put()
-            # logging.error('user configuration')
-            # for key in userconf.keys():
-                # logging.error(key + str(userconf[key]))
+            logging.error('user configuration')
+            for key in userconf.keys():
+                logging.error(key + str(userconf[key]))
                 
             if not userconf.has_key('activities'):
                 activities = db.GqlQuery('select * from ActivityModel where userid = :1', userid)
