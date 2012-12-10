@@ -2,6 +2,7 @@
 
 {% block head -%}
 <title>Image Gallery - {{user.salutation}} {{user.realname}}</title>
+<link type="text/css" rel="stylesheet" href="/stylesheets/main.css">
 {% endblock -%}
 
 {% block content -%}
@@ -12,6 +13,8 @@
         {% for im in imdict[key] -%}
         <div class="ImageWrapper">
             <img src="/img?img_key={{im.key()}}">
+            <p><a href="http://wwww.too-much-info.appspot.com/img?img_key={{im.key()}}">
+            Permalink</a></p>
             <p>Uploaded {{im.uploaded.strftime('%d/%m/%Y - %H:%M')}} UTC</p>
         </div>
         {% endfor -%}

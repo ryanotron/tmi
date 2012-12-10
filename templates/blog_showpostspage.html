@@ -12,22 +12,29 @@
     <h2>Blog</h2>
     {% endif -%}
     <h3>{{user.salutation}} {{user.realname}}</h3>
+    <div class="CategoryListing">
+        <ul>
+            {% for cat in blog_categories -%}
+            <a href="/u/{{user.username}}/blog?cat={{cat}}"><li>{{cat}}</a>
+            {% endfor -%}
+        </ul>
+    </div>
     {% if posts -%}
         {% for post in posts -%}
-            <div class="PostBlock">
-                <div class="PostHead">
-                    <h3>{{post.title}}</h3>
-                </div>
-                <div class="PostSubHead">
-                    posted on {{post.posted.strftime('%d/%m/%Y - %H:%M')}} UTC
-                    {%- if post.updated > post.posted -%}, updated on {{post.updated.strftime('%d/%m/%Y - %H:%M')}}{%- endif -%}
-                </div>
-                {{post.content|safe}}
-                <div class="PostFooter">
-                    Posted under: {{post.category}}, 
-                    <a href="/u/{{user.username}}/blog/{{post.key().id()}}">Permalink</a>
-                </div>
+        <div class="PostBlock">
+            <div class="PostHead">
+                <h3>{{post.title}}</h3>
             </div>
+            <div class="PostSubHead">
+                posted on {{post.posted.strftime('%d/%m/%Y - %H:%M')}} UTC
+                {%- if post.updated > post.posted -%}, updated on {{post.updated.strftime('%d/%m/%Y - %H:%M')}}{%- endif -%}
+            </div>
+            {{post.content|safe}}
+            <div class="PostFooter">
+                Posted under: {{post.category}}, 
+                <a href="/u/{{user.username}}/blog/{{post.key().id()}}">Permalink</a>
+            </div>
+        </div>
         {% endfor -%}
     {% else -%}
         <p>{{user.salutation}} {{user.realname}} has not posted anything yet</p>

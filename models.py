@@ -111,3 +111,4 @@ class BlogPostModel(db.Model):
     content = db.TextProperty()
     privacy = db.IntegerProperty()
     category = db.StringProperty()
+    draft = db.BooleanProperty()

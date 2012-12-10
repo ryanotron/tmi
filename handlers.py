@@ -1310,6 +1310,11 @@ class Blog_NewPostHandler(SuperHandler):
                 content = self.request.get('content')
                 privacy = self.request.get('privacy')
                 category = self.request.get('category')
+                isdraft = self.request.get('isdraft')
+                logging.error('is this new post a draft? ' + isdraft)
+                draft = False
+                if isdraft:
+                    draft = True
                 try:
                     privacy = int(privacy)
                 except:
@@ -1326,7 +1331,8 @@ class Blog_NewPostHandler(SuperHandler):
                                                    posted = uploaded,
                                                    updated = uploaded,
                                                    privacy = privacy,
-                                                   category = category)
+                                                   category = category,
+                                                   draft = draft)
                     newpost.put()
                     user.last_seen = datetime.datetime.utcnow()
                     user.put()
@@ -1361,9 +1367,27 @@ class Blog_ShowPostsHandler(SuperHandler):
                 privilege = 2
                 
         posts = list(db.GqlQuery('select * from BlogPostModel where userid = :1 order by posted desc', subject_id))
-        posts = [p for p in posts if p.privacy >= privilege]
+        blog_categories = set(['_'.join([elem for elem in post.category.split()]) for post in posts if post.category])
+        posts = [p for p in posts if p.privacy >= privilege and not p.draft]
+        
+        cat = self.request.get('cat')
+        #logging.error('raw cat is ' + cat)
+        if not cat: #reserved for when we have default categories
+            pass
+        elif cat and cat != 'all':
+            cats = [c.strip() for c in cat.split(' ')]
+            p_cats = [e for e in cats]
+            for cat in p_cats:
+                if len(cat.split('_')) > 1:
+                    cats.append(' '.join(cat.split('_')))
+            #logging.error('cats are: ' + str(cats))
+            posts = [post for post in posts if post.category in cats]
+        else: # just pass everything
+            pass
+            
         self.render('blog_showpostspage.html', user = subject[0],
                                                posts = posts,
+                                               blog_categories = blog_categories,
                                                userconf = json.loads(subject[0].confstring))
                                                
 class Blog_PanelHandler(SuperHandler):
@@ -1383,9 +1407,29 @@ class Blog_PanelHandler(SuperHandler):
                 user.confstring = json.dumps(userconf)
                 user.put()
             posts = list(db.GqlQuery('select * from BlogPostModel where userid = :1 order by posted desc', subject_id))
+            blog_categories = ''
+            if userconf.has_key('blog_categories'):
+                blog_categories = userconf['blog_categories']
+            else:
+                blog_categories = list(set([p.category for p in posts]))
+                userconf['blog_categories'] = blog_categories
+                user.confstring = json.dumps(userconf)
+                user.put()
+                
+            public_categories = ''
+            if userconf.has_key('public_categories'):
+                public_categories = userconf['public_categories']
+            else:
+                public_categories = blog_categories
+                userconf['blog_public_categories'] = public_categories
+                user.confstring = json.dumps(userconf)
+                user.put()
+                
             self.render('blog_panelpage.html', user = user,
                                                userconf = userconf,
-                                               posts = posts)
+                                               posts = posts,
+                                               blog_categories = blog_categories,
+                                               private_categories = private_categories)
         else:
             self.redirect('/login') # logged in as different person than requested page
             
@@ -1461,12 +1505,17 @@ class Blog_EditPostHandler(SuperHandler):
             content = self.request.get('content')
             category = self.request.get('category')
             privacy = self.request.get('privacy')
+            isdraft = self.request.get('isdraft')
+            draft = False
+            if isdraft:
+                draft = True
             try:
                 privacy = int(privacy)
             except:
                 privacy = 0
             postkey = db.Key.from_path('BlogPostModel', int(postid))
             post = db.get(postkey)
+            wasdraft = post.draft
             
             changed = False
             if title != post.title:
@@ -1481,9 +1530,14 @@ class Blog_EditPostHandler(SuperHandler):
             if category != post.category:
                 post.category = category
                 changed = True
+            if draft != post.draft:
+                post.draft = draft
+                post.posted = datetime.datetime.utcnow()
+                changed = True
                 
             if changed:
-                post.updated = datetime.datetime.utcnow()
+                if not wasdraft:
+                    post.updated = datetime.datetime.utcnow()
                 post.put()
                 user.last_seen = datetime.datetime.utcnow()
                 user.put()

@@ -76,6 +76,15 @@ div.CategoryListing li {
     float: left;
 }
 
+div.CategoryListing li:hover {
+    background-color: #ffdddd;
+}
+
+div.CategoryListing a {
+    text-decoration: none;
+    color: #111111;
+}
+
 table {
     border-collapse: collapse;
     width: 100%;
