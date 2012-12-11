@@ -1335,6 +1335,14 @@ class Blog_NewPostHandler(SuperHandler):
                                                    draft = draft)
                     newpost.put()
                     user.last_seen = datetime.datetime.utcnow()
+                    userconf = json.loads(user.confstring)
+                    if userconf.has_key('blog_categories'):
+                        if not category in userconf['blog_categories']:
+                            userconf['blog_categories'].append(category)
+                            user.confstring = json.dumps(userconf)
+                    else:
+                        userconf['blog_categories'] = [category]
+                        user.confstring = json.dumps(userconf)
                     user.put()
                     self.redirect('/u/' + user.username + '/blog')
                 else:
@@ -1367,13 +1375,30 @@ class Blog_ShowPostsHandler(SuperHandler):
                 privilege = 2
                 
         posts = list(db.GqlQuery('select * from BlogPostModel where userid = :1 order by posted desc', subject_id))
-        blog_categories = set(['_'.join([elem for elem in post.category.split()]) for post in posts if post.category])
+        blog_categories = list(set(['_'.join([elem for elem in post.category.split()]) for post in posts if post.category]))
+        userconf = json.loads(user.confstring)
+        if userconf.has_key('blog_categories'):
+            if userconf['blog_categories'] != blog_categories:
+                userconf['blog_categories'] = blog_categories
+                user.confstring = json.dumps(userconf)
+                user.put()
+        else:
+            userconf['blog_categories'] = blog_categories
+            user.confstring = json.dumps(userconf)
+            user.put()
+            
         posts = [p for p in posts if p.privacy >= privilege and not p.draft]
         
         cat = self.request.get('cat')
         #logging.error('raw cat is ' + cat)
-        if not cat: #reserved for when we have default categories
-            pass
+        if not cat and userconf.has_key('blog_public_categories'): #reserved for when we have default categories
+            cats = userconf['blog_public_categories']
+            p_cats = [e for e in cats]
+            for cat in p_cats:
+                if len(cat.split('_')) > 1:
+                    cats.append(' '.join(cat.split('_')))
+            #logging.error(cats)
+            posts = [post for post in posts if post.category in cats]
         elif cat and cat != 'all':
             cats = [c.strip() for c in cat.split(' ')]
             p_cats = [e for e in cats]
@@ -1417,18 +1442,20 @@ class Blog_PanelHandler(SuperHandler):
                 user.put()
                 
             public_categories = ''
-            if userconf.has_key('public_categories'):
-                public_categories = userconf['public_categories']
+            if userconf.has_key('blog_public_categories'):
+                public_categories = userconf['blog_public_categories']
             else:
                 public_categories = blog_categories
                 userconf['blog_public_categories'] = public_categories
                 user.confstring = json.dumps(userconf)
                 user.put()
+            private_categories = [cat for cat in blog_categories if not cat in public_categories]
                 
             self.render('blog_panelpage.html', user = user,
                                                userconf = userconf,
                                                posts = posts,
                                                blog_categories = blog_categories,
+                                               public_categories = public_categories,
                                                private_categories = private_categories)
         else:
             self.redirect('/login') # logged in as different person than requested page
@@ -1450,6 +1477,30 @@ class Blog_PanelHandler(SuperHandler):
                 user.confstring = json.dumps(userconf)
                 user.put()
             self.redirect('/u/' + username + '/blog/panel')
+        else:
+            self.redirect('/login')
+            
+class Blog_ShuffleCategoriesHandler(SuperHandler):
+    def post(self):
+        userid = self.request.cookies.get('userid')
+        userid, user = utils.verify_user(userid)
+        if user:
+            to_private = self.request.get('to_private', allow_multiple = True)
+            to_public = self.request.get('to_public', allow_multiple = True)
+            #logging.error(to_private)
+            #logging.error(to_public)
+            userconf = json.loads(user.confstring)
+            public_categories = userconf['blog_public_categories']
+            #logging.error(public_categories)
+            public_categories = [cat for cat in public_categories if not cat in to_private]
+            public_categories += to_public
+            #logging.error(public_categories)
+            userconf['blog_public_categories'] = public_categories
+            user.confstring = json.dumps(userconf)
+            user.last_seen = datetime.datetime.utcnow()
+            user.put()
+            #logging.error(user.confstring)
+            self.redirect('/u/%s/blog/panel' % user.username)
         else:
             self.redirect('/login')
             

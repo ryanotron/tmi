@@ -35,6 +35,33 @@
         Headline <input type="text" name="blog_headline" value="{{userconf['blog_headline']}}">
         <input type="submit">
     </form>
+    <form method="post" action="/blog_change_default_categories">
+        <div class="Wrapper">
+            <p>Shown categories. Tick to hide by default</p>
+            {% if public_categories -%}
+            <ul>
+                {% for cat in public_categories -%}
+                <li><input type="checkbox" name="to_private" value="{{cat}}">{{cat}}
+                {% endfor -%}
+            </ul>
+            {% else -%}
+            <p>There is no shown category</p>
+            {% endif -%}
+        </div>
+        <div class="Wrapper">
+            <p>Hidden categories. Tick to show by default.</p>
+            {% if private_categories -%}
+            <ul>
+                {% for cat in private_categories -%}
+                <li><input type="checkbox" name="to_public" value="{{cat}}">{{cat}}
+                {% endfor -%}
+            </ul>
+            {% else -%}
+            <p>There is no private category</p>
+            {% endif -%}
+        </div>
+        <input type="submit" value="make changes">
+    </form>
 </div>
 </div>
 {% endblock -%}
