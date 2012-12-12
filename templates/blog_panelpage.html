@@ -15,6 +15,7 @@
             <th>updated
             <th>privacy
             <th>category
+            <th>draft
             <th>edit
     {% for post in posts -%}
         <tr>
@@ -23,6 +24,7 @@
             <td>{{post.posted.strftime('%d/%m/%Y - %H:%M')}}
             <td>{{post.privacy}}
             <td>{{post.category}}
+            <td>{{post.draft}}
             <td><a href="/u/{{user.username}}/blog/{{post.key().id()}}/edit">edit</a>
     {% endfor -%}
     </table>

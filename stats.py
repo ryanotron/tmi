@@ -96,6 +96,24 @@ def sleep_stats(user):
             status['lastweek_average'] = 0
         else:
             status['lastweek_average'] = lastweek_total / 7.0
+            
+        # 7-day moving average
+        r_sleep_list = list(reversed(sleep_list))
+        mav7 = []
+        if len(r_sleep_list) > 7:
+            for i in  range(7, len(r_sleep_list)):
+                mav7.append([r_sleep_list[i-1][0], sum([e[1] for e in r_sleep_list[(i-7):i]])/7.0])
+        status['mav7'] = mav7
+        # 30-day moving average
+        mav30 = []
+        if len(r_sleep_list) > 30:
+            for i in range(30, len(r_sleep_list)):
+                mav30.append([r_sleep_list[i-1][0], sum([e[1] for e in r_sleep_list[(i-30):i]])/30.0])
+        status['mav30'] = mav30
+        mav = []
+        if len(mav7) > 10 and len(mav30) > 10:
+            mav = [[a[0], a[1], b[1]] for a, b in zip(reversed(mav7), reversed(mav30))]
+        status['mav'] = mav
         
         # sleep debts
         status['debt_by_lastweek'] = max(0, status['lastweek_average'] * (today.weekday() + 1) - thisweek_total)

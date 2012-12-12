@@ -29,6 +29,17 @@
 {% set dataset = sleep_stats['sleep_list'] -%}
 {% set chart = {'v_label':'hours', 'y_label': ['sleep hours', 'debt hours'], 'div_name': 'sleep_chart', 'xspace':'con', 'title': 'Sleep hours timeline', 'datalen': 2} -%}
 {% include 'js_timeline_chart.html' %}
+
+{% if sleep_stats['mav'] -%}
+{% set dataset = sleep_stats['mav'] -%}
+{% set chart = {'v_label':'hours', 'y_label': ['mav7', 'mav30'], 'div_name': 'sleep_mav_chart', 'xspace':'con', 'title': 'Sleep hours moving average timeline', 'datalen': 2} -%}
+{% include 'js_timeline_chart.html' %}
+{% elif sleep_stats['mav7'] -%}
+{% set dataset = sleep_stats['mav7'] -%}
+{% set chart = {'v_label':'hours', 'y_label': ['mav7'], 'div_name': 'sleep_mav7_chart', 'xspace':'con', 'title': 'Sleep hours 7-day moving average timeline', 'datalen': 1} -%}
+{% include 'js_timeline_chart.html' %}
+{% endif -%}
+
 {% set dataset = sleep_stats['sleep_histogram'] -%}
 {% set chart = {'y_label': 'frequency', 'div_name': 'sleep_histogram', 'title': 'Sleep hours histogram', 'xspace':'con'} -%}
 {% include 'js_histogram_chart.html' %}
@@ -107,6 +118,9 @@
             <div class="ChartWrapper">
             <div id="sleep_chart"></div>
             <div id="sleep_debt_chart"></div>
+            <div id="sleep_mav_chart"></div>
+            <div id="sleep_mav7_chart"></div>
+            <div id="sleep_mav30_chart"></div>
             <div id="sleep_histogram"></div>
             </div>
             {% else -%}
