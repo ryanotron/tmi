@@ -5,6 +5,27 @@ import webapp2
 import datetime, logging
 import json
 
+def require_login(fn):
+    def new_fn(self, *args, **kwargs):
+        userid = self.request.cookies.get('userid')
+        userid, user = utils.verify_user(userid)
+        if user:
+            fn(self, user, *args, **kwargs)
+        else:
+            logging.error('not logged in!')
+            self.redirect('/login')
+    return new_fn
+    
+def require_sameuser(fn):
+    @require_login
+    def new_fn(self, user, username, *args, **kwargs):
+        if user.username == username:
+            fn(self, user, *args, **kwargs)
+        else:
+            logging.error('mismatch!')
+            self.redirect('/login')
+    return new_fn
+
 class SuperHandler(webapp2.RequestHandler):
     def write(self, *a, **kw):
         self.response.out.write(*a, **kw)
@@ -1284,73 +1305,60 @@ class AboutHandler(SuperHandler):
         self.render('aboutpage.html')
         
 class Blog_NewPostHandler(SuperHandler):
-    def get(self, username):
-        userid = self.request.cookies.get('userid')
-        userid, user = utils.verify_user(userid)
-        if user:
-            userconf = json.loads(user.confstring)
-            if not userconf.has_key('blog_categories'):
-                blogposts = db.GqlQuery('select * from BlogPostModel where userid = :1', userid)
-                blog_categories = list(set(post.category for post in blogposts))
-                userconf['blog_categories'] = blog_categories
-                user.confstring = json.dumps(userconf)
-                user.put()
-                
-            self.render('blog_newpostpage.html', user = user,
-                                                 blog_categories = userconf['blog_categories'])
-        else:
-            self.redirect('/login')
+    @require_sameuser
+    def get(self, user):
+        userconf = json.loads(user.confstring)
+        if not userconf.has_key('blog_categories'):
+            blogposts = db.GqlQuery('select * from BlogPostModel where userid = :1', userid)
+            blog_categories = list(set(post.category for post in blogposts))
+            userconf['blog_categories'] = blog_categories
+            user.confstring = json.dumps(userconf)
+            user.put()
             
-    def post(self, username):
-        userid = self.request.cookies.get('userid')
-        userid, user = utils.verify_user(userid)
-        if user:
-            if username == user.username:
-                title = self.request.get('title')
-                content = self.request.get('content')
-                privacy = self.request.get('privacy')
-                category = self.request.get('category')
-                isdraft = self.request.get('isdraft')
-                logging.error('is this new post a draft? ' + isdraft)
-                draft = False
-                if isdraft:
-                    draft = True
-                try:
-                    privacy = int(privacy)
-                except:
-                    privacy = 3
-                uploaded = datetime.datetime.utcnow()
-                if title and content:
-                    if not privacy:
-                        privacy = 3 # 0: self, 1: approved, 2: logged in, 3: world
-                    if not category:
-                        category = 'unspecified'
-                    newpost = models.BlogPostModel(userid = userid,
-                                                   title = title,
-                                                   content = content,
-                                                   posted = uploaded,
-                                                   updated = uploaded,
-                                                   privacy = privacy,
-                                                   category = category,
-                                                   draft = draft)
-                    newpost.put()
-                    user.last_seen = datetime.datetime.utcnow()
-                    userconf = json.loads(user.confstring)
-                    if userconf.has_key('blog_categories'):
-                        if not category in userconf['blog_categories']:
-                            userconf['blog_categories'].append(category)
-                            user.confstring = json.dumps(userconf)
-                    else:
-                        userconf['blog_categories'] = [category]
-                        user.confstring = json.dumps(userconf)
-                    user.put()
-                    self.redirect('/u/' + user.username + '/blog')
-                else:
-                    self.redirect('/u/' + user.username + '/blog/newpost')
+        self.render('blog_newpostpage.html', user = user,
+                                             blog_categories = userconf['blog_categories'])
+    
+    @require_sameuser
+    def post(self, user):
+        title = self.request.get('title')
+        content = self.request.get('content')
+        privacy = self.request.get('privacy')
+        category = self.request.get('category')
+        isdraft = self.request.get('isdraft')
+        logging.error('is this new post a draft? ' + isdraft)
+        draft = False
+        if isdraft:
+            draft = True
+        try:
+            privacy = int(privacy)
+        except:
+            privacy = 3
+        uploaded = datetime.datetime.utcnow()
+        if title and content:
+            if not privacy:
+                privacy = 3 # 0: self, 1: approved, 2: logged in, 3: world
+            if not category:
+                category = 'unspecified'
+            newpost = models.BlogPostModel(userid = str(user.key().id()),
+                                           title = title,
+                                           content = content,
+                                           posted = uploaded,
+                                           updated = uploaded,
+                                           privacy = privacy,
+                                           category = category,
+                                           draft = draft)
+            newpost.put()
+            user.last_seen = datetime.datetime.utcnow()
+            userconf = json.loads(user.confstring)
+            if userconf.has_key('blog_categories'):
+                if not category in userconf['blog_categories']:
+                    userconf['blog_categories'].append(category)
+                    user.confstring = json.dumps(userconf)
             else:
-                self.redirect('/u/' + user.username + '/blog/newpost')
-        else:
-            self.redirect('/login')
+                userconf['blog_categories'] = [category]
+                user.confstring = json.dumps(userconf)
+            user.put()
+            self.redirect('/u/' + user.username + '/blog')
             
 class Blog_ShowPostsHandler(SuperHandler):
     def get(self, username):
