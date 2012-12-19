@@ -317,7 +317,7 @@ def hygiene_stats(user):
         shower_histogram = zip(b[:len(h)], b[1:len(h)+1], h)
         stats['shower']['histogram'] = shower_histogram
         stats['shower']['ave_interval'] = len(shower_between) > 0 and (sum(shower_between) / len(shower_between)) or 0
-        shower_times = [s.when.hour + s.when.minute/60.0 for s in showers]
+        shower_times = [(s.when.hour + s.when.minute/60.0 + user.timezone)%24 for s in showers]
         h, b = numpy.histogram(shower_times, bins = numpy.ceil(numpy.sqrt(len(shower_times))))
         b = [gethours(e) for e in b]
         stats['shower']['times_histogram'] = zip(b, b[1:], h)

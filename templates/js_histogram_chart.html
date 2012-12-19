@@ -13,7 +13,7 @@
         data.addRow(['{{"%d" % point[0]}}', {{'%d' % point[2]}}]);
         {%- endif -%}
         {%- endfor -%}
-        var options = {height: 300, width: 400, title: '{{chart["title"]}}', bar: {groupWidth: '90%'}};
+        var options = {height: 300, width: 300, title: '{{chart["title"]}}', bar: {groupWidth: '90%'}};
         var chart = new google.visualization.ColumnChart(document.getElementById('{{chart["div_name"]}}'));
         chart.draw(data, options);
     }

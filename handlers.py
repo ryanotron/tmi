@@ -1321,12 +1321,12 @@ class UserpageHandler(SuperHandler):
             else:
                 old_photos = []
             social_media = db.GqlQuery('select * from SocialMediaModel where userid = :1', userid)
-            books = list(db.GqlQuery('select * from BookLibraryModel where userid = :1 order by added desc limit 5', userid))
+            books = list(db.GqlQuery('select * from BookLibraryModel where userid = :1 order by added desc limit 10', userid))
             active_books = [book for book in books if book.active]
             inactive_books = [book for book in books if not book.active]
             if len(inactive_books) > 4:
                 inactive_books = inactive_books[0:4]
-            games = list(db.GqlQuery('select * from GameLibraryModel where userid = :1 order by added desc limit 5', userid))
+            games = list(db.GqlQuery('select * from GameLibraryModel where userid = :1 order by added desc limit 10', userid))
             active_games = [game for game in games if game.active]
             inactive_games = [game for game in games if not game.active]
             if len(inactive_games) > 4:
