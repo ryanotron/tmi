@@ -275,7 +275,56 @@
                 </table>
             </form>
         </div>
+        
+        <div class="FullSubBLock">
+            <h3>Register a song</h3>
+            <form method="post" action="/postmusic">
+                <table>
+                    <tr>
+                        <td>title
+                        <td><input type="text" name="title">
+                    <tr>
+                        <td>artist
+                        <td><input type="text" name="artist">
+                    <tr>
+                        <td>album
+                        <td><input type="text" name="album">
+                    <tr>
+                        <td>year
+                        <td><input type="text" name="year">
+                    <tr>
+                        <td>url
+                        <td><input type="text" name="url">
+                    <tr>
+                        <td><input type="submit">
+                </table>
+            </form>
+        </div>
     </div>
+    
+    <div class="Block" id="SongList">
+        <h2>20 Recently played songs</h2>
+        {% if songs -%}
+            {% for song in songs -%}
+            <div class="FullSubBlock">
+                <form action="/reportmusic" method="post">
+                    <div>
+                        <b>{{song.title}}</b>
+                        {%- if song.artist %}, by {{song.artist}}{% endif %}
+                        {% if song.year %}({{song.year}}){% endif %}
+                        {% if song.album %}on {{song.album}}{% endif %}<br>
+                        {% if song.url %}<a href="{{song.url}}">{{song.url}}</a>{% endif %}
+                    </div>
+                    <div class="Incrementer">
+                        <input type="hidden" name="key" value="{{song.key()}}">
+                        <input type="submit" value="just listened">
+                    </div>
+                </form>
+            </div>
+            {% endfor -%}
+        {% else -%}
+        <p>No registered song yet</p>
+        {% endif -%}
 
     <div class="Block" id="BatchExpense">
         <h2 class="PanelCategory">Batch Expense</h2>

@@ -1,6 +1,8 @@
 ﻿import datetime, logging, numpy
 from google.appengine.ext import db
 
+gethours = lambda x: '%02d:%02d' % (abs(x), abs(60*(x - int(x))))
+
 def filter_outliers(data, min_pct, max_pct):
     min_val = numpy.percentile(data, min_pct)
     max_val = numpy.percentile(data, max_pct)
@@ -160,6 +162,11 @@ def coffee_stats(user):
             coffees[i].when = coffees[i].when + timeshift
         daysince = (today.date() - coffees[-1].when.date()).days
         
+        coffee_times = [c.when.hour + c.when.minute/60.0 for c in coffees]
+        h, b = numpy.histogram(coffee_times, bins = numpy.ceil(numpy.sqrt(len(coffee_times))))
+        b = [gethours(e) for e in b]
+        status['coffee_times_histogram'] = zip(b, b[1:], h)
+        
         daily_cups = {}
         for i in range(daysince + 1):
             day = today - datetime.timedelta(days = i)
@@ -310,6 +317,10 @@ def hygiene_stats(user):
         shower_histogram = zip(b[:len(h)], b[1:len(h)+1], h)
         stats['shower']['histogram'] = shower_histogram
         stats['shower']['ave_interval'] = len(shower_between) > 0 and (sum(shower_between) / len(shower_between)) or 0
+        shower_times = [s.when.hour + s.when.minute/60.0 for s in showers]
+        h, b = numpy.histogram(shower_times, bins = numpy.ceil(numpy.sqrt(len(shower_times))))
+        b = [gethours(e) for e in b]
+        stats['shower']['times_histogram'] = zip(b, b[1:], h)
         
     if len(shaves) > 0:
         stats['shave']['latest'] = -1*(shaves[0].when - datetime.datetime.utcnow()).total_seconds() / (3600.0 * 24)

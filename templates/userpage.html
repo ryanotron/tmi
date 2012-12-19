@@ -17,6 +17,7 @@
 {% set chart = {'y_label': 'frequency', 'div_name': 'dinner_histogram', 'title':'Dinner Time Histogram', 'xspace':'str'} -%}
 {% include 'js_histogram_chart.html' -%}
 {% endif -%}
+
 {% if coffee_stats -%}
 {% set dataset = coffee_stats['daily_cups'] -%}
 {% set chart = {'v_label': 'cups', 'y_label': ['cups'], 'div_name': 'coffee_chart', 'xspace':'con', 'title': 'Coffee Timeline', 'datalen': 1} -%}
@@ -24,7 +25,11 @@
 {% set dataset = coffee_stats['coffee_histogram'] -%}
 {% set chart = {'y_label': 'frequency', 'div_name': 'coffee_histogram', 'title':'Coffee Histogram', 'xspace':'dis'} -%}
 {% include 'js_histogram_chart.html' -%}
+{% set dataset = coffee_stats['coffee_times_histogram'] -%}
+{% set chart = {'y_label': 'frequency', 'div_name': 'coffee_times_histogram', 'title': 'Coffee Times Histogram', 'xspace': 'str'} -%}
+{% include 'js_histogram_chart.html' -%}
 {% endif %}
+
 {% if sleep_stats -%}
 {% set dataset = sleep_stats['sleep_list'] -%}
 {% set chart = {'v_label':'hours', 'y_label': ['sleep hours', 'debt hours'], 'div_name': 'sleep_chart', 'xspace':'con', 'title': 'Sleep hours timeline', 'datalen': 2} -%}
@@ -44,9 +49,13 @@
 {% set chart = {'y_label': 'frequency', 'div_name': 'sleep_histogram', 'title': 'Sleep hours histogram', 'xspace':'con'} -%}
 {% include 'js_histogram_chart.html' %}
 {% endif %}
+
 {% if hygiene_stats['shower']['histogram'] -%}
 {% set dataset = hygiene_stats['shower']['histogram'] -%}
 {% set chart = {'y_label': 'frequency', 'div_name': 'shower_histogram', 'title': 'Hours between showers Histogram', 'xspace':'con'} -%}
+{% include 'js_histogram_chart.html' %}
+{% set dataset = hygiene_stats['shower']['times_histogram'] -%}
+{% set chart = {'y_label': 'frequency', 'div_name': 'shower_times_histogram', 'title': 'Shower Times Histogram', 'xspace':'str'} -%}
 {% include 'js_histogram_chart.html' %}
 {% endif -%}
 </head>
@@ -158,6 +167,7 @@
             <h3>{{user.salutation}} {{user.realname}}'s daily coffee intake</h3>
             <div id="coffee_chart"></div>
             <div id="coffee_histogram"></div>
+            <div id="coffee_times_histogram"></div>
             </div>
             {% else -%}
             <p>{{user.salutation}} {{user.realname}} has not shared {{user.pos_determi}} habits yet. Could {{user.nom_pronoun}} be a milk drinker?</p>
@@ -181,6 +191,7 @@
             </div><br>
             <div class="ChartWrapper">
             <div id="shower_histogram"></div>
+            <div id="shower_times_histogram"></div>
             </div>
             {% else -%}
             <p>{{user.salutation}} {{user.realname}} is not recorded to have showered. Ever. {{user.salutation}} {{user.realname}} is a stinko!</p>
@@ -220,6 +231,43 @@
         <p>{{user.salutation}} {{user.realname}} has not recorded any information pertaining {{user.pos_determi}} hygiene yet. Perhaps {{user.nom_pronoun}} is a dirty buffoon that should be avoided</p>
         {% endif -%}
     </div> <!-- End of Hygiene -->
+    
+    <div class="Block" id="Music">
+        <h2>Music</h2>
+        <div class="FullSubBlock" id="SongsAlltime">
+        <p>All time favorite songs of {{user.salutation}} {{user.realname}}</p>
+        {% if songs_top -%}
+            {% for song in songs_top -%}
+        <div class="FullSubBlock">
+            <b>{{song.title}}</b>
+            {%- if song.artist %}, by {{song.artist}}{% endif %}
+            {% if song.year %}({{song.year}}){% endif %}
+            {% if song.album %}on {{song.album}}{% endif %}<br>
+            {% if song.url %}<a href="{{song.url}}">{{song.url}}</a>{% endif %}
+        </div>
+            {% endfor -%}
+        {% else -%}
+        <p>{{user.salutation}} {{user.realname}} does not seem to listen to any songs</p>
+        {% endif -%}
+        </div>
+        
+        <div class="FullSubBlock" id="SongsWeek">
+        <p>Songs {{user.salutation}} {{user.realname}} have listened to in the past seven days</p>
+        {% if songs_week -%}
+            {% for song in songs_week -%}
+        <div class="FullSubBlock">
+            <b>{{song.title}}</b>
+            {%- if song.artist %}, by {{song.artist}}{% endif %}
+            {% if song.year %}({{song.year}}){% endif %}
+            {% if song.album %}on {{song.album}}{% endif %}<br>
+            {% if song.url %}<a href="{{song.url}}">{{song.url}}</a>{% endif %}
+        </div>
+            {% endfor -%}
+        {% else -%}
+        <p>{{user.salutation}} {{user.realname}} does not seem to listen to any songs</p>
+        {% endif -%}
+        </div>
+    </div>
 
     <div class="Block" id="Book">
         <h2>Books</h2>

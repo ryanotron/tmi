@@ -10,9 +10,10 @@ def require_login(fn):
         userid = self.request.cookies.get('userid')
         userid, user = utils.verify_user(userid)
         if user:
+            #logging.error('login check successful')
             fn(self, user, *args, **kwargs)
         else:
-            logging.error('not logged in!')
+            #logging.error('not logged in!')
             self.redirect('/login')
     return new_fn
     
@@ -1031,6 +1032,53 @@ class PostGameHandler(SuperHandler):
         else:
             self.redirect('/login')
             
+class PostMusicHandler(SuperHandler):
+    @require_login
+    def post(self, user):
+        title = self.request.get('title')
+        if title:
+            new_music = models.MusicLibraryModel(userid = str(user.key().id()),
+                                                 title = title)
+            artist = self.request.get('artist')
+            if artist:
+                new_music.artist = artist
+            
+            album = self.request.get('album')
+            if album:
+                new_music.album = album
+            
+            year = self.request.get('year')
+            if year:
+                try:
+                    new_music.year = int(year)
+                except:
+                    pass
+            
+            url = self.request.get('url')
+            if url:
+                new_music.url = url
+                
+            new_music.first_report = datetime.datetime.utcnow()
+            new_music.last_report = datetime.datetime.utcnow()
+            new_music.report_count = 1
+            new_music.put()
+            
+            user.last_seen = datetime.datetime.utcnow()
+            user.put()
+            self.redirect('/panel')
+        else:
+            self.redirect('/panel')
+
+class ReportMusicHandler(SuperHandler):
+    @require_login
+    def post(self, user):
+        song = db.get(self.request.get('key'))
+        song.report_count += 1
+        song.put()
+        user.last_seen = datetime.datetime.utcnow()
+        user.put()
+        self.redirect('/panel')
+
 class PostUserMessageHandler(SuperHandler):
     def post(self):
         userid = self.request.cookies.get('userid')
@@ -1207,9 +1255,9 @@ class PanelHandler(SuperHandler):
                 userconf = {}
                 user.confstring = json.dumps(userconf)
                 user.put()
-            logging.error('user configuration')
-            for key in userconf.keys():
-                logging.error(key + str(userconf[key]))
+            #logging.error('user configuration')
+            #for key in userconf.keys():
+            #    logging.error(key + str(userconf[key]))
                 
             if not userconf.has_key('activities'):
                 activities = db.GqlQuery('select * from ActivityModel where userid = :1', userid)
@@ -1226,7 +1274,7 @@ class PanelHandler(SuperHandler):
             if not userconf.has_key('places'):
                 travels = list(db.GqlQuery('select * from TravelModel where userid = :1', userid))
                 places = list(set([p.origin for p in travels] + [p.destination for p in travels]))
-                logging.error(places)
+                #logging.error(places)
                 userconf['places'] = places
                 config_updated = True
                 
@@ -1244,11 +1292,14 @@ class PanelHandler(SuperHandler):
                 user.confstring = json.dumps(userconf)
                 user.put()
                 
+            songs = list(db.GqlQuery('select * from MusicLibraryModel order by last_report desc limit 10'))
+                
             self.render('panelpage.html', user = user,
                                           expense_categories = expense_categories,
                                           activity_categories = userconf['activities'],
                                           timed_activity_categories = userconf['timed_activities'],
-                                          places = userconf['places'])
+                                          places = userconf['places'],
+                                          songs = songs)
         else:
             self.redirect('/login')
             
@@ -1284,6 +1335,13 @@ class UserpageHandler(SuperHandler):
             user_messages = stats.user_messages(user, 5)
             guest_messages = stats.guest_messages(user)
             
+            songs = db.GqlQuery('select * from MusicLibraryModel where userid = :1', userid)
+            songs_top5_alltime = sorted(songs, cmp = lambda x, y: int(x.report_count - y.report_count), reverse = True)
+            if len(songs_top5_alltime) > 5:
+                songs_top5_alltime = songs_top5_alltime[:5]
+            cutoff = datetime.datetime.utcnow() - datetime.timedelta(days = 7)
+            songs_7days = [song for song in songs if song.last_report > cutoff]
+            
             self.render('userpage.html', user = user,
                                          old_photos = old_photos,
                                          coffee_stats = coffee_stats,
@@ -1295,6 +1353,8 @@ class UserpageHandler(SuperHandler):
                                          inactive_books = inactive_books,
                                          active_games = active_games,
                                          inactive_games = inactive_games,
+                                         songs_top = songs_top5_alltime,
+                                         songs_week = songs_7days,
                                          user_messages = user_messages,
                                          guest_messages = guest_messages)
         else:

@@ -150,6 +150,10 @@ textarea {
     height: 20%;
 }
 
+div.Incrementer {
+    float: right;
+}
+
 div#aboutpage {
     margin: 20px;
 }

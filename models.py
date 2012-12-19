@@ -98,6 +98,17 @@ class GameLibraryModel(db.Model):
     platform = db.StringProperty()
     image = db.StringProperty()
     
+class MusicLibraryModel(db.Model):
+    userid       = db.StringProperty()
+    title        = db.StringProperty()
+    artist       = db.StringProperty()
+    album        = db.StringProperty()
+    year         = db.IntegerProperty()
+    url          = db.StringProperty()
+    first_report = db.DateTimeProperty()
+    last_report  = db.DateTimeProperty()
+    report_count = db.IntegerProperty()
+    
 class BetaKeyModel(db.Model):
     keystring = db.StringProperty()
     used = db.BooleanProperty()
