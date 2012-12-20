@@ -9,6 +9,8 @@
         data.addRow(['{{"%2.1f to %2.1f" % (point[0], point[1])}}', {{'%2.2f' % point[2]}}]);
         {%- elif chart['xspace'] == 'str' -%}
         data.addRow(['{{"%s to %s" % (point[0], point[1])}}', {{'%2.2f' % point[2]}}]);
+        {%- elif chart['xspace'] == 'strcon' -%}
+        data.addRow(['{{"%s" % point[0]}}', {{'%2.2f' % point[2]}}]);
         {%- else -%}
         data.addRow(['{{"%d" % point[0]}}', {{'%d' % point[2]}}]);
         {%- endif -%}

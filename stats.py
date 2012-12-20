@@ -2,6 +2,7 @@
 from google.appengine.ext import db
 
 gethours = lambda x: '%02d:%02d' % (abs(x), abs(60*(x - int(x))))
+weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
 def filter_outliers(data, min_pct, max_pct):
     min_val = numpy.percentile(data, min_pct)
@@ -16,6 +17,17 @@ def get_timed_activities(user, act_name, orderby = 'end', order = 'desc', number
     activities = db.GqlQuery(query)
     return list(activities)
     
+def timeofday_histogram(activities):
+    times = [act.when.hour + act.when.minute/60.0 for act in activities]
+    h, b = numpy.histogram(times, bins = numpy.ceil(numpy.sqrt(len(times))))
+    return h, b
+    
+def dayofweek_histogram(activities):
+    days = [act.when.weekday() for act in activities]
+    h, b = numpy.histogram(days, bins = range(0, 8))
+    b = [weekdays[e] for e in b[0:-1]]
+    return h, b
+
 def sleep_stats(user):
     sleeps = get_timed_activities(user, 'sleep')
     status = {}
@@ -167,6 +179,9 @@ def coffee_stats(user):
         b = [gethours(e) for e in b]
         status['coffee_times_histogram'] = zip(b, b[1:], h)
         
+        h, b = dayofweek_histogram(coffees)
+        status['coffee_dayofweek_histogram'] = zip(b, b, h)
+        
         daily_cups = {}
         for i in range(daysince + 1):
             day = today - datetime.timedelta(days = i)
@@ -198,6 +213,7 @@ def coffee_stats(user):
         h, b = numpy.histogram([elem[1] for elem in daily_cups], bins = range(0, max([elem[1] for elem in daily_cups]) + 2))
         coffee_histogram = zip(b, b, h)
         status['coffee_histogram'] = coffee_histogram
+        
         return status
     else:
         return None

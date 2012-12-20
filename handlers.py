@@ -1078,6 +1078,29 @@ class ReportMusicHandler(SuperHandler):
         user.last_seen = datetime.datetime.utcnow()
         user.put()
         self.redirect('/panel')
+        
+class MusicLibraryHandler(SuperHandler):
+    def get(self, username):
+        userid = self.request.cookies.get('userid')
+        userid, user = utils.verify_user(userid)
+        sameuser = False
+        if user.username == username:
+            sameuser = True
+            songs = list(db.GqlQuery('select * from MusicLibraryModel where userid = :1 order by last_report desc', userid))
+            self.render('musiclibrarypage.html', user = user,
+                                                 songs = songs,
+                                                 sameuser = sameuser)
+        else:
+            user = list(db.GqlQuery('select * from UserModel where username = :1 limit 1', username))
+            if len(user) > 0:
+                songs = list(db.GqlQuery('select * from MusicLibraryModel where userid = :1 order by last_report desc', str(user.key().id())))
+                self.render('musiclibrarypage.html', user = user[0],
+                                                     songs = songs,
+                                                     sameuser = sameuser)
+            else:
+                self.response.out.write('User %s does not exist' % username)
+                #self.redirect('/')
+        
 
 class PostUserMessageHandler(SuperHandler):
     def post(self):

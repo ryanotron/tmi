@@ -28,6 +28,9 @@
 {% set dataset = coffee_stats['coffee_times_histogram'] -%}
 {% set chart = {'y_label': 'frequency', 'div_name': 'coffee_times_histogram', 'title': 'Coffee Times Histogram', 'xspace': 'str'} -%}
 {% include 'js_histogram_chart.html' -%}
+{% set dataset = coffee_stats['coffee_dayofweek_histogram'] -%}
+{% set chart = {'y_label': 'frequency', 'div_name': 'coffee_dayofweek_histogram', 'title':'Coffee day of week Histogram', 'xspace':'strcon'} -%}
+{% include 'js_histogram_chart.html' -%}
 {% endif %}
 
 {% if sleep_stats -%}
@@ -168,6 +171,7 @@
             <div id="coffee_chart"></div>
             <div id="coffee_histogram"></div>
             <div id="coffee_times_histogram"></div>
+            <div id="coffee_dayofweek_histogram"></div>
             </div>
             {% else -%}
             <p>{{user.salutation}} {{user.realname}} has not shared {{user.pos_determi}} habits yet. Could {{user.nom_pronoun}} be a milk drinker?</p>

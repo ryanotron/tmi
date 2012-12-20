@@ -109,6 +109,12 @@ indexes:
   - name: when
     direction: desc
 
+- kind: MusicLibraryModel
+  properties:
+  - name: userid
+  - name: last_report
+    direction: desc
+
 - kind: SelfMessageModel
   properties:
   - name: userid
