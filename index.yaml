@@ -30,6 +30,12 @@ indexes:
   - name: when
     direction: desc
 
+- kind: ActivityModel
+  properties:
+  - name: userid
+  - name: when
+    direction: desc
+
 - kind: BlogPostModel
   properties:
   - name: userid

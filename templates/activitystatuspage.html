@@ -1,0 +1,46 @@
+﻿{% extends 'basepage.html' -%}
+
+{% block head -%}
+<title>{{user.salutation}} {{user.realname}} - Status for Activity {{act_name}}</title>
+<link type="text/css" rel="stylesheet" href="/stylesheets/userpage.css">
+<link rel="shortcut-icon" href="/favicon.ico" type="x-icon">
+<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+<script type="text/javascript">google.load('visualization','1', {packages:['corechart']});</script>
+{% set dataset = status['timeofday_histogram'] -%}
+{% set chart = {'y_label': 'f', 'div_name': 'timeofday_histogram', 'title':'Time of Day', 'xspace':'str'} -%}
+{% include 'js_histogram_chart.html' -%}
+
+{% set dataset = status['dayofweek_histogram'] -%}
+{% set chart = {'y_label': 'f', 'div_name': 'dayofweek_histogram', 'title':'Day of Week', 'xspace':'strcon'} -%}
+{% include 'js_histogram_chart.html' -%}
+
+{% set dataset = status['dayofmonth_histogram'] -%}
+{% set chart = {'y_label': 'f', 'div_name': 'dayofmonth_histogram', 'title':'Day of Month', 'xspace':'dis'} -%}
+{% include 'js_histogram_chart.html' -%}
+
+{% set dataset = status['timebetween_histogram']['data'] -%}
+{% set chart = {'y_label': 'f', 'div_name': 'timebetween_histogram', 'title':'Time Between (%s)' % status['timebetween_histogram']['unit'], 'xspace':'con'} -%}
+{% include 'js_histogram_chart.html' -%}
+{% endblock -%}
+
+{% block content -%}
+<div class="Block">
+    <h2>{{user.salutation}} {{user.realname}} - Record for activity: {{act_name}}</h2>
+    <div class="CharWrapper">
+    <div id="timeofday_histogram"></div>
+    <div id="dayofweek_histogram"></div>
+    <div id="dayofmonth_histogram"></div>
+    <div id="timebetween_histogram"></div>
+    </div>
+    <div class="FullSubBlock">
+        <p>See {{user.salutation}} {{user.realname}}'s other activities</p>
+        <div class="CategoryListing">
+            <ul>
+                {% for cat in activity_categories -%}
+                <a href="/u/{{user.username}}/activity?act_name={{cat}}"><li>{{cat}}</a>
+                {% endfor -%}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock -%}

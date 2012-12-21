@@ -17,6 +17,34 @@ def get_timed_activities(user, act_name, orderby = 'end', order = 'desc', number
     activities = db.GqlQuery(query)
     return list(activities)
     
+def timebetween_histogram(activities, unit = 'hours'):
+    # activities are sorted in descending order!
+    unit_scale = {'seconds':1, 'minutes':60, 'hours':(60*60), 'days':(60*60*24), 'weeks':(60*60*24*7)}
+    activities = list(reversed(activities))
+    timelist = []
+    prev_act = activities[0]
+    for act in activities[1:]:
+        interval = (act.when - prev_act.when).total_seconds()
+        timelist.append(interval)
+        prev_act = act
+    if unit == 'auto':
+        mu_interval = numpy.mean(timelist)
+        if mu_interval >= 60 and mu_interval < 3600:
+            unit = 'minutes'
+        elif mu_interval >= 3600 and mu_interval < (3600*24):
+            unit = 'hours'
+        elif mu_interval >= (3600*24) and mu_interval < (3600*24*7):
+            unit = 'days'
+        elif mu_interval >= (3600*24*7):
+            unit = 'weeks'
+    if not unit_scale.has_key(unit):
+        unit = 'seconds'
+    timelist = [t/unit_scale[unit] for t in timelist]
+    # for a, b in zip(activities, timelist):
+        # logging.error(a.when.strftime('%d/%m/%Y %H:%M') + '\t' + str(b))
+    h, b = numpy.histogram(timelist, bins = numpy.ceil(numpy.sqrt(len(timelist))))
+    return h, b, unit
+    
 def timeofday_histogram(activities):
     times = [act.when.hour + act.when.minute/60.0 for act in activities]
     h, b = numpy.histogram(times, bins = numpy.ceil(numpy.sqrt(len(times))))
@@ -27,6 +55,36 @@ def dayofweek_histogram(activities):
     h, b = numpy.histogram(days, bins = range(0, 8))
     b = [weekdays[e] for e in b[0:-1]]
     return h, b
+    
+def dayofmonth_histogram(activities):
+    days = [act.when.day for act in activities]
+    h, b = numpy.histogram(days, bins = range(1, 32))
+    return h, b
+    
+def general_activity_stats(user, actname):
+    userid = str(user.key().id())
+    activities = list(db.GqlQuery('select * from ActivityModel where userid = :1 order by when desc', userid))
+    activities = [act for act in activities if act.name == actname]
+    timeshift = datetime.timedelta(hours = user.timezone)
+    for i in range(len(activities)):
+        activities[i].when = activities[i].when + timeshift
+    status = {}
+    if not activities:
+        return status
+        
+    h, b = timeofday_histogram(activities)
+    b = [gethours(e) for e in b]
+    status['timeofday_histogram'] = zip(b, b[1:], h)
+     
+    h, b = dayofweek_histogram(activities)
+    status['dayofweek_histogram'] = zip(b, b, h)
+     
+    h, b = dayofmonth_histogram(activities)
+    status['dayofmonth_histogram'] = zip(b, b, h)
+     
+    h, b, u = timebetween_histogram(activities, unit='auto')
+    status['timebetween_histogram'] = {'data': zip(b, b[1:], h), 'unit': u}
+    return status
 
 def sleep_stats(user):
     sleeps = get_timed_activities(user, 'sleep')
@@ -181,6 +239,9 @@ def coffee_stats(user):
         
         h, b = dayofweek_histogram(coffees)
         status['coffee_dayofweek_histogram'] = zip(b, b, h)
+        
+        h, b = dayofmonth_histogram(coffees)
+        status['coffee_dayofmonth_histogram'] = zip(b, b, h)
         
         daily_cups = {}
         for i in range(daysince + 1):

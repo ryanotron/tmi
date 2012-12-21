@@ -1099,8 +1099,6 @@ class MusicLibraryHandler(SuperHandler):
                                                      sameuser = sameuser)
             else:
                 self.response.out.write('User %s does not exist' % username)
-                #self.redirect('/')
-        
 
 class PostUserMessageHandler(SuperHandler):
     def post(self):
@@ -1155,7 +1153,7 @@ class PresentActivityHandler(SuperHandler):
             if userid:
                 user = utils.validate_user(userid)
                 if user:
-                    activities = db.GqlQuery('select * from ActivityModel order by when desc')
+                    activities = db.GqlQuery('select * from ActivityModel where userid = :1 order by when desc', userid)
                     activities = list(activities)
                     self.render('activitylistpage.html', user = user, activities = activities)
                 else:
@@ -1164,6 +1162,32 @@ class PresentActivityHandler(SuperHandler):
                 self.redirect('/login')
         else:
             self.redirect('/login')
+            
+class ActivityStatusHandler(SuperHandler):
+    def get(self, username):
+        user = list(db.GqlQuery('select * from UserModel where username = :1 limit 1', username))
+        if user:
+            user = user[0]
+            act_name = self.request.get('act_name')
+            status = stats.general_activity_stats(user, act_name)
+            userconf = json.loads(user.confstring)
+            
+            if not userconf.has_key('activities'):
+                activities = db.GqlQuery('select * from ActivityModel where userid = :1', userid)
+                activity_categories = list(set(a.name.strip() for a in activities))
+                userconf['activities'] = activity_categories
+                user.confstring = json.dumps(userconf)
+                user.put()
+                
+            if status:
+                self.render('activitystatuspage.html', user = user,
+                                                       status = status,
+                                                       act_name = act_name,
+                                                       activity_categories = userconf['activities'])
+            else:
+                self.response.out.write('%s %s does not record such activity' % (user.salutation, user.realname))
+        else:
+            self.response.out.write('There is no such user')
             
 class PresentTimedActivityHandler(SuperHandler):
     def get(self):
