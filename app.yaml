@@ -41,3 +41,6 @@ libraries:
   
 - name: numpy
   version: latest
+
+builtins:
+- remote_api: on
