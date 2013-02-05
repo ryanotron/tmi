@@ -74,7 +74,8 @@
             </ul></div>
             {% endif -%}
             Day <input maxlength="10" class="Date" type="text" name="activity_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}"><br>
-            Time <input class="Time" type="text" name="activity_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}"><br>
+            Time <input class="Time" type="text" name="activity_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}">
+            GMT <input type="text" name="timezone" value="{{'%+2.1f' % user.timezone}}"><br>
             <input type="submit">
         </form>
         </div>
@@ -97,7 +98,8 @@
                 <input class="Time" type="text" name="act_start_time"><br>
                 End time <input class="Date" type="text" name="act_end_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">
                 <input class="Time" type="text" name="act_end_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}"><br>
-                (duration) <input type="text" name="act_duration"><br> hours
+                GMT <input type="text" name="timezone" value="{{'%+2.1f' % user.timezone}}"><br>
+                (duration) <input type="text" name="act_duration"> hours <br>
                 <input type="submit">
             </form>
         </div>
@@ -121,6 +123,7 @@
                 <input class="Time" type="text" name="act_start_time"><br>
                 Woke up at <input class="Date" type="text" name="act_end_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">, 
                 <input class="Time" type="text" name="act_end_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}"><br>
+                GMT <input type="text" name="timezone" value="{{'%+2.1f' % user.timezone}}"><br>
                 for <input type="text" name="act_duration"> hours<br>
                 <input type="submit">
             </form>
@@ -139,7 +142,8 @@
                 of <input type="text" name="meal_menu"><br>
                 at <input type="text" name="meal_place"><br>
                 at this time <input class="Date" type="text" name="meal_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">
-                <input class="Time" type="text" name="meal_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}"><br>
+                <input class="Time" type="text" name="meal_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}">
+                GMT <input type="text" name="timezone" value="{{'%+2.1f' % user.timezone}}"><br>
                 and it costed me <input type="text" name="meal_cost">
                 <input class="Currency" type="text" name="meal_currency" value="{{user.currency}}"><br>
                 Photo <input type="file" name="meal_image"><br>
@@ -154,6 +158,7 @@
             Shower 
             <input class="Date" type="text" name="activity_day" value="{{(datetime.datetime.today() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}"> 
             <input class="Time" type="text" name="activity_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}">
+            GMT <input type="text" name="timezone" value="{{'%+2.1f' % user.timezone}}">
             <input type="hidden" name="activity_name" value="shower"><br>
             <input type="submit">
         </form><br>
@@ -197,9 +202,11 @@
             I traveled from <input type="text" name="trv_origin">
             to <input type="text" name="trv_destination"><br>
             I departed at <input class="Date" type="text" name="trv_start_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">
-            <input class="Time" type="text" name="trv_start_time"><br>
+            <input class="Time" type="text" name="trv_start_time">
+            GMT <input type="text" name="start_timezone" value="{{'%+2.1f' % user.timezone}}"><br>
             and arrived at <input class="Date" type="text" name="trv_finish_day" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y')}}">
-            <input class="Time" type="text" name="trv_finish_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}"><br>
+            <input class="Time" type="text" name="trv_finish_time" value="{{(datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)).strftime('%H:%M')}}">
+            GMT <input type="text" name="finish_timezone" value="{{'%+2.1f' % user.timezone}}"><br>
             (it took me <input type="text" name="trv_duration"> minutes)<br>
             {% if places -%}
             <div class="CategoryListing"><ul>

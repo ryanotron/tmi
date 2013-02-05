@@ -35,12 +35,14 @@ class ActivityModel(db.Model):
     userid = db.StringProperty(required = True)
     name   = db.StringProperty()
     when   = db.DateTimeProperty()
+    timezone = db.FloatProperty()
     
 class TimedActivityModel(db.Model):
     userid = db.StringProperty(required = True)
     name   = db.StringProperty()
     start  = db.DateTimeProperty()
     end    = db.DateTimeProperty()
+    timezone = db.FloatProperty()
 
 class ExpenseModel(db.Model):
     userid   = db.StringProperty(required = True)
@@ -56,6 +58,8 @@ class TravelModel(db.Model):
     destination = db.StringProperty()
     whenstart   = db.DateTimeProperty()
     whenfinish  = db.DateTimeProperty()
+    start_timezone  = db.FloatProperty()
+    finish_timezone = db.FloatProperty()
 
 class MealModel(db.Model):
     userid   = db.StringProperty(required = True)
@@ -64,6 +68,7 @@ class MealModel(db.Model):
     place    = db.StringProperty()
     category = db.StringProperty() # breakfast, lunch, dinner, supper, snack
     image    = db.StringProperty()
+    timezone = db.FloatProperty()
 
 class UserMessageModel(db.Model):
     userid  = db.StringProperty(required = True)

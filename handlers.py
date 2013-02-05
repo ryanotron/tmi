@@ -356,6 +356,7 @@ class PostActivityHandler(SuperHandler):
                     activity_name = self.request.get('activity_name')
                     activity_day  = self.request.get('activity_day')
                     activity_time = self.request.get('activity_time')
+                    timezone      = self.request.get('timezone')
 
                     if activity_name and activity_day:
                         try:
@@ -370,9 +371,20 @@ class PostActivityHandler(SuperHandler):
                             D = int(D)
                             #logging.error('split day')
 
+                            if timezone:
+                                try:
+                                    timezone = float(timezone)
+                                except:
+                                    timezone = user.timezone
+                                    logging.error('timezone conversion error, falling back to user timezone')
+                            else:
+                                timezone = user.timezone
+                                logging.error('timezone unspecified, falling back to user timezone')
+
                             new_activity = models.ActivityModel(userid = userid,
                                                                 name   = activity_name,
-                                                                when   = datetime.datetime(Y, M, D, h, m) - datetime.timedelta(hours = user.timezone))
+                                                                when   = datetime.datetime(Y, M, D, h, m) - datetime.timedelta(hours = timezone),
+                                                                timezone = timezone)
                                                                 
                             newconf = utils.update_config(json.loads(user.confstring), 'activities', activity_name)
                             if newconf:
@@ -404,7 +416,8 @@ class InsPostActivityHandler(SuperHandler):
             #logging.error('posted '+act_name+' from instant, with new user verification method')
             new_act = models.ActivityModel(userid = userid,
                                            name   = act_name,
-                                           when   = datetime.datetime.utcnow())
+                                           when   = datetime.datetime.utcnow(),
+                                           timezone = user.timezone)
             new_act.put()
             user.last_seen = datetime.datetime.utcnow()
             user.put()
@@ -441,7 +454,8 @@ class PostBatchActivityHandler(SuperHandler):
 
                                 new_act = models.ActivityModel(userid = userid,
                                                                name = name,
-                                                               when = when - datetime.timedelta(hours = user.timezone))
+                                                               when = when - datetime.timedelta(hours = user.timezone),
+                                                               timezone = user.timezone)
                                 new_act.put()
                                 new_conf = utils.update_config(json.loads(user.confstring), 'activities', name)
                                 if new_conf:
@@ -475,6 +489,7 @@ class PostTimedActivityHandler(SuperHandler):
             act_end_day    = self.request.get('act_end_day')
             act_end_time   = self.request.get('act_end_time')
             act_duration   = self.request.get('act_duration')
+            timezone       = self.request.get('timezone')
             error = False
             
             if act_name:
@@ -526,10 +541,18 @@ class PostTimedActivityHandler(SuperHandler):
                     self.redirect('/panel')
 
                 if not error:
+                    if timezone:
+                        try:
+                            timezone = float(timezone)
+                        except:
+                            timezone = user.timezone
+                    else:
+                        timezone = user.timezone
                     new_timed_act = models.TimedActivityModel(userid = userid,
                                                               name   = act_name,
-                                                              start  = act_start_time - datetime.timedelta(hours = user.timezone),
-                                                              end    = act_end_time - datetime.timedelta(hours = user.timezone))
+                                                              start  = act_start_time - datetime.timedelta(hours = timezone),
+                                                              end    = act_end_time - datetime.timedelta(hours = timezone),
+                                                              timezone = timezone)
                     new_timed_act.put()
                     
                     newconf = utils.update_config(json.loads(user.confstring), 'timed_activities', act_name)
@@ -583,7 +606,8 @@ class PostBatchTimedActivityHandler(SuperHandler):
                                 new_act = models.TimedActivityModel(userid = userid,
                                                                 name = name,
                                                                 start = start - datetime.timedelta(hours = user.timezone),
-                                                                end = end - datetime.timedelta(hours = user.timezone))
+                                                                end = end - datetime.timedelta(hours = user.timezone),
+                                                                timezone = user.timezone)
                                 new_act.put()
                                 
                                 new_conf = utils.update_config(json.loads(user.confstring), 'timed_activities', name)
@@ -672,11 +696,16 @@ class PostBatchExpenseHandler(SuperHandler):
         userid, user = utils.verify_user(userid)
         if user:
             expenses = self.request.get('batchexpense')
+            #logging.error(expenses)
             if expenses:
                 expenses = expenses.split('\n')
                 for elem in expenses:
+                    #logging.error(elem)
                     expense = constants.batchexpense_re.match(elem)
+                    logging.error(elem)
+                    logging.error(expense)
                     if expense:
+                        logging.error(expense.groups())
                         new_expense = models.ExpenseModel(userid   = str(userid),
                                                           name     = expense.group('name'),
                                                           category = expense.group('cat'),
@@ -733,8 +762,10 @@ class PostTravelHandler(SuperHandler):
                     trv_destination = self.request.get('trv_destination')
                     trv_start_day   = self.request.get('trv_start_day')
                     trv_start_time  = self.request.get('trv_start_time')
+                    start_timezone  = self.request.get('start_timezone')
                     trv_finish_day  = self.request.get('trv_finish_day')
                     trv_finish_time = self.request.get('trv_finish_time')
+                    finish_timezone = self.request.get('finish_timezone')
                     trv_duration    = self.request.get('trv_duration') # how granular should we be? I usually use minutes in my manual log
                     
                     if trv_origin and trv_destination:
@@ -746,6 +777,7 @@ class PostTravelHandler(SuperHandler):
                                 D, M, Y = [int(elem) for elem in trv_start_day.split('/')]
                                 h, m    = [int(elem) for elem in trv_start_time.split(':')]
                                 trv_start_time = datetime.datetime(Y, M, D, h, m)
+                                start_timezone = float(start_timezone)
                             except:
                                 self.redirect('/panel')
                             
@@ -754,10 +786,12 @@ class PostTravelHandler(SuperHandler):
                                     D, M, Y = [int(elem) for elem in trv_finish_day.split('/')]
                                     h, m    = [int(elem) for elem in trv_finish_time.split(':')]
                                     trv_finish_time = datetime.datetime(Y, M, D, h, m)
+                                    finish_timezone = float(finish_timezone)
                                 except:
                                     self.redirect('/panel')
                             elif trv_duration:
                                 trv_finish_time = trv_start_time + datetime.timedelta(minutes = float(trv_duration))
+                                finish_timezone = start_timezone
                             else:
                                 self.redirect('/panel')
                         elif trv_finish_time:
@@ -765,11 +799,13 @@ class PostTravelHandler(SuperHandler):
                                 D, M, Y = [int(elem) for elem in trv_finish_day.split('/')]
                                 h, m    = [int(elem) for elem in trv_finish_time.split(':')]
                                 trv_finish_time = datetime.datetime(Y, M, D, h, m)
+                                finish_timezone = float(finish_timezone)
                             except:
                                 self.redirect('/panel')
                             
                             if trv_duration:
                                 trv_start_time = trv_finish_time - datetime.timedelta(minutes = float(trv_duration))
+                                start_timezone = finish_timezone
                             else:
                                 self.redirect('/panel')
                         else:
@@ -778,8 +814,10 @@ class PostTravelHandler(SuperHandler):
                         new_travel = models.TravelModel(userid      = userid,
                                                         origin      = trv_origin,
                                                         destination = trv_destination,
-                                                        whenstart   = trv_start_time - datetime.timedelta(user.timezone),
-                                                        whenfinish  = trv_finish_time - datetime.timedelta(user.timezone))
+                                                        whenstart   = trv_start_time - datetime.timedelta(start_timezone),
+                                                        start_timezone = start_timezone,
+                                                        whenfinish  = trv_finish_time - datetime.timedelta(finish_timezone),
+                                                        finish_timezone = finish_timezone)
                                                         
                         new_travel.put()
                         
@@ -824,16 +862,25 @@ class PostMealHandler(SuperHandler):
             meal_cost     = self.request.get('meal_cost')
             meal_currency = self.request.get('meal_currency')
             meal_image    = self.request.get('meal_image')
+            timezone      = self.request.get('timezone')
 
             if meal_menu and meal_time:
                 error = False
+                if timezone:
+                    try:
+                        timezone = float(timezone)
+                    except:
+                        timezone = user.timezone
+                else:
+                    timezone = user.timezone
                 try:
                     D, M, Y = [int(elem) for elem in meal_day.split('/')]
                     h, m    = [int(elem) for elem in meal_time.split(':')]
-                    meal_time = datetime.datetime(Y, M, D, h, m) - datetime.timedelta(hours = user.timezone)
+                    meal_time = datetime.datetime(Y, M, D, h, m) - datetime.timedelta(hours = timezone)
 
                     new_meal = models.MealModel(userid   = userid,
                                                 when     = meal_time,
+                                                timezone = timezone,
                                                 menu     = meal_menu,
                                                 place    = meal_place,
                                                 category = meal_category)
@@ -1735,7 +1782,7 @@ class HackHandler(SuperHandler):
         userid, user = utils.verify_user(userid)
         if user and user.username == 'ryanotron':
             keystring = self.request.get('betakey')
-            betakey = models.BetaKeyModel(keystring = 'keystring', used = False)
+            betakey = models.BetaKeyModel(keystring = keystring, used = False)
             betakey.put()
             # meals = db.GqlQuery('select * from MealModel where userid = :1', userid)
             # meals = list(meals)
