@@ -1793,3 +1793,38 @@ class HackHandler(SuperHandler):
             # self.redirect('/panel')
         else:
             self.redirect('/login')
+
+class Hack_AddTimezonesHandler(SuperHandler):
+    def post(self):
+        users = db.GqlQuery('select * from UserModel')
+        userdict = {}
+        for user in users:
+            userid = str(user.key().id())
+            userdict[userid] = user
+
+        activities = db.GqlQuery('select * from ActivityModel')
+        for activity in activities:
+            if not activity.timezone:
+                activity.timezone = userdict[activity.userid].timezone
+                activity.put()
+
+        timedacts = db.GqlQuery('select * from TimedActivityModel')
+        for timedact in timedacts:
+            if not timedact.timezone:
+                timedact.timezone = userdict[timedact.userid].timezone
+                timedact.put()
+
+        meals = db.GqlQuery('select * from MealModel')
+        for meal in meals:
+            if not meal.timezone:
+                meal.timezone = userdict[meal.userid].timezone
+                meal.put()
+
+        travels = db.GqlQuery('select * from TravelModel')
+        for travel in travels:
+            if not travel.start_timezone:
+                travel.start_timezone = userdict[travel.userid].timezone
+                travel.finish_timezone = userdict[travel.userid].timezone
+                travel.put()
+
+        self.redirect('/hack')
