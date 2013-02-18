@@ -67,7 +67,10 @@ def general_activity_stats(user, actname):
     activities = [act for act in activities if act.name == actname]
     timeshift = datetime.timedelta(hours = user.timezone)
     for i in range(len(activities)):
-        activities[i].when = activities[i].when + timeshift
+        try:
+            activities[i].when = activities[i].when + datetime.timedelta(hours = activities[i].timezone)
+        except:
+            activities[i].when = activities[i].when + timeshift
     status = {}
     if not activities:
         return status
@@ -100,8 +103,12 @@ def sleep_stats(user):
         today = datetime.datetime.utcnow() + timeshift
         
         for i in range(len(sleeps)):
-            sleeps[i].end   = sleeps[i].end + timeshift
-            sleeps[i].start = sleeps[i].start + timeshift # from now on, sleeps are in user's timezone
+            try:
+                sleeps[i].end   = sleeps[i].end   + datetime.timedelta(hours = sleep[i].timezone)
+                sleeps[i].start = sleeps[i].start + datetime.timedelta(hours = sleep[i].timezone)
+            except:
+                sleeps[i].end   = sleeps[i].end + timeshift
+                sleeps[i].start = sleeps[i].start + timeshift # from now on, sleeps are in user's timezone
         
         # latest sleep
         status['latest_waketime'] = sleeps[0].end
@@ -229,7 +236,10 @@ def coffee_stats(user):
         timeshift = datetime.timedelta(hours = user.timezone)
         today = datetime.datetime.utcnow() + timeshift
         for i in range(len(coffees)):
-            coffees[i].when = coffees[i].when + timeshift
+            try:
+                coffees[i].when = coffees[i].when + datetime.timedelta(hours = coffees[i].timezone)
+            except:
+                coffees[i].when = coffees[i].when + timeshift
         daysince = (today.date() - coffees[-1].when.date()).days
         
         coffee_times = [c.when.hour + c.when.minute/60.0 for c in coffees]
@@ -319,7 +329,10 @@ def meal_stats(user):
     now = datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)
     status = {}
     for i in range(len(meals)):
-        meals[i].when += datetime.timedelta(hours = user.timezone)
+        try:
+            meals[i].when += datetime.timedelta(hours = meals[i].timezone)
+        except:
+            meals[i].when += datetime.timedelta(hours = user.timezone)
         
     proper_meals = [meal for meal in meals if meal.category in ('breakfast', 'lunch', 'dinner')]
         
@@ -394,7 +407,10 @@ def hygiene_stats(user):
         shower_histogram = zip(b[:len(h)], b[1:len(h)+1], h)
         stats['shower']['histogram'] = shower_histogram
         stats['shower']['ave_interval'] = len(shower_between) > 0 and (sum(shower_between) / len(shower_between)) or 0
-        shower_times = [(s.when.hour + s.when.minute/60.0 + user.timezone)%24 for s in showers]
+        try:
+            shower_times = [(s.when.hour + s.when.minute/60.0 + s.timezone)%24 for s in showers]
+        except:
+            shower_times = [(s.when.hour + s.when.minute/60.0 + user.timezone)%24 for s in showers]
         h, b = numpy.histogram(shower_times, bins = numpy.ceil(numpy.sqrt(len(shower_times))))
         b = [gethours(e) for e in b]
         stats['shower']['times_histogram'] = zip(b, b[1:], h)
