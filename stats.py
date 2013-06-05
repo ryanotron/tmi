@@ -216,9 +216,11 @@ def sleep_stats(user):
         
         sleep_list = [[a[0], a[1], b[1]] for a, b in zip(sleep_list, debt_list)]
         status['sleep_list'] = sleep_list
+        sleep_hours_list = [elem[1] for elem in sleep_list]
         
         # sleep histogram
-        h, b = numpy.histogram([elem[1] for elem in sleep_list], bins = numpy.ceil(numpy.sqrt(len(sleep_list))))
+        sleep_hours_list = filter_outliers(sleep_hours_list, 5, 95)
+        h, b = numpy.histogram(sleep_hours_list, bins = numpy.ceil(numpy.sqrt(len(sleep_list))))
         sleep_histogram = zip(b[:len(h)], b[1:len(h)+1], h)
         status['sleep_histogram'] = sleep_histogram
         return status
@@ -403,6 +405,7 @@ def hygiene_stats(user):
     if len(showers) > 0:
         stats['shower']['latest'] = -1*(showers[0].when - datetime.datetime.utcnow()).total_seconds() / 3600.0
         shower_between = [(showers[i].when - showers[i+1].when).total_seconds()/3600.0 for i in range(len(showers) - 1)]
+        shower_between = filter_outliers(shower_between, 5, 95)
         h, b = numpy.histogram(shower_between, bins = numpy.ceil(numpy.sqrt(len(shower_between))))
         shower_histogram = zip(b[:len(h)], b[1:len(h)+1], h)
         stats['shower']['histogram'] = shower_histogram
