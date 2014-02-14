@@ -90,7 +90,7 @@ def general_activity_stats(user, actname):
     return status
 
 def sleep_stats(user):
-    sleeps = get_timed_activities(user, 'sleep')
+    sleeps = get_timed_activities(user, 'sleep', number = 100)
     status = {}
     
     if not sleeps:
@@ -227,7 +227,7 @@ def sleep_stats(user):
 
 def coffee_stats(user):
     userid = str(user.key().id())
-    coffees = get_activities(user, 'coffee')
+    coffees = get_activities(user, 'coffee', number = 500)
     status = {}
     
     if coffees:
@@ -323,7 +323,7 @@ def get_meals(user, order = 'desc', number = 0):
     return list(meals)
     
 def meal_stats(user):
-    meals = get_meals(user, order = 'asc')
+    meals = get_meals(user, order = 'asc', number = 300)
     if not meals:
         return None
         
@@ -398,9 +398,9 @@ def hygiene_stats(user):
     stats['shave'] = {}
     stats['haircut'] = {}
     
-    showers  = get_activities(user, 'shower')
-    shaves   = get_activities(user, 'shave')
-    haircuts = get_activities(user, 'cut hair')
+    showers  = get_activities(user, 'shower', number = 100)
+    shaves   = get_activities(user, 'shave', number = 100)
+    haircuts = get_activities(user, 'cut hair', number = 100)
     
     if len(showers) > 0:
         stats['shower']['latest'] = -1*(showers[0].when - datetime.datetime.utcnow()).total_seconds() / 3600.0
