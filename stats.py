@@ -323,9 +323,10 @@ def get_meals(user, order = 'desc', number = 0):
     return list(meals)
     
 def meal_stats(user):
-    meals = get_meals(user, order = 'asc', number = 300)
+    meals = get_meals(user, order = 'desc', number = 300)
     if not meals:
         return None
+    meals.reverse()
         
     # pre-processing
     now = datetime.datetime.utcnow() + datetime.timedelta(hours = user.timezone)
