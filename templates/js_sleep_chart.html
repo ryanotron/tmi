@@ -9,8 +9,8 @@
         data.addRow([new Date({{sleep[0].year}}, {{sleep[0].month - 1}}, {{sleep[0].day}}), {{'%2.2f' % sleep[1]}}]);
         {% endfor -%}
 
-        var options = {height: 400,
-                       pointSize: 3,
+        var options = {height: 360,
+                       pointSize: 1,
                        lineWidth: 1,};
         var chart = new google.visualization.LineChart(document.getElementById('sleep_chart'));
         chart.draw(data, options);

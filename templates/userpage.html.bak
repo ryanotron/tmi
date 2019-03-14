@@ -119,13 +119,6 @@
             {% for message in user_messages -%}
             <div class="Message">
                 {{'%2.2f' % ((datetime.datetime.utcnow() - message.when).total_seconds() / 3600)}} hours ago, on {{(message.when + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y %H:%M')}} UTC{{'%+2.1f' % user.timezone}}
-                {% if (datetime.datetime.utcnow() - message.when).days > 14 -%}
-                    {{'%d' % ((datetime.datetime.utcnow() - message.when).days/7)}} weeks ago, on {{(message.when + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y %H:%M')}} UTC{{'%+2.1f' % user.timezone}}
-                {% elif (datetime.datetime.utcnow() - message.when).days > 2 -%}
-                    {{'%d' % (datetime.datetime.utcnow() - message.when).days}} days ago, on {{(message.when + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y %H:%M')}} UTC{{'%+2.1f' % user.timezone}}
-                {% else -%}
-                    {{'%d' % ((datetime.datetime.utcnow() - message.when).total_seconds()/3600)}} hour(s) ago, on {{(message.when + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y %H:%M')}} UTC{{'%+2.1f' % user.timezone}}
-                {% endif -%}
                 <blockquote>
                 {{message.message}}
                 </blockquote>
@@ -251,6 +244,133 @@
         <p>{{user.salutation}} {{user.realname}} has not recorded any information pertaining {{user.pos_determi}} hygiene yet. Perhaps {{user.nom_pronoun}} is a dirty buffoon that should be avoided</p>
         {% endif -%}
     </div> <!-- End of Hygiene -->
+    
+    <div class="Block" id="Music">
+        <h2>Music</h2>
+        <div class="FullSubBlock" id="SongsAlltime">
+        <p>All time favorite songs of {{user.salutation}} {{user.realname}}</p>
+        {% if songs_top -%}
+            {% for song in songs_top -%}
+        <div class="FullSubBlock">
+            <b>{{song.title}}</b>
+            {%- if song.artist %}, by {{song.artist}}{% endif %}
+            {% if song.year %}({{song.year}}){% endif %}
+            {% if song.album %}on {{song.album}}{% endif %}<br>
+            {% if song.url %}<a href="{{song.url}}">{{song.url}}</a>{% endif %}
+        </div>
+            {% endfor -%}
+        {% else -%}
+        <p>{{user.salutation}} {{user.realname}} does not seem to listen to any songs</p>
+        {% endif -%}
+        </div>
+        
+        <div class="FullSubBlock" id="SongsWeek">
+        <p>Songs {{user.salutation}} {{user.realname}} have listened to in the past seven days</p>
+        {% if songs_week -%}
+            {% for song in songs_week -%}
+        <div class="FullSubBlock">
+            <b>{{song.title}}</b>
+            {%- if song.artist %}, by {{song.artist}}{% endif %}
+            {% if song.year %}({{song.year}}){% endif %}
+            {% if song.album %}on {{song.album}}{% endif %}<br>
+            {% if song.url %}<a href="{{song.url}}">{{song.url}}</a>{% endif %}
+        </div>
+            {% endfor -%}
+        {% else -%}
+        <p>{{user.salutation}} {{user.realname}} does not seem to listen to any songs</p>
+        {% endif -%}
+        </div>
+    </div>
+
+    <div class="Block" id="Book">
+        <h2>Books</h2>
+        <div class="FullSubBlock">
+            <h3>Currently reading</h3>
+            {% if active_books -%}
+            {% for book in active_books -%}
+            <div class="BookWrapper">
+                {% if book.image -%}
+                <div class="SubBlock">
+                    <img src="/img?img_key={{book.image}}">
+                </div>
+                {% endif -%}
+                <div class="SubBlock">
+                    {{book.title}}<br>
+                    by {{book.author}}
+                </div>
+            </div>
+            {% endfor -%}
+            {% else -%}
+            <p>{{user.salutation}} {{user.realname}} is currently not reading any book. Recommend something.</p>
+            {% endif -%}
+        </div>
+
+        <div class="FullSubBlock">
+            <h3>Previously reading</h3>
+            {% if inactive_books -%}
+            {% for book in inactive_books -%}
+            <div class="BookWrapper">
+                {% if book.image -%}
+                <div class="SubBlock">
+                    <img src="/img?img_key={{book.image}}">
+                </div>
+                {% endif -%}
+                <div class="SubBlock">
+                    {{book.title}}<br>
+                    by {{book.author}}
+                </div>
+            </div>
+            {% endfor -%}
+            {% else -%}
+            <p>{{user.salutation}} {{user.realname}} is not recorded to have finished reading any book yet.</p>
+            {% endif -%}
+        </div>
+    </div> <!-- End of Book -->
+
+    <div class="Block" id="Game">
+        <h2>Games</h2>
+        <div class="FullSubBlock">
+            <h3>Currently playing</h3>
+            {% if active_games -%}
+            {% for game in active_games -%}
+            <div class="BookWrapper">
+                {% if game.image -%}
+                <div class="SubBlock">
+                    <img src="/img?img_key={{game.image}}">
+                </div>
+                {% endif -%}
+                <div class="SubBlock">
+                    {{game.title}}<br>
+                    on {{game.platform}}
+                </div>
+            </div>
+            {% endfor -%}
+            {% else -%}
+            <p>{{user.salutation}} {{user.realname}} is currently not playing any game. Recommend something.</p>
+            {% endif %}
+        </div>
+
+        <div class="FullSubBlock">
+            <h3>Previously playing</h3>
+            {% if inactive_games -%}
+            {% for game in inactive_games -%}
+            <div class="BookWrapper">
+                {% if game.image -%}
+                <div class="SubBlock">
+                    <img src="/img?img_key={{game.image}}">
+                </div>
+                {% endif -%}
+                <div class="SubBlock">
+                    {{game.title}}<br>
+                    on {{game.platform}}
+                </div>
+            </div>
+            {% endfor -%}
+            {% else -%}
+            <p>{{user.salutation}} {{user.realname}} is not recorded to have finished reading any game yet.</p>
+            {% endif -%}
+        </div>
+    </div> <!-- End of Game -->
 
     <div class="Block" id="GuestMessage">
         <h2>Messages for {{user.salutation}} {{user.realname}}</h2>

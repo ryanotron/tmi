@@ -1,4 +1,4 @@
-application: too-much-info
+application: new-appengine-project
 version: 1
 runtime: python27
 api_version: 1

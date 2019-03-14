@@ -39,6 +39,9 @@ class SuperHandler(webapp2.RequestHandler):
 
 class MainpageHandler(SuperHandler):
     def get(self):
+        self.render('thenuclearoption.html')
+        return
+        
         userid = self.request.cookies.get('userid')
         username = 'Anon'
         salutation = 'Comrade'
@@ -1175,6 +1178,8 @@ class PostUserMessageHandler(SuperHandler):
             
 class PostGuestMessageHandler(SuperHandler):
     def post(self):
+        print 'non!'
+        return
         guest_name = self.request.get('guest_name')
         message    = self.request.get('guest_message')
         userid     = self.request.get('userid')
@@ -1284,6 +1289,9 @@ class PresentExpenseHandler(SuperHandler):
 
 class LibraryHandler(SuperHandler):
     def get(self, username):
+        self.render('thenuclearoption.html')
+        return
+        
         userid = self.request.cookies.get('userid')
         userid, user = utils.verify_user(userid)
         libtype = self.request.get('type')
@@ -1397,8 +1405,14 @@ class PanelHandler(SuperHandler):
         else:
             self.redirect('/login')
             
+class NuclearHandler(SuperHandler):
+    def get(self, username):
+        self.render('thenuclearoption.html')
+        return
+            
 class UserpageHandler(SuperHandler):
     def get(self, username):
+
         users = db.GqlQuery('select * from UserModel where username = :1 limit 1', username)
         users = list(users)
         if len(users) > 0:
@@ -1414,41 +1428,41 @@ class UserpageHandler(SuperHandler):
                 old_photos = old_photos[1:]
             else:
                 old_photos = []
-            social_media = db.GqlQuery('select * from SocialMediaModel where userid = :1', userid)
-            books = list(db.GqlQuery('select * from BookLibraryModel where userid = :1 order by added desc limit 10', userid))
-            active_books = [book for book in books if book.active]
-            inactive_books = [book for book in books if not book.active]
-            if len(inactive_books) > 4:
-                inactive_books = inactive_books[0:4]
-            games = list(db.GqlQuery('select * from GameLibraryModel where userid = :1 order by added desc limit 10', userid))
-            active_games = [game for game in games if game.active]
-            inactive_games = [game for game in games if not game.active]
-            if len(inactive_games) > 4:
-                inactive_games = inactive_games[0:4]
+            #social_media = db.GqlQuery('select * from SocialMediaModel where userid = :1', userid)
+            #books = list(db.GqlQuery('select * from BookLibraryModel where userid = :1 order by added desc limit 10', userid))
+            #active_books = [book for book in books if book.active]
+            #inactive_books = [book for book in books if not book.active]
+            #if len(inactive_books) > 4:
+                #inactive_books = inactive_books[0:4]
+            #games = list(db.GqlQuery('select * from GameLibraryModel where userid = :1 order by added desc limit 10', userid))
+            #active_games = [game for game in games if game.active]
+            #inactive_games = [game for game in games if not game.active]
+            #if len(inactive_games) > 4:
+                #inactive_games = inactive_games[0:4]
             
             user_messages = stats.user_messages(user, 5)
             guest_messages = stats.guest_messages(user)
             
-            songs = db.GqlQuery('select * from MusicLibraryModel where userid = :1', userid)
-            songs_top5_alltime = sorted(songs, cmp = lambda x, y: int(x.report_count - y.report_count), reverse = True)
-            if len(songs_top5_alltime) > 5:
-                songs_top5_alltime = songs_top5_alltime[:5]
-            cutoff = datetime.datetime.utcnow() - datetime.timedelta(days = 7)
-            songs_7days = [song for song in songs if song.last_report > cutoff]
+            #songs = db.GqlQuery('select * from MusicLibraryModel where userid = :1', userid)
+            #songs_top5_alltime = sorted(songs, cmp = lambda x, y: int(x.report_count - y.report_count), reverse = True)
+            #if len(songs_top5_alltime) > 5:
+                #songs_top5_alltime = songs_top5_alltime[:5]
+            #cutoff = datetime.datetime.utcnow() - datetime.timedelta(days = 7)
+            #songs_7days = [song for song in songs if song.last_report > cutoff]
             
             self.render('userpage.html', user = user,
                                          old_photos = old_photos,
                                          coffee_stats = coffee_stats,
-                                         social_media = social_media,
+                                         #social_media = social_media,
                                          sleep_stats = sleep_stats,
                                          meal_stats = meal_stats,
                                          hygiene_stats = hygiene_stats,
-                                         active_books = active_books,
-                                         inactive_books = inactive_books,
-                                         active_games = active_games,
-                                         inactive_games = inactive_games,
-                                         songs_top = songs_top5_alltime,
-                                         songs_week = songs_7days,
+                                         #active_books = active_books,
+                                         #inactive_books = inactive_books,
+                                         #active_games = active_games,
+                                         #inactive_games = inactive_games,
+                                         #songs_top = songs_top5_alltime,
+                                         #songs_week = songs_7days,
                                          user_messages = user_messages,
                                          guest_messages = guest_messages)
         else:
@@ -1759,6 +1773,8 @@ class Blog_EditPostHandler(SuperHandler):
 
 class PublicUserpageHandler(SuperHandler):
     def get(self, username):
+        self.render('thenuclearoption.html')
+        return
         users = db.GqlQuery('select * from UserModel where username = :1 limit 1', username)
         users = list(users)
         if len(users) > 0:
@@ -1793,6 +1809,13 @@ class HackHandler(SuperHandler):
             # self.redirect('/panel')
         else:
             self.redirect('/login')
+            
+#class AddBetaKey(SuperHandler):
+#    def get(self):
+#        keystring = '0000'
+#        betakey = models.BetaKeyModel(keystring = keystring, used = False)
+#        betakey.put()
+#        self.render('thenuclearoption.html')
 
 class Hack_AddTimezonesHandler(SuperHandler):
     def post(self):

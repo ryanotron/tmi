@@ -13,7 +13,7 @@ function drawChart() {
     {%- endfor -%}
     ]);
     {%- endfor -%}
-    var options = {'height': 300, 'width': 500, 'lineWidth': 1, 'pointSize': 5, vAxis: {format: '##', title: '{{chart["v_label"]}}', minValue: 0}, 'title': '{{chart["title"]}}'};
+    var options = {'height': 360, 'width': 960, 'lineWidth': 1, 'pointSize': 2, vAxis: {format: '##', title: '{{chart["v_label"]}}', minValue: 0}, 'title': '{{chart["title"]}}'};
     var chart = new google.visualization.LineChart(document.getElementById('{{chart["div_name"]}}'));
     chart.draw(data, options);
     }

@@ -8,9 +8,9 @@
         {% for cup in daily_cups -%}
         data.addRow([new Date({{cup[0].year}}, {{cup[0].month - 1}}, {{cup[0].day}}), {{cup[1]}}]);
         {% endfor %}
-        var options = {'height': 400,
+        var options = {'height': 360,
                        'lineWidth': 1,
-                       'pointSize': 5,
+                       'pointSize': 3,
                        vAxis: {format: '##', title: 'Cups'}};
 
         var chart = new google.visualization.LineChart(document.getElementById('coffee_chart'));

@@ -2,7 +2,12 @@
 from google.appengine.ext import db
 
 gethours = lambda x: '%02d:%02d' % (abs(x), abs(60*(x - int(x))))
-weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
+def get_year_day_count():
+    today = datetime.date.today()
+    last_year = datetime.date(year = today.year-1, month=today.month, day = today.day)
+    return (today - last_year).days
 
 def filter_outliers(data, min_pct, max_pct):
     min_val = numpy.percentile(data, min_pct)
@@ -58,7 +63,7 @@ def dayofweek_histogram(activities):
     
 def dayofmonth_histogram(activities):
     days = [act.when.day for act in activities]
-    h, b = numpy.histogram(days, bins = range(1, 32))
+    h, b = numpy.histogram(days, bins = range(0, 33))
     return h, b
     
 def general_activity_stats(user, actname):
@@ -90,7 +95,9 @@ def general_activity_stats(user, actname):
     return status
 
 def sleep_stats(user):
-    sleeps = get_timed_activities(user, 'sleep', number = 100)
+    #day_count = 2 * get_year_day_count()
+    day_count = 7*4*6 # six 'metric' months
+    sleeps = get_timed_activities(user, 'sleep', number = day_count)
     status = {}
     
     if not sleeps:
@@ -127,7 +134,7 @@ def sleep_stats(user):
         for sleep in sleeps:
             duration = (sleep.end - sleep.start).total_seconds() / 3600.0
             alltime_total += duration
-            if sleep.end < lastweek_end and sleep.end > lastweek_start:
+            if sleep.end < lastweek_end and sleep.end >= lastweek_start:
                 lastweek_total += duration
                 #logging.error('lastweek total %2.2f' % lastweek_total)
             elif sleep.end >= lastweek_end:
@@ -205,7 +212,7 @@ def sleep_stats(user):
                 if not debt_list:
                     debt_list.append([sleep[0], max(0.0, alltime_average - sleep[1])])
                 else:
-                    debt_list.append([sleep[0], max(0.0, prev_debt + alltime_average - sleep[1])])
+                    debt_list.append([sleep[0], max(0.0, alltime_average - sleep[1])])
                 prev_debt = debt_list[-1][1]
                 #logging.error('at date ' + sleep[0].strftime('%d/%m/%Y') + ' duration: %2.2f' %sleep[1] +' accumulated debt: %2.2f' % prev_debt)
                 
@@ -220,14 +227,17 @@ def sleep_stats(user):
         
         # sleep histogram
         sleep_hours_list = filter_outliers(sleep_hours_list, 5, 95)
-        h, b = numpy.histogram(sleep_hours_list, bins = numpy.ceil(numpy.sqrt(len(sleep_list))))
+        #h, b = numpy.histogram(sleep_hours_list, bins = numpy.ceil(numpy.sqrt(len(sleep_list))))
+        h, b = numpy.histogram(sleep_hours_list, bins = numpy.arange(0, 13, 0.5))
         sleep_histogram = zip(b[:len(h)], b[1:len(h)+1], h)
         status['sleep_histogram'] = sleep_histogram
         return status
 
 def coffee_stats(user):
     userid = str(user.key().id())
-    coffees = get_activities(user, 'coffee', number = 500)
+    #day_count = 2 * get_year_day_count()
+    day_count = 7*4*6 # six 'metric' months
+    coffees = get_activities(user, 'coffee', number = day_count)
     status = {}
     
     if coffees:
@@ -245,7 +255,8 @@ def coffee_stats(user):
         daysince = (today.date() - coffees[-1].when.date()).days
         
         coffee_times = [c.when.hour + c.when.minute/60.0 for c in coffees]
-        h, b = numpy.histogram(coffee_times, bins = numpy.ceil(numpy.sqrt(len(coffee_times))))
+        #h, b = numpy.histogram(coffee_times, bins = numpy.ceil(numpy.sqrt(len(coffee_times))))
+        h, b = numpy.histogram(coffee_times, bins = numpy.arange(0, 25, 0.5))
         b = [gethours(e) for e in b]
         status['coffee_times_histogram'] = zip(b, b[1:], h)
         
@@ -323,7 +334,7 @@ def get_meals(user, order = 'desc', number = 0):
     return list(meals)
     
 def meal_stats(user):
-    meals = get_meals(user, order = 'desc', number = 300)
+    meals = get_meals(user, order = 'desc', number = 3*7*4*6)
     if not meals:
         return None
     meals.reverse()
@@ -348,15 +359,19 @@ def meal_stats(user):
     dilist = filter_outliers([getminutes(meal) for meal in proper_meals if meal.category == 'dinner'], 5, 95)
     
     gethours = lambda x: '%02d:%02d' % (abs(x), abs(60*(x - int(x))))
-    h, b = numpy.histogram(brlist, bins = numpy.ceil(numpy.sqrt(len(brlist))))
+    hours_bins = numpy.arange(0, 25, 0.5)
+    #h, b = numpy.histogram(brlist, bins = numpy.ceil(numpy.sqrt(len(brlist))))
+    h, b = numpy.histogram(brlist, bins = numpy.arange(2, 15, 0.5))
     b = [gethours(e) for e in b]
     status['br_histogram'] = zip(b, b[1:], h)
     
-    h, b = numpy.histogram(lulist, bins = numpy.ceil(numpy.sqrt(len(lulist))))
+    #h, b = numpy.histogram(lulist, bins = numpy.ceil(numpy.sqrt(len(lulist))))
+    h, b = numpy.histogram(lulist, bins = numpy.arange(6, 19, 0.5))
     b = [gethours(e) for e in b]
     status['lu_histogram'] = zip(b, b[1:], h)
     
-    h, b = numpy.histogram(dilist, bins = numpy.ceil(numpy.sqrt(len(dilist))))
+    #h, b = numpy.histogram(dilist, bins = numpy.ceil(numpy.sqrt(len(dilist))))
+    h, b = numpy.histogram(dilist, bins = hours_bins)
     b = [gethours(e) for e in b]
     status['di_histogram'] = zip(b, b[1:], h)
 
@@ -399,15 +414,15 @@ def hygiene_stats(user):
     stats['shave'] = {}
     stats['haircut'] = {}
     
-    showers  = get_activities(user, 'shower', number = 100)
-    shaves   = get_activities(user, 'shave', number = 100)
-    haircuts = get_activities(user, 'cut hair', number = 100)
+    showers  = get_activities(user, 'shower', number = 7*4*6)
+    shaves   = get_activities(user, 'shave', number = 3*4*6)
+    haircuts = get_activities(user, 'cut hair', number = 30)
     
     if len(showers) > 0:
         stats['shower']['latest'] = -1*(showers[0].when - datetime.datetime.utcnow()).total_seconds() / 3600.0
         shower_between = [(showers[i].when - showers[i+1].when).total_seconds()/3600.0 for i in range(len(showers) - 1)]
         shower_between = filter_outliers(shower_between, 5, 95)
-        h, b = numpy.histogram(shower_between, bins = numpy.ceil(numpy.sqrt(len(shower_between))))
+        h, b = numpy.histogram(shower_between, bins = numpy.arange(0, 49, 1))
         shower_histogram = zip(b[:len(h)], b[1:len(h)+1], h)
         stats['shower']['histogram'] = shower_histogram
         stats['shower']['ave_interval'] = len(shower_between) > 0 and (sum(shower_between) / len(shower_between)) or 0
@@ -415,7 +430,7 @@ def hygiene_stats(user):
             shower_times = [(s.when.hour + s.when.minute/60.0 + s.timezone)%24 for s in showers]
         except:
             shower_times = [(s.when.hour + s.when.minute/60.0 + user.timezone)%24 for s in showers]
-        h, b = numpy.histogram(shower_times, bins = numpy.ceil(numpy.sqrt(len(shower_times))))
+        h, b = numpy.histogram(shower_times, bins = numpy.arange(0, 25, 1))
         b = [gethours(e) for e in b]
         stats['shower']['times_histogram'] = zip(b, b[1:], h)
         
