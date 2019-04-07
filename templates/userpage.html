@@ -118,7 +118,6 @@
             <h3>Latest messages from {{user.salutation}} {{user.realname}}</h3>
             {% for message in user_messages -%}
             <div class="Message">
-                {{'%2.2f' % ((datetime.datetime.utcnow() - message.when).total_seconds() / 3600)}} hours ago, on {{(message.when + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y %H:%M')}} UTC{{'%+2.1f' % user.timezone}}
                 {% if (datetime.datetime.utcnow() - message.when).days > 14 -%}
                     {{'%d' % ((datetime.datetime.utcnow() - message.when).days/7)}} weeks ago, on {{(message.when + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y %H:%M')}} UTC{{'%+2.1f' % user.timezone}}
                 {% elif (datetime.datetime.utcnow() - message.when).days > 2 -%}

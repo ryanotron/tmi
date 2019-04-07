@@ -13,6 +13,13 @@ def filter_outliers(data, min_pct, max_pct):
     min_val = numpy.percentile(data, min_pct)
     max_val = numpy.percentile(data, max_pct)
     return [d for d in data if d < max_val and d > min_val]
+
+def get_timed_activities_from_t(user, act_name, tee, order='desc'):
+    userid = str(user.key().id())
+    query = "select * from TimedActivityModel where userid = '{:s}' and name = '{:s}' and end > datetime('{:s}') order by end {:s}"\
+            .format(userid, act_name, tee.strftime('%Y-%m-%d %H:%M:%S'), order)
+    activities = db.GqlQuery(query)
+    return list(activities)
     
 def get_timed_activities(user, act_name, orderby = 'end', order = 'desc', number = 0):
     userid = str(user.key().id())
@@ -96,8 +103,10 @@ def general_activity_stats(user, actname):
 
 def sleep_stats(user):
     #day_count = 2 * get_year_day_count()
-    day_count = 7*4*6 # six 'metric' months
-    sleeps = get_timed_activities(user, 'sleep', number = day_count)
+    day_count = 7*4*6 + numpy.ceil(6/3*7)# six 'metric' months
+    #sleeps = get_timed_activities(user, 'sleep', number = day_count)
+    tee = datetime.datetime.utcnow() - datetime.timedelta(days=day_count)
+    sleeps = get_timed_activities_from_t(user, 'sleep', tee)
     status = {}
     
     if not sleeps:
@@ -236,8 +245,14 @@ def sleep_stats(user):
 def coffee_stats(user):
     userid = str(user.key().id())
     #day_count = 2 * get_year_day_count()
-    day_count = 7*4*6 # six 'metric' months
-    coffees = get_activities(user, 'coffee', number = day_count)
+    day_count = 7*4*6 + numpy.ceil(6/3*7)#about six months
+    #coffees = get_activities(user, 'coffee', number = day_count)
+    
+    now = datetime.datetime.now()
+    then = now - datetime.timedelta(days=day_count)
+    
+    coffees = get_activities_from_t(user, 'coffee', then)
+    
     status = {}
     
     if coffees:
@@ -324,6 +339,14 @@ def get_activities(user, act_name, order = 'desc', number = 0):
         query = query + ' limit %d' % number
     acts = db.GqlQuery(query)
     return list(acts)
+
+def get_activities_from_t(user, act_name, tee, order='desc'):
+    userid = str(user.key().id())
+    query = "select * from ActivityModel where userid = '{:s}' and name = '{:s}' and when > datetime('{:s}') order by when {:s}"\
+            .format(userid, act_name, tee.strftime('%Y-%m-%d %H:%M:%S'), order)
+    logging.error(query)
+    acts = db.GqlQuery(query)
+    return list(acts)
     
 def get_meals(user, order = 'desc', number = 0):
     userid = str(user.key().id())
@@ -361,17 +384,17 @@ def meal_stats(user):
     gethours = lambda x: '%02d:%02d' % (abs(x), abs(60*(x - int(x))))
     hours_bins = numpy.arange(0, 25, 0.5)
     #h, b = numpy.histogram(brlist, bins = numpy.ceil(numpy.sqrt(len(brlist))))
-    h, b = numpy.histogram(brlist, bins = numpy.arange(2, 15, 0.5))
+    h, b = numpy.histogram(brlist, bins = numpy.arange(7.5-6, 7.5+7, 0.5))
     b = [gethours(e) for e in b]
     status['br_histogram'] = zip(b, b[1:], h)
     
     #h, b = numpy.histogram(lulist, bins = numpy.ceil(numpy.sqrt(len(lulist))))
-    h, b = numpy.histogram(lulist, bins = numpy.arange(6, 19, 0.5))
+    h, b = numpy.histogram(lulist, bins = numpy.arange(12.5-6, 12.5+7, 0.5))
     b = [gethours(e) for e in b]
     status['lu_histogram'] = zip(b, b[1:], h)
     
     #h, b = numpy.histogram(dilist, bins = numpy.ceil(numpy.sqrt(len(dilist))))
-    h, b = numpy.histogram(dilist, bins = hours_bins)
+    h, b = numpy.histogram(dilist, bins = numpy.arange(19.5-6, 19.5+7, 0.5))
     b = [gethours(e) for e in b]
     status['di_histogram'] = zip(b, b[1:], h)
 

@@ -1407,12 +1407,23 @@ class PanelHandler(SuperHandler):
             
 class NuclearHandler(SuperHandler):
     def get(self, username):
-        self.render('thenuclearoption.html')
+        #self.render('thenuclearoption.html')
+        users = db.GqlQuery('select * from UserModel where username = :1 limit 1', username)
+        users = list(users)
+        if len(users) > 0:
+            user = users[0]
+            coffee_stats = stats.coffee_stats(user)
+            self.render('publicuserpage.html', user = user,
+                                               coffee_stats = coffee_stats)
+        else:
+            self.render('thenuclearoption.html')
         return
             
 class UserpageHandler(SuperHandler):
+    @require_sameuser
     def get(self, username):
-
+        if not type(username) == type('a string'):
+            username = username.username
         users = db.GqlQuery('select * from UserModel where username = :1 limit 1', username)
         users = list(users)
         if len(users) > 0:

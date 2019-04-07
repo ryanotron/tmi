@@ -1,6 +1,21 @@
-﻿{% extends 'basepage.html' %}
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>{{user.salutation}} {{user.realname}} - Too Much Information!</title>
+    <link type="text/css" rel="stylesheet" href="/stylesheets/userpage.css">
+    <link rel="shortcut-icon" href="/favicon.ico" type="x-icon">
+</head>
 
-{% block content %}
+<body>
+    <div class="Block" id="Navigation">
+        <ul>
+            <a href="/u/{{user.username}}"><li>TMI</a>
+            <a href="/u/{{user.username}}/library?type=book"><li>Books</a>
+            <a href="/u/{{user.username}}/library?type=game"><li>Games</a>
+            <a href="/about"><li>About</a>
+        </ul>
+    </div>
+    
     <div class="BlockWrapper">
         <h1>{{user.salutation}} {{user.realname}}</h1>
         <p>Last seen on {{(user.last_seen + datetime.timedelta(hours = user.timezone)).strftime('%H:%M, %d/%m/%Y')}} UTC{{'%+2.1f' % user.timezone}}, which is {{'%2.2f' % ((datetime.datetime.utcnow() - user.last_seen).total_seconds() / (60.0 * 60))}} hours ago.</p>
@@ -16,5 +31,6 @@
                 <p>{{user.salutation}} {{user.realname}} has not shared {{user.pos_determi}} habits yet. Could {{user.nom_pronoun}} be a milk drinker?</p>
             {% endif %}
         <div>
-        
-{% endblock %}
+    </div> 
+</body>
+</html>
