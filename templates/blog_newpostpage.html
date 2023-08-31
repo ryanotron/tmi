@@ -25,7 +25,7 @@
         </ol>
         Category <input type="text" name="category" value="{{params['category']}}"><br>
         {% if post -%}
-            <input type="hidden" name="postid" value="{{post.key().id()}}">
+            <input type="hidden" name="postid" value="{{post.key.id()}}">
         {% endif -%}
         <div class="CategoryListing">
             <p>Previous categories:</p>

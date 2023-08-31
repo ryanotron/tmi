@@ -22,7 +22,7 @@
         {% if sameuser -%}
         <div class="Toggler">
             <form action="/reportmusic" method="post">
-                <input type="hidden" name="key" value="{{song.key()}}">
+                <input type="hidden" name="key" value="{{song.key}}">
                 <input type="submit" value="Just listened">
             </form>
         </div>

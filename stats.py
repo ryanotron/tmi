@@ -1,5 +1,6 @@
 ﻿import datetime, logging, numpy
-from google.appengine.ext import db
+from google.appengine.ext import ndb
+db = ndb
 
 gethours = lambda x: '%02d:%02d' % (abs(x), abs(60*(x - int(x))))
 weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
@@ -15,18 +16,18 @@ def filter_outliers(data, min_pct, max_pct):
     return [d for d in data if d < max_val and d > min_val]
 
 def get_timed_activities_from_t(user, act_name, tee, order='desc'):
-    userid = str(user.key().id())
+    userid = str(user.key.id())
     query = "select * from TimedActivityModel where userid = '{:s}' and name = '{:s}' and end > datetime('{:s}') order by end {:s}"\
             .format(userid, act_name, tee.strftime('%Y-%m-%d %H:%M:%S'), order)
-    activities = db.GqlQuery(query)
+    activities = db.gql(query)
     return list(activities)
     
 def get_timed_activities(user, act_name, orderby = 'end', order = 'desc', number = 0):
-    userid = str(user.key().id())
+    userid = str(user.key.id())
     query = 'select * from TimedActivityModel where userid = \'%s\' and name = \'%s\' order by %s %s' % (userid, act_name, orderby, order)
     if number > 0:
         query += ' limit %d' % number
-    activities = db.GqlQuery(query)
+    activities = db.gql(query)
     return list(activities)
     
 def timebetween_histogram(activities, unit = 'hours'):
@@ -74,8 +75,8 @@ def dayofmonth_histogram(activities):
     return h, b
     
 def general_activity_stats(user, actname):
-    userid = str(user.key().id())
-    activities = list(db.GqlQuery('select * from ActivityModel where userid = :1 order by when desc', userid))
+    userid = str(user.key.id())
+    activities = list(db.gql('select * from ActivityModel where userid = :1 order by when desc', userid))
     activities = [act for act in activities if act.name == actname]
     timeshift = datetime.timedelta(hours = user.timezone)
     for i in range(len(activities)):
@@ -102,9 +103,7 @@ def general_activity_stats(user, actname):
     return status
 
 def sleep_stats(user):
-    #day_count = 2 * get_year_day_count()
-    day_count = 7*4*6 + numpy.ceil(6/3*7)# six 'metric' months
-    #sleeps = get_timed_activities(user, 'sleep', number = day_count)
+    day_count = 7*26 # half a year
     tee = datetime.datetime.utcnow() - datetime.timedelta(days=day_count)
     sleeps = get_timed_activities_from_t(user, 'sleep', tee)
     status = {}
@@ -201,9 +200,9 @@ def sleep_stats(user):
         status['mav7'] = mav7
         # 30-day moving average
         mav30 = []
-        if len(r_sleep_list) > 30:
-            for i in range(30, len(r_sleep_list)):
-                mav30.append([r_sleep_list[i-1][0], sum([e[1] for e in r_sleep_list[(i-30):i]])/30.0])
+        if len(r_sleep_list) > 28:
+            for i in range(28, len(r_sleep_list)):
+                mav30.append([r_sleep_list[i-1][0], sum([e[1] for e in r_sleep_list[(i-28):i]])/28.0])
         status['mav30'] = mav30
         mav = []
         if len(mav7) > 10 and len(mav30) > 10:
@@ -235,20 +234,21 @@ def sleep_stats(user):
         sleep_hours_list = [elem[1] for elem in sleep_list]
         
         # sleep histogram
-        sleep_hours_list = filter_outliers(sleep_hours_list, 5, 95)
+        # sleep_hours_list = filter_outliers(sleep_hours_list, 5, 95)
         #h, b = numpy.histogram(sleep_hours_list, bins = numpy.ceil(numpy.sqrt(len(sleep_list))))
-        h, b = numpy.histogram(sleep_hours_list, bins = numpy.arange(0, 13, 0.5))
+        h, b = numpy.histogram(sleep_hours_list, bins = numpy.arange(0, 16.5, 0.5))
         sleep_histogram = zip(b[:len(h)], b[1:len(h)+1], h)
         status['sleep_histogram'] = sleep_histogram
         return status
 
 def coffee_stats(user):
-    userid = str(user.key().id())
+    userid = str(user.key.id())
     #day_count = 2 * get_year_day_count()
-    day_count = 7*4*6 + numpy.ceil(6/3*7)#about six months
+    # day_count = 7*4*6 + numpy.ceil(6/3*7)#about six months
+    day_count = 7*26
     #coffees = get_activities(user, 'coffee', number = day_count)
     
-    now = datetime.datetime.now()
+    now = datetime.datetime.utcnow()
     then = now - datetime.timedelta(days=day_count)
     
     coffees = get_activities_from_t(user, 'coffee', then)
@@ -258,6 +258,7 @@ def coffee_stats(user):
     if coffees:
         # hours since last cup
         status['last_cup'] = (datetime.datetime.utcnow() - coffees[0].when).total_seconds() / 3600.0
+        logging.error('latest coffee {}'.format(coffees[0].when))
         
         # preprocessing
         timeshift = datetime.timedelta(hours = user.timezone)
@@ -289,7 +290,10 @@ def coffee_stats(user):
         # begin looping over list, filling status along the way
         for coffee in coffees:
             day = coffee.when
-            daily_cups[day.date()] += 1
+            if day.date() in daily_cups:
+                daily_cups[day.date()] += 1
+            else:
+                daily_cups[day.date()] = 1
 
         daily_cups = daily_cups.items()
         daily_cups.sort(reverse = True)
@@ -318,8 +322,8 @@ def coffee_stats(user):
         return None
     
 def meal_status(user):
-    userid = str(user.key().id())
-    meals = db.GqlQuery('select * from MealModel where userid = :1 order by when desc', userid)
+    userid = str(user.key.id())
+    meals = db.gql('select * from MealModel where userid = :1 order by when desc', userid)
     meals = list(meals)
     if len(meals) > 0:
         latest_meal = meals[0]
@@ -333,31 +337,32 @@ def meal_status(user):
         pass
 
 def get_activities(user, act_name, order = 'desc', number = 0):
-    userid = str(user.key().id())
+    userid = str(user.key.id())
     query = 'select * from ActivityModel where userid = \'%s\' and name = \'%s\' order by when %s' % (userid, act_name, order)
     if number > 0:
         query = query + ' limit %d' % number
-    acts = db.GqlQuery(query)
+    acts = db.gql(query)
     return list(acts)
 
 def get_activities_from_t(user, act_name, tee, order='desc'):
-    userid = str(user.key().id())
-    query = "select * from ActivityModel where userid = '{:s}' and name = '{:s}' and when > datetime('{:s}') order by when {:s}"\
-            .format(userid, act_name, tee.strftime('%Y-%m-%d %H:%M:%S'), order)
+    userid = str(user.key.id())
+    now = datetime.datetime.utcnow()
+    query = "select * from ActivityModel where userid = '{:s}' and name = '{:s}' and when > datetime('{:s}') and when < datetime('{:s}') order by when {:s}"\
+            .format(userid, act_name, tee.strftime('%Y-%m-%d %H:%M:%S'), now.strftime('%Y-%m-%d %H:%M:%S'), order)
     logging.error(query)
-    acts = db.GqlQuery(query)
+    acts = db.gql(query)
     return list(acts)
     
 def get_meals(user, order = 'desc', number = 0):
-    userid = str(user.key().id())
+    userid = str(user.key.id())
     query = 'select * from MealModel where userid = \'%s\' order by when %s' % (userid, order)
     if number > 0:
         query += ' limit %d' % number
-    meals = db.GqlQuery(query)
+    meals = db.gql(query)
     return list(meals)
     
 def meal_stats(user):
-    meals = get_meals(user, order = 'desc', number = 3*7*4*6)
+    meals = get_meals(user, order = 'desc', number = 3*7*26)
     if not meals:
         return None
     meals.reverse()
@@ -470,11 +475,11 @@ def hygiene_stats(user):
     return stats
     
 def get_activities(user, act_name, order = 'desc', number = 0):
-    userid = str(user.key().id())
+    userid = str(user.key.id())
     query = 'select * from ActivityModel where userid = \'%s\' and name = \'%s\' order by when %s' % (userid, act_name, order)
     if number > 0:
         query = query + ' limit %d' % number
-    acts = db.GqlQuery(query)
+    acts = db.gql(query)
     return list(acts)
     
 def time_between_activities(user, act_name, order = 'desc', number = 0):
@@ -493,12 +498,12 @@ def average_time_between_activities(user, act_name):
         return 0
 
 def activity_status(user, act_name, number):
-    userid = str(user.key().id())
+    userid = str(user.key.id())
     query = 'select * from ActivityModel where userid = \'%s\' and name = \'%s\' order by when desc' % (userid, act_name)
     if number > 0:
         query += ' limit %d' % number
         
-    acts = db.GqlQuery(query)
+    acts = db.gql(query)
     acts = list(acts)
     if len(acts) > 0:
         latest = acts[0]
@@ -510,12 +515,12 @@ def activity_status(user, act_name, number):
         pass
         
 def user_messages(user, number):
-    userid = str(user.key().id())
+    userid = str(user.key.id())
     query = 'select * from UserMessageModel where userid = \'%s\' order by when desc' % userid
     if number > 0:
         query += ' limit %d' % number
         
-    messages = db.GqlQuery(query)
+    messages = db.gql(query)
     messages = list(messages)
     if len(messages) > 0:
         return messages
@@ -523,12 +528,12 @@ def user_messages(user, number):
         pass
         
 def guest_messages(user, number = 0):
-    userid = str(user.key().id())
+    userid = str(user.key.id())
     query = 'select * from GuestMessageModel where userid = \'%s\' order by when desc' % userid
     if number > 0:
         query += ' limit %d' % number
         
-    messages = db.GqlQuery(query)
+    messages = db.gql(query)
     messages = list(messages)
     if len(messages) > 0:
         return messages

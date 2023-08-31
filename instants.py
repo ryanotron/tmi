@@ -1,7 +1,8 @@
-﻿from google.appengine.ext import db
+﻿from google.appengine.ext import ndb
 import webapp2
 import utils, handlers, models
 import datetime
+db = ndb
 
 class InsPostActivityHandler(handlers.SuperHandler):
     def post(self):

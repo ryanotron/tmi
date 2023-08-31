@@ -1,7 +1,8 @@
 import constants
 import random, datetime, hashlib, logging
 from string import letters
-from google.appengine.ext import db
+from google.appengine.ext import ndb
+db = ndb
 
 def render_str(template, **params):
     t = constants.jinjaenv.get_template(template)
@@ -31,9 +32,13 @@ def verify_password(username, password, hashedpw):
     return securify_password(username, password, salt) == hashedpw
     
 def validate_user(userid):
-    user = db.Key.from_path('UserModel', int(userid))
-    if user:
-        return db.get(user)
+    # user = db.Key.from_path('UserModel', int(userid))
+    logging.error('validate user {}'.format(userid))
+    user = db.Key('UserModel', int(userid))
+    user_entity = user.get()
+    logging.error('{}'.format(user_entity.username))
+    if user_entity:
+        return user_entity
     else:
         return None
         

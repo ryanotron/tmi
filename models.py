@@ -1,4 +1,5 @@
-from google.appengine.ext import db
+from google.appengine.ext import ndb
+db = ndb
 
 class UserModel(db.Model):
     username   = db.StringProperty(required = True)
@@ -22,8 +23,8 @@ class SocialMediaModel(db.Model):
     userid = db.StringProperty(required = True)
     sm_username = db.StringProperty(required = True)
     sm_sitename = db.StringProperty(required = True)
-    sm_siteurl  = db.LinkProperty()
-    sm_userpage = db.LinkProperty()
+    sm_siteurl  = db.StringProperty()
+    sm_userpage = db.StringProperty()
     
 class ImageModel(db.Model):
     userid   = db.StringProperty(required = True)

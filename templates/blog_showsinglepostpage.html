@@ -22,7 +22,7 @@
         {{post.content|safe}}
         <div class="PostFooter">
             Posted under: {{post.category}}, 
-            <a href="/u/{{user.username}}/blog/{{post.key().id()}}">Permalink</a>
+            <a href="/u/{{user.username}}/blog/{{post.key.id()}}">Permalink</a>
         </div>
     </div>
     {% else -%}

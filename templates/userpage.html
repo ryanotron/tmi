@@ -47,7 +47,7 @@
 
 {% if sleep_stats['mav'] -%}
 {% set dataset = sleep_stats['mav'] -%}
-{% set chart = {'v_label':'hours', 'y_label': ['mav7', 'mav30'], 'div_name': 'sleep_mav_chart', 'xspace':'con', 'title': 'Sleep hours moving average timeline', 'datalen': 2} -%}
+{% set chart = {'v_label':'hours', 'y_label': ['mav7', 'mav28'], 'div_name': 'sleep_mav_chart', 'xspace':'con', 'title': 'Sleep hours moving average timeline', 'datalen': 2} -%}
 {% include 'js_timeline_chart.html' %}
 {% elif sleep_stats['mav7'] -%}
 {% set dataset = sleep_stats['mav7'] -%}
@@ -96,7 +96,7 @@
             </div>
             {% for photo in old_photos -%}
             <div class="SubBlock">
-                <img src="/img?img_key={{photo.key()}}">
+                <img src="/img?img_key={{photo.key.id()}}">
                 <p class="Caption">{{(photo.uploaded + datetime.timedelta(hours = user.timezone)).strftime('%d/%m/%Y %H:%M')}}</p>
             </div>
             {% endfor -%}
@@ -139,7 +139,7 @@
         <div class="FullSubBlock" id="Sleep">
             <h3>Sleep</h3>
             {% if sleep_stats -%}
-            <p>{{user.salutation}} {{user.realname}} woke up at {{sleep_stats['latest_waketime'].strftime('%H:%M')}} after {{'%2.2f' % sleep_stats['latest_duration']}} hours of sleep. {{user.nom_pronoun}} slept for, on average, {{'%2.2f' % sleep_stats['lastweek_average']}} hours per day last week, and for {{'%2.2f' % sleep_stats['alltime_average']}} hours all time. To maintain {{user.pos_determi}} all time average {{user.salutation}} {{user.realname}} has a sleep debt of {{'%2.2f' % sleep_stats['debt_by_alltime']}} hours.</p>
+            <p>{{user.salutation}} {{user.realname}} woke up at {{sleep_stats['latest_waketime'].strftime('%H:%M')}} after {{'%2.2f' % sleep_stats['latest_duration']}} hours of sleep. {{user.nom_pronoun}} slept for, on average, {{'%2.2f' % sleep_stats['lastweek_average']}} hours per day last week, and for {{'%2.2f' % sleep_stats['alltime_average']}} hours last 26 weeks. To maintain {{user.pos_determi}} half-year average, {{user.salutation}} {{user.realname}} has a sleep debt of {{'%2.2f' % sleep_stats['debt_by_alltime']}} hours.</p>
             <div class="ChartWrapper">
             <div id="sleep_chart"></div><br>
             <div id="sleep_chart_short"></div><br>
@@ -259,7 +259,7 @@
                 Your name: <input type="text" name="guest_name"><br>
                 Your message:<br>
                 <textarea name="guest_message"></textarea>
-                <input type="hidden" name="userid" value="{{user.key().id()}}"><br>
+                <input type="hidden" name="userid" value="{{user.key.id()}}"><br>
                 <input type="submit">
             </form>
         </div>

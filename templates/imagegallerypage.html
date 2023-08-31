@@ -12,8 +12,8 @@
         <h2>Category: {{key}}</h2>
         {% for im in imdict[key] -%}
         <div class="ImageWrapper">
-            <img src="/img?img_key={{im.key()}}">
-            <p><a href="http://wwww.too-much-info.appspot.com/img?img_key={{im.key()}}">
+            <img src="/img?img_key={{im.key}}">
+            <p><a href="http://wwww.too-much-info.appspot.com/img?img_key={{im.key}}">
             Permalink</a></p>
             <p>Uploaded {{im.uploaded.strftime('%d/%m/%Y - %H:%M')}} UTC</p>
         </div>

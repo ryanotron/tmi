@@ -1,9 +1,11 @@
 import utils, models, constants, stats
-from google.appengine.ext import db
+from google.appengine.ext import ndb
 from google.appengine.api import images
 import webapp2
 import datetime, logging
 import json
+import mimetypes
+db = ndb
 
 def require_login(fn):
     def new_fn(self, *args, **kwargs):
@@ -80,7 +82,7 @@ class SignupHandler(SuperHandler):
         if username:
             valid = constants.username_re.match(username)
             if valid:
-                names = db.GqlQuery('select * from UserModel where username = :1 limit 1', username)
+                names = db.gql('select * from UserModel where username = :1 limit 1', username)
                 names = list(names)
                 if len(names) > 0:
                     username_error = 'This username is taken!'
@@ -93,7 +95,7 @@ class SignupHandler(SuperHandler):
                                 error = True
                                 betakey_error = 'Fill in your beta key!'
                             else:
-                                dbkey = db.GqlQuery('select * from BetaKeyModel where keystring = :1 limit 1', betakey)
+                                dbkey = db.gql('select * from BetaKeyModel where keystring = :1 limit 1', betakey)
                                 if len(list(dbkey)) > 0: 
                                     dbkey = list(dbkey)[0]
                                     if not dbkey.used:
@@ -147,7 +149,7 @@ class SignupHandler(SuperHandler):
                                            betakey_error = betakey_error)
         else:
             new_user.put()
-            userid = str(new_user.key().id())
+            userid = str(new_user.key.id())
             self.response.headers.add_header('Set-Cookie', 'userid=%s; Path=/' % utils.securify_cookie(userid))
             self.redirect('/panel')
             
@@ -162,14 +164,14 @@ class LoginHandler(SuperHandler):
         error = False
         
         if username and password:
-            user = db.GqlQuery('select * from UserModel where username = :1 limit 1', username)
+            user = db.gql('select * from UserModel where username = :1 limit 1', username)
             user = list(user)
             #logging.error('hit database')
             if len(user) > 0:
                 #logging.error('user found')
                 user = user[0]
                 if utils.verify_password(username, password, user.hashedpw):
-                    userid = str(user.key().id())
+                    userid = str(user.key.id())
                     self.response.headers.add_header('Set-Cookie', 'userid=%s; Path=/' % utils.securify_cookie(userid))
                     self.redirect('/panel')
                 else:
@@ -262,10 +264,10 @@ class ProfileHandler(SuperHandler):
                     new_photo = images.resize(new_photo, height = 150)
                     new_photo = models.ImageModel(userid = userid,
                                                   uploaded = datetime.datetime.utcnow(),
-                                                  image = db.Blob(new_photo),
+                                                  image = new_photo,
                                                   category = 'profile_img')
                     new_photo.put()
-                    img_key = new_photo.key()
+                    img_key = new_photo.key.id()
                     user.photo_key = str(img_key)
                     updated = True
                     
@@ -298,8 +300,9 @@ class ProfileHandler(SuperHandler):
 
 class ImageHandler(SuperHandler):
     def get(self):
-        image = db.get(self.request.get('img_key'))
-        #user = db.get(self.request.get('img_key'))
+        imgid = self.request.get('img_key')
+        key = db.Key('ImageModel', int(imgid))
+        image = key.get()
         if image.image:
             self.response.headers['Content-Type'] = 'image/png'
             self.response.out.write(image.image)
@@ -313,15 +316,16 @@ class PostImageHandler(SuperHandler):
         if user:
             cat = self.request.get('img_category')
             img = self.request.get('imagefile')
+            logging.error("uploading image {}, {}".format(cat, type(img)))
             if img:
                 img = images.resize(img, height = 150)
+                logging.error(type(img))
                 img = models.ImageModel(userid = userid,
                                         image = img,
                                         uploaded = datetime.datetime.utcnow(),
                                         category = cat)
                 img.put()
-                imgkey = str(img.key())
-                user.photo_key = imgkey
+                user.photo_key = str(img.key.id())
                 user.last_seen = datetime.datetime.utcnow()
                 user.put()
                 self.redirect('/panel')
@@ -332,11 +336,11 @@ class PostImageHandler(SuperHandler):
             
 class ImageGalleryHandler(SuperHandler):
     def get(self, username):
-        subject = list(db.GqlQuery('select * from UserModel where username = :1 limit 1', username))
+        subject = list(db.gql('select * from UserModel where username = :1 limit 1', username))
         if subject:
             subject = subject[0]
-            subject_id = str(subject.key().id())
-            images = list(db.GqlQuery('select * from ImageModel where userid = :1', subject_id))
+            subject_id = str(subject.key.id())
+            images = list(db.gql('select * from ImageModel where userid = :1', subject_id))
             catset = set([im.category for im in images])
             imdict = {}
             imdict['unspecified'] = [im for im in images if not im.category]
@@ -447,12 +451,9 @@ class PostBatchActivityHandler(SuperHandler):
                                 #logging.error('when is ' + when)
                                 try:
                                     whenmatch = constants.datetime_re.match(when)
-                                    #logging.error(str(whenmatch))
                                     D,M,Y,h,m = [int(elem) for elem in whenmatch.groups()]
                                     when = datetime.datetime(Y, M, D, h, m)
-                                    #logging.error(when)
                                 except:
-                                    #logging.error('error parsing datetime')
                                     self.redirect('/panel')
 
                                 new_act = models.ActivityModel(userid = userid,
@@ -892,10 +893,10 @@ class PostMealHandler(SuperHandler):
                         image = images.resize(meal_image, height = constants.image_height)
                         image = models.ImageModel(userid = userid,
                                                   uploaded = datetime.datetime.utcnow(),
-                                                  image = db.Blob(image),
+                                                  image = image,
                                                   category = 'meal_img')
                         image.put()
-                        image_id = str(image.key())
+                        image_id = str(image.key.id())
                         new_meal.image = image_id
                         
                     new_meal.put()
@@ -1012,10 +1013,10 @@ class PostBookHandler(SuperHandler):
                     image = images.resize(image, height = 150)
                     image = models.ImageModel(userid = userid,
                                               uploaded = datetime.datetime.utcnow(),
-                                              image = db.Blob(image),
+                                              image = image,
                                               category = 'book_img')
                     image.put()
-                    image_id = str(image.key())
+                    image_id = str(image.key.id())
                     new_book.image = image_id
                 
                 new_book.put()
@@ -1069,10 +1070,10 @@ class PostGameHandler(SuperHandler):
                     image = images.resize(image, height = 150)
                     image = models.ImageModel(userid = userid,
                                               uploaded = datetime.datetime.utcnow(),
-                                              image = db.Blob(image),
+                                              image = image,
                                               category = 'game_img')
                     image.put()
-                    image_key = str(image.key())
+                    image_key = str(image.key.id())
                     new_game.image = image_key
                 
                 new_game.put()
@@ -1087,7 +1088,7 @@ class PostMusicHandler(SuperHandler):
     def post(self, user):
         title = self.request.get('title')
         if title:
-            new_music = models.MusicLibraryModel(userid = str(user.key().id()),
+            new_music = models.MusicLibraryModel(userid = str(user.key.id()),
                                                  title = title)
             artist = self.request.get('artist')
             if artist:
@@ -1122,7 +1123,8 @@ class PostMusicHandler(SuperHandler):
 class ReportMusicHandler(SuperHandler):
     @require_login
     def post(self, user):
-        song = db.get(self.request.get('key'))
+        key = db.Key(urlsafe=self.request.get('key'))
+        song = key.get()
         song.report_count += 1
         song.put()
         user.last_seen = datetime.datetime.utcnow()
@@ -1136,14 +1138,14 @@ class MusicLibraryHandler(SuperHandler):
         sameuser = False
         if user.username == username:
             sameuser = True
-            songs = list(db.GqlQuery('select * from MusicLibraryModel where userid = :1 order by last_report desc', userid))
+            songs = list(db.gql('select * from MusicLibraryModel where userid = :1 order by last_report desc', userid))
             self.render('musiclibrarypage.html', user = user,
                                                  songs = songs,
                                                  sameuser = sameuser)
         else:
-            user = list(db.GqlQuery('select * from UserModel where username = :1 limit 1', username))
+            user = list(db.gql('select * from UserModel where username = :1 limit 1', username))
             if len(user) > 0:
-                songs = list(db.GqlQuery('select * from MusicLibraryModel where userid = :1 order by last_report desc', str(user.key().id())))
+                songs = list(db.gql('select * from MusicLibraryModel where userid = :1 order by last_report desc', str(user.key.id())))
                 self.render('musiclibrarypage.html', user = user[0],
                                                      songs = songs,
                                                      sameuser = sameuser)
@@ -1205,7 +1207,7 @@ class PresentActivityHandler(SuperHandler):
             if userid:
                 user = utils.validate_user(userid)
                 if user:
-                    activities = db.GqlQuery('select * from ActivityModel where userid = :1 order by when desc', userid)
+                    activities = db.gql('select * from ActivityModel where userid = :1 order by when desc', userid)
                     activities = list(activities)
                     self.render('activitylistpage.html', user = user, activities = activities)
                 else:
@@ -1217,7 +1219,7 @@ class PresentActivityHandler(SuperHandler):
             
 class ActivityStatusHandler(SuperHandler):
     def get(self, username):
-        user = list(db.GqlQuery('select * from UserModel where username = :1 limit 1', username))
+        user = list(db.gql('select * from UserModel where username = :1 limit 1', username))
         if user:
             user = user[0]
             act_name = self.request.get('act_name')
@@ -1225,7 +1227,7 @@ class ActivityStatusHandler(SuperHandler):
             userconf = json.loads(user.confstring)
             
             if not userconf.has_key('activities'):
-                activities = db.GqlQuery('select * from ActivityModel where userid = :1', userid)
+                activities = db.gql('select * from ActivityModel where userid = :1', userid)
                 activity_categories = list(set(a.name.strip() for a in activities))
                 userconf['activities'] = activity_categories
                 user.confstring = json.dumps(userconf)
@@ -1249,7 +1251,7 @@ class PresentTimedActivityHandler(SuperHandler):
             if userid:
                 user = utils.validate_user(userid)
                 if user:
-                    activities = db.GqlQuery('select * from TimedActivityModel order by end desc')
+                    activities = db.gql('select * from TimedActivityModel order by end desc')
                     activities = list(activities)
                     self.render('timedactivitylistpage.html', user = user, activities = activities)
                 else:
@@ -1263,7 +1265,7 @@ class PresentExpenseHandler(SuperHandler):
     def get(self, username):
         userid = self.request.cookies.get('userid')
         userid, user = utils.verify_user(userid)
-        subject = list(db.GqlQuery('select * from UserModel where username = :1 limit 1', username))
+        subject = list(db.gql('select * from UserModel where username = :1 limit 1', username))
         # if the request is for a real person
         if subject:
             subject = subject[0]
@@ -1275,7 +1277,7 @@ class PresentExpenseHandler(SuperHandler):
                 owner = True
                 
             # get expenses from db, then filter it if requester isn't owner
-            expenses = list(db.GqlQuery('select * from ExpenseModel where userid = :1 order by when desc', str(subject.key().id())))
+            expenses = list(db.gql('select * from ExpenseModel where userid = :1 order by when desc', str(subject.key.id())))
             if not owner:
                 if subject_conf.has_key('public_expense_categories'):
                     expenses = [e for e in expenses if e.category in subject_conf['public_expense_categories']]
@@ -1289,8 +1291,8 @@ class PresentExpenseHandler(SuperHandler):
 
 class LibraryHandler(SuperHandler):
     def get(self, username):
-        self.render('thenuclearoption.html')
-        return
+        # self.render('thenuclearoption.html')
+        # return
         
         userid = self.request.cookies.get('userid')
         userid, user = utils.verify_user(userid)
@@ -1303,20 +1305,21 @@ class LibraryHandler(SuperHandler):
             libtype = 'book'
             
         if user and user.username == username:
-            books = db.GqlQuery('select * from %s where userid = :1 order by added desc' % libmodel, userid)
+            books = db.gql('select * from %s where userid = :1 order by added desc' % libmodel, userid)
             books = list(books)
             self.render('librarypage.html', user = user, login = True, books = books, libtype=libtype)
         else:
-            user = list(db.GqlQuery('select * from UserModel where username = :1 limit 1', username))
+            user = list(db.gql('select * from UserModel where username = :1 limit 1', username))
             if user[0]: 
-                userid = str(user[0].key().id())
-                books = list(db.GqlQuery('select * from %s where userid = :1 order by added desc' % libmodel, userid))
+                userid = str(user[0].key.id())
+                books = list(db.gql('select * from %s where userid = :1 order by added desc' % libmodel, userid))
                 self.render('librarypage.html', user = user[0], login = False, books = books, libtype=libtype)
             else:
                 self.redirect('/')
                 
     def post(self, username):
-        book = db.get(self.request.get('key'))
+        key = db.Key(urlsafe=self.request.get('key'))
+        book = key.get()
         act = self.request.get('act')
         if act == 'toggle':
             book.active = not book.active
@@ -1332,11 +1335,11 @@ class LibraryHandler(SuperHandler):
                 if hasattr(book, 'platform'):
                     cat = 'game_img'
                 image = models.ImageModel(userid = book.userid,
-                                          image = db.Blob(image),
+                                          image = image,
                                           uploaded = datetime.datetime.utcnow(),
                                           category = cat)
                 image.put()
-                imkey = str(image.key())
+                imkey = str(image.key.id())
                 book.image = imkey
         book.put()
         if hasattr(book, 'platform'):
@@ -1362,19 +1365,19 @@ class PanelHandler(SuperHandler):
             #    logging.error(key + str(userconf[key]))
                 
             if not userconf.has_key('activities'):
-                activities = db.GqlQuery('select * from ActivityModel where userid = :1', userid)
+                activities = db.gql('select * from ActivityModel where userid = :1', userid)
                 activity_categories = list(set(a.name.strip() for a in activities))
                 userconf['activities'] = activity_categories
                 config_updated = True
                 
             if not userconf.has_key('timed_activities'):
-                timed_activities = db.GqlQuery('select * from TimedActivityModel where userid = :1', userid)
+                timed_activities = db.gql('select * from TimedActivityModel where userid = :1', userid)
                 timed_activity_categories = list(set(ta.name for ta in timed_activities))
                 userconf['timed_activities'] = timed_activity_categories
                 config_updated = True
                 
             if not userconf.has_key('places'):
-                travels = list(db.GqlQuery('select * from TravelModel where userid = :1', userid))
+                travels = list(db.gql('select * from TravelModel where userid = :1', userid))
                 places = list(set([p.origin for p in travels] + [p.destination for p in travels]))
                 #logging.error(places)
                 userconf['places'] = places
@@ -1385,7 +1388,7 @@ class PanelHandler(SuperHandler):
             if userconf.has_key('expense_categories'):
                 expense_categories = userconf['expense_categories']
             else:
-                expenses = list(db.GqlQuery('select * from ExpenseModel where userid = :1', userid))
+                expenses = list(db.gql('select * from ExpenseModel where userid = :1', userid))
                 expense_categories = list(set(e.category.strip() for e in expenses))
                 userconf['expense_categories'] = expense_categories
                 config_updated = True
@@ -1394,7 +1397,7 @@ class PanelHandler(SuperHandler):
                 user.confstring = json.dumps(userconf)
                 user.put()
                 
-            songs = list(db.GqlQuery('select * from MusicLibraryModel order by last_report desc limit 10'))
+            songs = list(db.gql('select * from MusicLibraryModel order by last_report desc limit 10'))
                 
             self.render('panelpage.html', user = user,
                                           expense_categories = expense_categories,
@@ -1408,7 +1411,7 @@ class PanelHandler(SuperHandler):
 class NuclearHandler(SuperHandler):
     def get(self, username):
         #self.render('thenuclearoption.html')
-        users = db.GqlQuery('select * from UserModel where username = :1 limit 1', username)
+        users = db.gql('select * from UserModel where username = :1 limit 1', username)
         users = list(users)
         if len(users) > 0:
             user = users[0]
@@ -1424,7 +1427,7 @@ class UserpageHandler(SuperHandler):
     def get(self, username):
         if not type(username) == type('a string'):
             username = username.username
-        users = db.GqlQuery('select * from UserModel where username = :1 limit 1', username)
+        users = db.gql('select * from UserModel where username = :1 limit 1', username)
         users = list(users)
         if len(users) > 0:
             user = users[0]
@@ -1433,19 +1436,23 @@ class UserpageHandler(SuperHandler):
             meal_stats = stats.meal_stats(user)
             hygiene_stats = stats.hygiene_stats(user)
 
-            userid = str(user.key().id())
-            old_photos = list(db.GqlQuery('select * from ImageModel where userid = :1 and category = :2 order by uploaded desc limit 5', userid, 'profile_img'))
+            userid = str(user.key.id())
+            old_photos = list(db.gql('select * from ImageModel where userid = :1 and category = :2 order by uploaded desc limit 5', userid, 'profile_img'))
             if len(old_photos) > 1:
                 old_photos = old_photos[1:]
             else:
                 old_photos = []
-            #social_media = db.GqlQuery('select * from SocialMediaModel where userid = :1', userid)
-            #books = list(db.GqlQuery('select * from BookLibraryModel where userid = :1 order by added desc limit 10', userid))
+
+            logging.error("there are {} photos".format(len(old_photos)))
+            for op in old_photos:
+                logging.error("for instance {}, {}".format(op.uploaded, type(op.image)))
+            #social_media = db.gql('select * from SocialMediaModel where userid = :1', userid)
+            #books = list(db.gql('select * from BookLibraryModel where userid = :1 order by added desc limit 10', userid))
             #active_books = [book for book in books if book.active]
             #inactive_books = [book for book in books if not book.active]
             #if len(inactive_books) > 4:
                 #inactive_books = inactive_books[0:4]
-            #games = list(db.GqlQuery('select * from GameLibraryModel where userid = :1 order by added desc limit 10', userid))
+            #games = list(db.gql('select * from GameLibraryModel where userid = :1 order by added desc limit 10', userid))
             #active_games = [game for game in games if game.active]
             #inactive_games = [game for game in games if not game.active]
             #if len(inactive_games) > 4:
@@ -1454,7 +1461,7 @@ class UserpageHandler(SuperHandler):
             user_messages = stats.user_messages(user, 5)
             guest_messages = stats.guest_messages(user)
             
-            #songs = db.GqlQuery('select * from MusicLibraryModel where userid = :1', userid)
+            #songs = db.gql('select * from MusicLibraryModel where userid = :1', userid)
             #songs_top5_alltime = sorted(songs, cmp = lambda x, y: int(x.report_count - y.report_count), reverse = True)
             #if len(songs_top5_alltime) > 5:
                 #songs_top5_alltime = songs_top5_alltime[:5]
@@ -1488,7 +1495,7 @@ class Blog_NewPostHandler(SuperHandler):
     def get(self, user):
         userconf = json.loads(user.confstring)
         if not userconf.has_key('blog_categories'):
-            blogposts = db.GqlQuery('select * from BlogPostModel where userid = :1', userid)
+            blogposts = db.gql('select * from BlogPostModel where userid = :1', userid)
             blog_categories = list(set(post.category for post in blogposts))
             userconf['blog_categories'] = blog_categories
             user.confstring = json.dumps(userconf)
@@ -1518,7 +1525,7 @@ class Blog_NewPostHandler(SuperHandler):
                 privacy = 3 # 0: self, 1: approved, 2: logged in, 3: world
             if not category:
                 category = 'unspecified'
-            newpost = models.BlogPostModel(userid = str(user.key().id()),
+            newpost = models.BlogPostModel(userid = str(user.key.id()),
                                            title = title,
                                            content = content,
                                            posted = uploaded,
@@ -1541,10 +1548,10 @@ class Blog_NewPostHandler(SuperHandler):
             
 class Blog_ShowPostsHandler(SuperHandler):
     def get(self, username):
-        subject = list(db.GqlQuery('select * from UserModel where username = :1 limit 1', username))
+        subject = list(db.gql('select * from UserModel where username = :1 limit 1', username))
         subject_id = ''
         if subject:
-            subject_id = str(subject[0].key().id())
+            subject_id = str(subject[0].key.id())
         else:
             self.redirect('/') # user not found, must find better redirect destination
         userid = self.request.cookies.get('userid')
@@ -1561,7 +1568,7 @@ class Blog_ShowPostsHandler(SuperHandler):
                 logged_in = True
                 privilege = 2
                 
-        posts = list(db.GqlQuery('select * from BlogPostModel where userid = :1 order by posted desc', subject_id))
+        posts = list(db.gql('select * from BlogPostModel where userid = :1 order by posted desc', subject_id))
         blog_categories = list(set(['_'.join([elem for elem in post.category.split()]) for post in posts if post.category]))
         userconf = json.loads(user.confstring)
         if userconf.has_key('blog_categories'):
@@ -1604,10 +1611,10 @@ class Blog_ShowPostsHandler(SuperHandler):
                                                
 class Blog_PanelHandler(SuperHandler):
     def get(self, username):
-        subject = list(db.GqlQuery('select * from UserModel where username = :1 limit 1', username))
+        subject = list(db.gql('select * from UserModel where username = :1 limit 1', username))
         subject_id = ''
         if subject:
-            subject_id = str(subject[0].key().id())
+            subject_id = str(subject[0].key.id())
         else:
             self.redirect('/') # user not found, must find better redirect destination
         userid = self.request.cookies.get('userid')
@@ -1618,7 +1625,7 @@ class Blog_PanelHandler(SuperHandler):
                 userconf['blog_headline'] = '%s %s\'s Blog' % (user.salutation, user.realname)
                 user.confstring = json.dumps(userconf)
                 user.put()
-            posts = list(db.GqlQuery('select * from BlogPostModel where userid = :1 order by posted desc', subject_id))
+            posts = list(db.gql('select * from BlogPostModel where userid = :1 order by posted desc', subject_id))
             blog_categories = ''
             if userconf.has_key('blog_categories'):
                 blog_categories = userconf['blog_categories']
@@ -1648,10 +1655,10 @@ class Blog_PanelHandler(SuperHandler):
             self.redirect('/login') # logged in as different person than requested page
             
     def post(self, username):
-        subject = list(db.GqlQuery('select * from UserModel where username = :1 limit 1', username))
+        subject = list(db.gql('select * from UserModel where username = :1 limit 1', username))
         subject_id = ''
         if subject:
-            subject_id = str(subject[0].key().id())
+            subject_id = str(subject[0].key.id())
         else:
             self.redirect('/') # user not found, must find better redirect destination
         userid = self.request.cookies.get('userid')
@@ -1693,33 +1700,33 @@ class Blog_ShuffleCategoriesHandler(SuperHandler):
             
 class Blog_ShowSinglePostHandler(SuperHandler):
     def get(self, username, postid):
-        subject = list(db.GqlQuery('select * from UserModel where username = :1 limit 1', username))
+        subject = list(db.gql('select * from UserModel where username = :1 limit 1', username))
         subject_id = ''
         if subject:
-            subject_id = str(subject[0].key().id())
+            subject_id = str(subject[0].key.id())
         else:
             self.redirect('/') # user not found, must find better redirect destination
         
-        postkey = db.Key.from_path('BlogPostModel', int(postid))
-        post = db.get(postkey)
+        postkey = db.Key('BlogPostModel', int(postid))
+        post = postkey.get()
         self.render('blog_showsinglepostpage.html', user = subject[0],
                                                     userconf = json.loads(subject[0].confstring),
                                                     post = post)
                                                
 class Blog_EditPostHandler(SuperHandler):
     def get(self, username, postid):
-        subject = list(db.GqlQuery('select * from UserModel where username = :1 limit 1', username))
+        subject = list(db.gql('select * from UserModel where username = :1 limit 1', username))
         subject_id = ''
         if subject:
-            subject_id = str(subject[0].key().id())
+            subject_id = str(subject[0].key.id())
         else:
             self.redirect('/') # user not found, must find better redirect destination
         userid = self.request.cookies.get('userid')
         userid, user = utils.verify_user(userid)
         if user and user.username == username:
             userconf = json.loads(user.confstring)
-            postkey = db.Key.from_path('BlogPostModel', int(postid))
-            post = db.get(postkey)
+            postkey = db.Key('BlogPostModel', int(postid))
+            post = postkey.get()
             if post:
                 self.render('blog_newpostpage.html', user = user,
                                                      post = post,
@@ -1730,10 +1737,10 @@ class Blog_EditPostHandler(SuperHandler):
             self.redirect('/login')
             
     def post(self, username, postid):
-        subject = list(db.GqlQuery('select * from UserModel where username = :1 limit 1', username))
+        subject = list(db.gql('select * from UserModel where username = :1 limit 1', username))
         subject_id = ''
         if subject:
-            subject_id = str(subject[0].key().id())
+            subject_id = str(subject[0].key.id())
         else:
             self.redirect('/') # user not found, must find better redirect destination
         userid = self.request.cookies.get('userid')
@@ -1751,8 +1758,8 @@ class Blog_EditPostHandler(SuperHandler):
                 privacy = int(privacy)
             except:
                 privacy = 0
-            postkey = db.Key.from_path('BlogPostModel', int(postid))
-            post = db.get(postkey)
+            postkey = db.Key('BlogPostModel', int(postid))
+            post = postkey.get()
             wasdraft = post.draft
             
             changed = False
@@ -1786,7 +1793,7 @@ class PublicUserpageHandler(SuperHandler):
     def get(self, username):
         self.render('thenuclearoption.html')
         return
-        users = db.GqlQuery('select * from UserModel where username = :1 limit 1', username)
+        users = db.gql('select * from UserModel where username = :1 limit 1', username)
         users = list(users)
         if len(users) > 0:
             user = users[0]
@@ -1799,7 +1806,7 @@ class HackHandler(SuperHandler):
         userid = self.request.cookies.get('userid')
         userid, user = utils.verify_user(userid)
         if user and user.username == 'ryanotron':
-            betakeys = list(db.GqlQuery('select * from BetaKeyModel'))
+            betakeys = list(db.gql('select * from BetaKeyModel'))
             self.render('hackpage.html', user = user)
         else:
             self.redirect('/login')
@@ -1811,7 +1818,7 @@ class HackHandler(SuperHandler):
             keystring = self.request.get('betakey')
             betakey = models.BetaKeyModel(keystring = keystring, used = False)
             betakey.put()
-            # meals = db.GqlQuery('select * from MealModel where userid = :1', userid)
+            # meals = db.gql('select * from MealModel where userid = :1', userid)
             # meals = list(meals)
             # for meal in meals:
                 # if meal.when < datetime.datetime(2012, 10, 31):
@@ -1830,31 +1837,31 @@ class HackHandler(SuperHandler):
 
 class Hack_AddTimezonesHandler(SuperHandler):
     def post(self):
-        users = db.GqlQuery('select * from UserModel')
+        users = db.gql('select * from UserModel')
         userdict = {}
         for user in users:
-            userid = str(user.key().id())
+            userid = str(user.key.id())
             userdict[userid] = user
 
-        activities = db.GqlQuery('select * from ActivityModel')
+        activities = db.gql('select * from ActivityModel')
         for activity in activities:
             if not activity.timezone:
                 activity.timezone = userdict[activity.userid].timezone
                 activity.put()
 
-        timedacts = db.GqlQuery('select * from TimedActivityModel')
+        timedacts = db.gql('select * from TimedActivityModel')
         for timedact in timedacts:
             if not timedact.timezone:
                 timedact.timezone = userdict[timedact.userid].timezone
                 timedact.put()
 
-        meals = db.GqlQuery('select * from MealModel')
+        meals = db.gql('select * from MealModel')
         for meal in meals:
             if not meal.timezone:
                 meal.timezone = userdict[meal.userid].timezone
                 meal.put()
 
-        travels = db.GqlQuery('select * from TravelModel')
+        travels = db.gql('select * from TravelModel')
         for travel in travels:
             if not travel.start_timezone:
                 travel.start_timezone = userdict[travel.userid].timezone

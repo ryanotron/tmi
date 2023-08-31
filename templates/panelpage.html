@@ -323,7 +323,7 @@
                         {% if song.url %}<a href="{{song.url}}">{{song.url}}</a>{% endif %}
                     </div>
                     <div class="Incrementer">
-                        <input type="hidden" name="key" value="{{song.key()}}">
+                        <input type="hidden" name="key" value="{{song.key.id()}}">
                         <input type="submit" value="just listened">
                     </div>
                 </form>

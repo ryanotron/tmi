@@ -25,7 +25,7 @@
             <td>{{post.privacy}}
             <td>{{post.category}}
             <td>{{post.draft}}
-            <td><a href="/u/{{user.username}}/blog/{{post.key().id()}}/edit">edit</a>
+            <td><a href="/u/{{user.username}}/blog/{{post.key.id()}}/edit">edit</a>
     {% endfor -%}
     </table>
 {% else -%}

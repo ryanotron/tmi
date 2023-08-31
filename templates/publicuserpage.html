@@ -24,7 +24,6 @@
     <div class="BlockWrapper">
         <h2>Energy</h2>
         <div class="Sub_BlockWrapper">
-            {% set coffee_stats = stats.coffee_stats(user) -%}
             {% if coffee_stats -%}
                 <p>{{user.salutation}} {{user.realname}}'s last cup of coffee was {{'%2.2f' % coffee_stats['last_cup']}} hours ago. Today {{user.nom_pronoun}} has had {{'%2d' % coffee_stats['todays_total']}} cup(s). On average {{user.nom_pronoun}} drinks {{'%1.2f' % coffee_stats['alltime_average']}} cups a day.</p>
             {% else %}
