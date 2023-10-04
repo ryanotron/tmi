@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<head>
+  <title>Coffee Table :: Profile</title>
+</head>
+<body>
+  <h1>Profile: {{user.salutation}} {{user.realname}}</h1>
+  <form method="post">
+    <table>
+      <tr>
+        <td>Username</td>
+        <td>{{user.username}}</td>
+      </tr>
+      <tr>
+        <td>Salutation</td>
+        <td><input type="text" name="salutation" value="{{user.salutation}}"></td>
+      </tr>
+      <tr>
+        <td>Real name</td>
+        <td><input type="text" name="realname" value="{{user.realname}}"></td>
+      </tr>
+      <tr>
+        <td>Time zone</td>
+        <td><input type="text" name="timezone" value="{{user.timezone}}"></td>
+      </tr>
+      <tr>
+        <td>Nominative pronoun</td>
+        <td><input type="text" name="nom_pronoun" value="{{user.nom_pronoun}}"></td>
+      </tr>
+      <tr>
+        <td>Accusative pronoun</td>
+        <td><input type="text" name="acc_pronoun" value="{{user.acc_pronoun}}"></td>
+      </tr>
+      <tr>
+        <td>Possessive pronoun</td>
+        <td><input type="text" name="pos_pronoun" value="{{user.pos_pronoun}}"></td>
+      </tr>
+      <tr>
+        <td>Possessive determiner</td>
+        <td><input type="text" name="pos_determi" value="{{user.pos_determi}}"></td>
+      </tr>
+      <tr>
+        <td><input type="submit" value="update profile"></td>
+      </tr>
+    </table>
+  </form>
+</body>

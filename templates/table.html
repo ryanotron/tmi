@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<head>
+  <title>Coffee Table</title>
+  <link type="text/css" rel="stylesheet" href="/stylesheets/main.css">
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  <script type="text/javascript" src="/scripts/table.js"></script>
+</head>
+<body>
+  <h1>You are {{user.salutation}} {{user.realname}}</h1>
+
+  <div class="TableBlockWide" id="DivPhotoGallery">
+    <ul class="TablePhotos">
+      {% for img in imgs %}
+      <li><img src="/img/{{img}}"/></li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div class="TableBlockWide">
+    {% if messages|length > 0 %}
+    <ul class="Message">
+    {% for message in messages %}
+    <li>
+      <p class="MessageStamp"><b>{{message[0].strftime("%Y-%m-%d %H:%M")}}</b></p>
+      <p>{{message[1]}}</p>
+    </li>
+    {% endfor %}
+    </ul>
+    {% else %}
+    <p>No messages</p>
+    {% endif %}
+  </div>
+
+  <div class="TableBlock">
+    <h2>Coffee</h2>
+    <ul>
+      <li>Latest: <span id="coffee_latest"></span></li>
+      <li>Cups today: <span id="coffee_cups_today"></span></li>
+      <li>Average daily cups: <span id="coffee_mean_daily"></span></li>
+      <li>Average time of day: <span id="mean_tod"></span></li>
+    </ul>
+
+    <div class="ChartWrapper" id="chart_coffee_tod_histo"></div>
+    <div class="ChartWrapper" id="chart_coffee_count_histo"></div>
+    <div class="ChartWrapper" id="chart_coffee_timeline"></div>
+  </div>
+
+  <div class="TableBlock">
+    <h2>Sleep</h2>
+    <ul>
+      <li>Latest waking: <span id="sleep_latest"></span></li>
+      <li>Semester mean: <span id="sleep_semester_mean"></span> hours</li>
+      <li>Last week mean: <span id="sleep_last_week_mean"></span> hours</li>
+      <li>This week deficit: <span id="sleep_week_deficit"></span> hours</li>
+    </ul>
+    <div class="ChartWrapper" id="chart_sleep_dur_short_timeline"></div>
+    <div class="ChartWrapper" id="chart_sleep_dur_timeline"></div>
+    <div class="ChartWrapper" id="chart_sleep_dur_mavs"></div>
+    <div class="ChartWrapper" id="chart_sleep_dur_histo"></div>
+    <div class="ChartWrapper" id="chart_sleep_wake_histo"></div>
+  </div>
+
+  <div class="TableBlock">
+    <h2>Meal</h2>
+    <p>Latest:</p>
+    <div id="meals_latests"></div>
+    <div class="ChartWrapper" id="chart_meal_histo"></div>
+  </div>
+
+  <div class="TableBlock">
+    <h2>Shower</h2>
+    <ul>
+      <li>Latest: <span id="shower_latest"></span></li>
+      <li>Mean interval: <span id="shower_mean_interval"></span> hours</li>
+    </ul>
+    <div class="ChartWrapper" id="chart_shower_t_histo"></div>
+    <div class="ChartWrapper" id="chart_shower_dt_histo"></div>
+  </div>
+  
+</body>

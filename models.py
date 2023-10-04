@@ -1,131 +1,130 @@
 from google.appengine.ext import ndb
-db = ndb
 
-class UserModel(db.Model):
-    username   = db.StringProperty(required = True)
-    hashedpw   = db.StringProperty(required = True)
-    nameday    = db.DateTimeProperty()
-    email      = db.StringProperty()
-    timezone   = db.FloatProperty()
-    currency   = db.StringProperty()
-    realname   = db.StringProperty()
-    salutation = db.StringProperty()
-    last_seen  = db.DateTimeProperty(required = True)
-    gender     = db.StringProperty()
-    pos_pronoun = db.StringProperty() # possessive pronoun (his, hers, its)
-    nom_pronoun = db.StringProperty() # nominative pronoun (he, she, it)
-    acc_pronoun = db.StringProperty() # accusative pronoun (him, her, it)
-    pos_determi = db.StringProperty() # possessive determinant (his, her, its)
-    photo_key   = db.StringProperty()
-    confstring  = db.TextProperty() # configuration string, a json string dump
+class UserModel(ndb.Model):
+    username   = ndb.StringProperty(required = True)
+    hashedpw   = ndb.StringProperty(required = True)
+    nameday    = ndb.DateTimeProperty()
+    email      = ndb.StringProperty()
+    timezone   = ndb.FloatProperty()
+    currency   = ndb.StringProperty()
+    realname   = ndb.StringProperty()
+    salutation = ndb.StringProperty()
+    last_seen  = ndb.DateTimeProperty(required = True)
+    gender     = ndb.StringProperty()
+    pos_pronoun = ndb.StringProperty() # possessive pronoun (his, hers, its)
+    nom_pronoun = ndb.StringProperty() # nominative pronoun (he, she, it)
+    acc_pronoun = ndb.StringProperty() # accusative pronoun (him, her, it)
+    pos_determi = ndb.StringProperty() # possessive determinant (his, her, its)
+    photo_key   = ndb.StringProperty()
+    confstring  = ndb.TextProperty() # configuration string, a json string dump
     
-class SocialMediaModel(db.Model):
-    userid = db.StringProperty(required = True)
-    sm_username = db.StringProperty(required = True)
-    sm_sitename = db.StringProperty(required = True)
-    sm_siteurl  = db.StringProperty()
-    sm_userpage = db.StringProperty()
+class SocialMediaModel(ndb.Model):
+    userid = ndb.StringProperty(required = True)
+    sm_username = ndb.StringProperty(required = True)
+    sm_sitename = ndb.StringProperty(required = True)
+    sm_siteurl  = ndb.StringProperty()
+    sm_userpage = ndb.StringProperty()
     
-class ImageModel(db.Model):
-    userid   = db.StringProperty(required = True)
-    image    = db.BlobProperty()
-    uploaded = db.DateTimeProperty()
-    category = db.StringProperty() #profile_img, meal_img, book_img, game_img, expense_img
+class ImageModel(ndb.Model):
+    userid   = ndb.StringProperty(required = True)
+    image    = ndb.BlobProperty()
+    uploaded = ndb.DateTimeProperty()
+    category = ndb.StringProperty() #profile_img, meal_img, book_img, game_img, expense_img
 
-class ActivityModel(db.Model):
-    userid = db.StringProperty(required = True)
-    name   = db.StringProperty()
-    when   = db.DateTimeProperty()
-    timezone = db.FloatProperty()
+class ActivityModel(ndb.Model):
+    userid = ndb.StringProperty(required = True)
+    name   = ndb.StringProperty()
+    when   = ndb.DateTimeProperty()
+    timezone = ndb.FloatProperty()
     
-class TimedActivityModel(db.Model):
-    userid = db.StringProperty(required = True)
-    name   = db.StringProperty()
-    start  = db.DateTimeProperty()
-    end    = db.DateTimeProperty()
-    timezone = db.FloatProperty()
+class TimedActivityModel(ndb.Model):
+    userid = ndb.StringProperty(required = True)
+    name   = ndb.StringProperty()
+    start  = ndb.DateTimeProperty()
+    end    = ndb.DateTimeProperty()
+    timezone = ndb.FloatProperty()
 
-class ExpenseModel(db.Model):
-    userid   = db.StringProperty(required = True)
-    name     = db.StringProperty()
-    category = db.StringProperty()
-    amount   = db.FloatProperty()
-    currency = db.StringProperty() # stub. Defaults to user's currency. When we can check for currency conversion online, this'd more useful
-    when     = db.DateTimeProperty()
+class ExpenseModel(ndb.Model):
+    userid   = ndb.StringProperty(required = True)
+    name     = ndb.StringProperty()
+    category = ndb.StringProperty()
+    amount   = ndb.FloatProperty()
+    currency = ndb.StringProperty() # stub. Defaults to user's currency. When we can check for currency conversion online, this'd more useful
+    when     = ndb.DateTimeProperty()
 
-class TravelModel(db.Model):
-    userid      = db.StringProperty(required = True)
-    origin      = db.StringProperty()
-    destination = db.StringProperty()
-    whenstart   = db.DateTimeProperty()
-    whenfinish  = db.DateTimeProperty()
-    start_timezone  = db.FloatProperty()
-    finish_timezone = db.FloatProperty()
+class TravelModel(ndb.Model):
+    userid      = ndb.StringProperty(required = True)
+    origin      = ndb.StringProperty()
+    destination = ndb.StringProperty()
+    whenstart   = ndb.DateTimeProperty()
+    whenfinish  = ndb.DateTimeProperty()
+    start_timezone  = ndb.FloatProperty()
+    finish_timezone = ndb.FloatProperty()
 
-class MealModel(db.Model):
-    userid   = db.StringProperty(required = True)
-    when     = db.DateTimeProperty()
-    menu     = db.StringProperty()
-    place    = db.StringProperty()
-    category = db.StringProperty() # breakfast, lunch, dinner, supper, snack
-    image    = db.StringProperty()
-    timezone = db.FloatProperty()
+class MealModel(ndb.Model):
+    userid   = ndb.StringProperty(required = True)
+    when     = ndb.DateTimeProperty()
+    menu     = ndb.StringProperty()
+    place    = ndb.StringProperty()
+    category = ndb.StringProperty() # breakfast, lunch, dinner, supper, snack
+    image    = ndb.StringProperty()
+    timezone = ndb.FloatProperty()
 
-class UserMessageModel(db.Model):
-    userid  = db.StringProperty(required = True)
-    message = db.TextProperty()
-    when    = db.DateTimeProperty()
+class UserMessageModel(ndb.Model):
+    userid  = ndb.StringProperty(required = True)
+    message = ndb.TextProperty()
+    when    = ndb.DateTimeProperty()
 
-class GuestMessageModel(db.Model):
-    userid    = db.StringProperty(required = True)
-    guestname = db.StringProperty()
-    message   = db.TextProperty()
-    when      = db.DateTimeProperty()
+class GuestMessageModel(ndb.Model):
+    userid    = ndb.StringProperty(required = True)
+    guestname = ndb.StringProperty()
+    message   = ndb.TextProperty()
+    when      = ndb.DateTimeProperty()
     
-class BookLibraryModel(db.Model):
-    userid = db.StringProperty(required = True)
-    title  = db.StringProperty()
-    author = db.StringProperty()
-    isbn   = db.StringProperty()
-    doi    = db.StringProperty()
-    added  = db.DateTimeProperty()
-    start  = db.DateTimeProperty()
-    finish = db.DateTimeProperty()
-    active = db.BooleanProperty()
-    image  = db.StringProperty()
+class BookLibraryModel(ndb.Model):
+    userid = ndb.StringProperty(required = True)
+    title  = ndb.StringProperty()
+    author = ndb.StringProperty()
+    isbn   = ndb.StringProperty()
+    doi    = ndb.StringProperty()
+    added  = ndb.DateTimeProperty()
+    start  = ndb.DateTimeProperty()
+    finish = ndb.DateTimeProperty()
+    active = ndb.BooleanProperty()
+    image  = ndb.StringProperty()
     
-class GameLibraryModel(db.Model):
-    userid = db.StringProperty()
-    title  = db.StringProperty()
-    added  = db.DateTimeProperty()
-    start  = db.DateTimeProperty()
-    finish = db.DateTimeProperty()
-    active = db.BooleanProperty()
-    platform = db.StringProperty()
-    image = db.StringProperty()
+class GameLibraryModel(ndb.Model):
+    userid = ndb.StringProperty()
+    title  = ndb.StringProperty()
+    added  = ndb.DateTimeProperty()
+    start  = ndb.DateTimeProperty()
+    finish = ndb.DateTimeProperty()
+    active = ndb.BooleanProperty()
+    platform = ndb.StringProperty()
+    image = ndb.StringProperty()
     
-class MusicLibraryModel(db.Model):
-    userid       = db.StringProperty()
-    title        = db.StringProperty()
-    artist       = db.StringProperty()
-    album        = db.StringProperty()
-    year         = db.IntegerProperty()
-    url          = db.StringProperty()
-    first_report = db.DateTimeProperty()
-    last_report  = db.DateTimeProperty()
-    report_count = db.IntegerProperty()
+class MusicLibraryModel(ndb.Model):
+    userid       = ndb.StringProperty()
+    title        = ndb.StringProperty()
+    artist       = ndb.StringProperty()
+    album        = ndb.StringProperty()
+    year         = ndb.IntegerProperty()
+    url          = ndb.StringProperty()
+    first_report = ndb.DateTimeProperty()
+    last_report  = ndb.DateTimeProperty()
+    report_count = ndb.IntegerProperty()
     
-class BetaKeyModel(db.Model):
-    keystring = db.StringProperty()
-    used = db.BooleanProperty()
-    whenused = db.DateTimeProperty()
+class BetaKeyModel(ndb.Model):
+    keystring = ndb.StringProperty()
+    used = ndb.BooleanProperty()
+    whenused = ndb.DateTimeProperty()
     
-class BlogPostModel(db.Model):
-    userid = db.StringProperty()
-    posted = db.DateTimeProperty()
-    updated = db.DateTimeProperty()
-    title = db.StringProperty()
-    content = db.TextProperty()
-    privacy = db.IntegerProperty()
-    category = db.StringProperty()
-    draft = db.BooleanProperty()
+class BlogPostModel(ndb.Model):
+    userid = ndb.StringProperty()
+    posted = ndb.DateTimeProperty()
+    updated = ndb.DateTimeProperty()
+    title = ndb.StringProperty()
+    content = ndb.TextProperty()
+    privacy = ndb.IntegerProperty()
+    category = ndb.StringProperty()
+    draft = ndb.BooleanProperty()

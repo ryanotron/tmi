@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<head>
+  <link type="text/css" rel="stylesheet" href="/stylesheets/main.css">
+  <title>Coffee Table :: Panel</title>
+</head>
+<body>
+  <h1>Panel</h1>
+  <p>You are {{user.username}}</p>
+  <h2>{{user.salutation}} {{user.realname}}</h2>
+
+  <div class="PanelBlockWide">
+    <ul class="instant">
+      <li>
+        <form action="/post_activity" method="post">
+          <input type="hidden" name="now" value="1">
+          <input type="hidden" name="name" value="coffee">
+          <input type="submit" value="I just had coffee!">
+        </form>
+      </li>
+      <li>
+        <form action="/post_activity" method="post">
+          <input type="hidden" name="now" value="1">
+          <input type="hidden" name="name" value="shower">
+          <input type="submit" value="I just showered!">
+        </form>
+      </li>
+      <li>
+        <form action="/post_activity" method="post">
+          <input type="hidden" name="now" value="1">
+          <input type="hidden" name="name" value="shave">
+          <input type="submit" value="I just shaved!">
+        </form>
+      </li>
+    </ul>
+  </div>
+
+  <div class="PanelBlockWide">
+    <h2>Message</h2>
+    <form action="/post_message" method="post">
+      <textarea name="message"></textarea><br>
+      <input type="submit" value="I said what I said">
+    </form>
+  </div>
+
+  <div class="PanelBlockWide">
+    <h2>Photo</h2>
+    <form action="/post_img" method="post" enctype="multipart/form-data">
+      <input type="file" name="img_file">
+      <input type="hidden" name="img_category" value="profile_img">
+      <input type="submit" value="I look like this">
+    </form>
+  </div>
+
+  <div class="PanelBlock">
+    <h2>Activity</h2>
+    <form action="/post_activity" method="post">
+      <input type="hidden" name="now" value="-1">
+      <table>
+        <tr>
+          <td>Name</td>
+          <td><input type="text" name="name"></td>
+        </tr>
+        <tr>
+          <td>When</td>
+          <td><input type="datetime-local" name="when" value="{{t_str}}"></td>
+        </tr>
+        <tr>
+          <td>Timezone UTC</td>
+          <td><input type="text" name="timezone" value="{{'%+2.1f' % user.timezone}}"></td>
+        </tr>
+        <tr>
+          <td><input type="submit" value="record activity"></td>
+        </tr>
+      </table>
+    </form>
+  </div>
+
+  <div class="PanelBlock">
+    <h2>Duration Activity</h2>
+    <form action="/post_duration_activity" method="post">
+      <table>
+        <tr>
+          <td>Name</td>
+          <td><input type="text" name="name"></td>
+        </tr>
+        <tr>
+          <td>Begin</td>
+          <td><input type="datetime-local" name="start" value="{{t_str}}"></td>
+        </tr>
+        <tr>
+          <td>End</td>
+          <td><input type="datetime-local" name="end" value="{{t_str}}"></td>
+        </tr>
+        <tr>
+          <td>Timezone UTC</td>
+          <td><input type="text" name="timezone" value="{{'%+2.1f' % user.timezone}}"></td>
+        </tr>
+        <tr>
+          <td><input type="submit" value="record duration activity"></td>
+        </tr>
+      </table>
+    </form>
+  </div>
+
+  <div class="PanelBlock">
+    <h2>Meal</h2>
+    <form action="/post_meal" method="post">
+      <table>
+        <tr>
+          <td>Category</td>
+          <td><input type="text" name="category"></td>
+        </tr>
+        <tr>
+          <td>Menu</td>
+          <td><input type="text" name="menu"></td>
+        </tr>
+        <tr>
+          <td>Where</td>
+          <td><input type="text" name="where"></td>
+        </tr>
+        <tr>
+          <td>When</td>
+          <td><input type="datetime-local" name="when" value="{{t_str}}"></td>
+        </tr>
+        <tr>
+          <td>Timezone UTC</td>
+          <td><input type="text" name="timezone" value="{{'%+2.1f' % user.timezone}}"></td>
+        </tr>
+        <tr>
+          <td><input type="submit" value="record meal"></td>
+        </tr>
+      </table>
+    </form>
+  </div>
+</body>
