@@ -86,7 +86,6 @@ div.PanelBlockWide textarea
 div.TableBlock
 {
     float: left;
-    min-width: 45%;
     width: fit-content;
     height: fit-content;
     border: 1px solid blue;

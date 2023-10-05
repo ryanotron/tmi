@@ -47,14 +47,14 @@ def calca_coffee(user, coffees):
         counts[day] = 0
         day += datetime.timedelta(days=1)
 
-    N = 0
+    N = 0.
     tods = []
     mean_tod = 0.
     for coffee in coffees:
         # get time of day
         tee = coffee.when + datetime.timedelta(hours=coffee.timezone)
         counts[tee.date()] += 1
-        N += 1
+        N += 1.
         tod = tee.hour + tee.minute/60.
         tods.append(tod)
         mean_tod += tod
@@ -69,7 +69,7 @@ def calca_coffee(user, coffees):
         mean_daily_count += count
         if count > max_daily_count:
             max_daily_count = count
-    mean_daily_count /= len(counts.keys())
+    mean_daily_count /= 1.*len(counts.keys())
     daily_count_bins = range(0, max_daily_count+2, 1)
     daily_count_histo = histo(counts.values(), daily_count_bins)
 
