@@ -1,15 +1,17 @@
-import datetime, functools, hashlib, logging, random
+import datetime, functools, hashlib, io, logging, random
+from PIL import Image
 from string import ascii_letters as letters
 
 from flask import Flask, redirect, render_template, request, session, url_for
+from google.appengine.api import wrap_wsgi_app
 from google.appengine.ext import ndb
-from google.appengine.api import images as libimg
 
 from calca import *
 from models import *
 from app_secrets import session_secret
 
 app = Flask(__name__)
+app.wsgi_app = wrap_wsgi_app(app.wsgi_app)
 app.secret_key = session_secret
 
 def securify_password(username, password, salt=None):
@@ -461,9 +463,23 @@ def post_img(user):
         logging.error('image upload failed')
         return redirect('/panel')
 
-    img_resize = libimg.resize(img_file.read(), height=150)
+    # img_resize = libimg.resize(img_file.read(), height=150)
+    try:
+        img = Image.open(img_file)
+    except:
+        logging.error('failed to open image')
+        return redirect('/panel')
+    w, l = img.size
+    w = 150 * w / l
+    try:
+        img_resize = img.resize((int(w), 150))
+        img_bytes = io.BytesIO()
+        img_resize.save(img_bytes, format='PNG')
+    except:
+        logging.error('failed to resize')
+        return redirect('/panel')
     new_img = ImageModel(userid=str(user.key.id()),
-                         image=img_resize,
+                         image=img_bytes.getvalue(),
                          uploaded=datetime.datetime.utcnow(),
                          category=img_category)
     new_img.put()

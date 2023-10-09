@@ -98,7 +98,7 @@ def calca_coffee(user, coffees):
            'tod_histo': tod_histo,
            'tod_bins': tod_bins,
            'daily_count_histo': daily_count_histo,
-           'daily_count_bins': daily_count_bins,
+           'daily_count_bins': list(daily_count_bins),
            'daily_count_timeline': daily_count_timeline
           }
 
@@ -199,6 +199,7 @@ def calca_sleep(user, sleeps):
         latest.timezone,
         dt_latest
     )
+    latest_dur = dur_series[-1][1]
 
     res = {'semester_mean': semester_mean,
            'last_week_mean': last_week_mean,
@@ -212,6 +213,7 @@ def calca_sleep(user, sleeps):
            'wake_histo': wake_histo,
            'sleep_histo': sleep_histo,
            'latest_str': latest_str,
+           'latest_dur': latest_dur,
           }
 
     return res

@@ -1,2 +1,4 @@
-Flask
+flask
+appengine-python-standard
+Pillow
 numpy

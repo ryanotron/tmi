@@ -54,7 +54,8 @@ function drawChart()
                 'height': 480,
                 'chartArea': {'width': '90%', 'height': 'auto'},
                 'legend': {'position': 'bottom'},
-                'vAxis': {'textPosition': 'out'}
+                'vAxis': {'textPosition': 'out'},
+                'pointSize': 2,
                 };
 
     var chart = new google.visualization.LineChart(document.getElementById('chart_coffee_timeline'));
@@ -112,6 +113,7 @@ function drawChart()
                 'legend': {'position': 'bottom'},
                 'hAxis': {'format': 'dd-MMM',
                         'minValue': stop_date,},
+                'pointSize': 4,
                 };
 
     var chart = new google.visualization.LineChart(document.getElementById('chart_sleep_dur_short_timeline'));
@@ -131,6 +133,7 @@ function drawChart()
     }
 
     opts['title'] = 'sleep duration timeline (26 weeks)'
+    opts['pointSize'] = 2;
 
     var chart = new google.visualization.LineChart(document.getElementById('chart_sleep_dur_timeline'));
     chart.draw(data, opts);
@@ -193,6 +196,7 @@ function drawChart()
 
     // simple values
     document.getElementById('sleep_latest').innerHTML = sleep_data.latest_str;
+    document.getElementById('sleep_latest_dur').innerHTML = sleep_data.latest_dur.toFixed(2);
     document.getElementById('sleep_semester_mean').innerHTML = sleep_data.semester_mean.toFixed(2);
     document.getElementById('sleep_last_week_mean').innerHTML = sleep_data.last_week_mean.toFixed(2);
     document.getElementById('sleep_week_deficit').innerHTML = sleep_data.week_deficit.toFixed(2);
