@@ -255,7 +255,7 @@ def calca_meal(user, meals):
                         'category': meal.category,
                         'menu': meal.menu,
                         'place': meal.place})
-        latest_string += '<li>{}, {}, {} at {}</li>'.format(
+        latest_string += '<li>{}, {}: {} at {}</li>'.format(
             latests[-1]['when'].strftime('%Y-%b-%d, %H:%M'),
             meal.category,
             meal.menu,

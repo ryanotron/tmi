@@ -17,7 +17,7 @@ app.secret_key = session_secret
 def securify_password(username, password, salt=None):
     if not salt:
         salt = ''.join([random.choice(letters) for i in range(5)])
-    return hashlib.sha256(username + password + salt).hexdigest() + '|' + salt
+    return hashlib.sha256((username + password + salt).encode()).hexdigest() + '|' + salt
 
 
 def verify_password(username, password, hashedpw):
@@ -56,9 +56,7 @@ def require_login(handler):
 
 @app.route('/')
 def get_root():
-    users = ndb.gql("select * from UserModel")
-    activities = ndb.gql("select * from ActivityModel limit 10")
-    return render_template('index.html', users=users, activities=activities)
+    return redirect('/panel')
 
 
 @app.route('/signup', methods=['GET'])
@@ -373,6 +371,8 @@ def get_coffee_stats(user):
                            .fetch() 
 
     coffees = list(coffees)
+    if len(coffees) == 0:
+        return {}
     stats = calca_coffee(user, coffees)
     return stats
 
@@ -389,6 +389,8 @@ def get_sleep_stats(user):
                                .fetch()
 
     sleeps = list(sleeps)
+    if len(sleeps) == 0:
+        return {}
     ret = calca_sleep(user, sleeps)
     return ret
 
@@ -403,6 +405,8 @@ def get_meal_stats(user):
                      .order(-MealModel.when)\
                      .fetch()
     meals = list(meals)
+    if len(meals) == 0:
+        return {}
     ret = calca_meal(user, meals)
     return ret
 
@@ -417,7 +421,9 @@ def get_shower_stats(user):
                                   ActivityModel.name == 'shower')\
                            .order(-ActivityModel.when)\
                            .fetch()
-    showers = list(showers) 
+    showers = list(showers)
+    if len(showers) == 0:
+        return {}
     ret = calca_shower(user, showers)
     return ret
 
