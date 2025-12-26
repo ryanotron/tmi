@@ -52,6 +52,14 @@ body
     width: auto;
 }
 
+input[type="text"],
+input[type="datetime-local"],
+input[type="file"],
+textarea 
+{
+    box-sizing: border-box;
+}
+
 div
 {
     float: none;
@@ -64,7 +72,7 @@ div
 div.PanelBlock
 {
     float: left;
-    min-width: 30%;
+    min-width: 280px;
     border: 1px solid red;
 }
 
@@ -78,6 +86,7 @@ div.PanelBlockWide
 div.PanelBlockWide textarea
 {
     width: 80%;
+    max-width: 600px;
     height: 6em;
     margin-left: 12px;
     margin-bottom: 12px;
@@ -106,3 +115,154 @@ div.ChartWrapper
     margin: 2px;
     padding: 2px;
 }
+
+@media (max-width: 768px)
+  {
+      body
+      {
+          font-size: 16px;
+          padding: 8px;
+      }
+
+      div.PanelBlock,
+      div.PanelBlockWide
+      {
+          float: none;
+          width: 100%;
+          min-width: unset;
+          margin: 8px 0;
+      }
+
+      input[type="text"],
+      input[type="datetime-local"],
+      textarea
+      {
+          width: 100%;
+          font-size: 16px;
+          padding: 12px;
+          box-sizing: border-box;
+      }
+
+      input[type="submit"]
+      {
+          width: 100%;
+          padding: 12px;
+          font-size: 16px;
+          margin-top: 8px;
+      }
+
+      ul.instant li
+      {
+          display: block;
+          float: none;
+          width: 100%;
+          padding-right: 0;
+          margin-bottom: 8px;
+      }
+
+      ul.instant li input[type="submit"]
+      {
+          width: 100%;
+      }
+
+      table
+      {
+          width: 100%;
+      }
+
+      td
+      {
+          display: block;
+          width: 100%;
+          padding: 4px 0;
+      }
+
+      p.MessageStamp
+      {
+          font-size: 12px;
+      }
+
+      div.PanelBlockWide textarea
+      {
+          width: 100%;
+          margin-left: 0;
+      }
+
+      div.TableBlock,
+      div.TableBlockWide
+      {
+          float: none;
+          width: 100%;
+          min-width: unset;
+          margin: 8px 0;
+          box-sizing: border-box;
+      }
+
+      div.ChartWrapper
+      {
+          width: 100%;
+          overflow-x: auto;
+          overflow-y: hidden;
+      }
+
+      div.ChartWrapper > div,
+      div.ChartWrapper svg
+      {
+          max-width: 100%;
+          height: auto;
+      }
+
+      ul.TablePhotos
+      {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          padding: 0;
+      }
+
+      ul.TablePhotos li
+      {
+          flex: 1 1 calc(50% - 8px);
+          min-width: 150px;
+      }
+
+      ul.TablePhotos img
+      {
+          width: 100%;
+          height: auto;
+          display: block;
+      }
+
+      div.TableBlock ul
+      {
+          padding-left: 20px;
+          line-height: 1.6;
+      }
+
+      div.TableBlock ul li
+      {
+          margin-bottom: 8px;
+          font-size: 16px;
+      }
+
+      ul.Message
+      {
+          padding: 0;
+      }
+
+      ul.Message li
+      {
+          margin-bottom: 12px;
+      }
+
+      h1
+      {
+          font-size: 24px;
+          word-wrap: break-word;
+      }
+
+      h2
+      {
+          font-size: 20px;
+      }
+  }
