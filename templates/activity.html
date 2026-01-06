@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<head>
+  <title>Coffee Table</title>
+  <link type="text/css" rel="stylesheet" href="/stylesheets/main.css">
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  <script type="text/javascript" src="/scripts/activity.js"></script>
+</head>
+
+<body>
+  {% include 'navi.html' %}
+
+  <div class="TableBlock">
+    <h2>{{actname}}</h2>
+    <ul>
+      <li>Latest: <span id="latest"></span></li>
+      <li>Mean interval: <span id="mean_interval"></span> hours</li>
+    </ul>
+    <div class="ChartWrapper" id="chart_t_histo"></div>
+    <div class="ChartWrapper" id="chart_dt_histo"></div>
+  </div>
+</body>

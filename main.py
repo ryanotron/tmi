@@ -428,6 +428,40 @@ def get_shower_stats(user):
     return ret
 
 
+@app.route('/activity_stats', methods=['GET'])
+@require_login
+def get_activity_stats(user):
+    actname = request.args.get('name')
+    if actname is None:
+        return {}
+    now = datetime.datetime.utcnow()
+    then = now - datetime.timedelta(weeks=26)
+    acts = ActivityModel.query(ActivityModel.userid == str(user.key.id()),
+                               ActivityModel.when >= then,
+                               ActivityModel.name == actname)\
+                        .order(-ActivityModel.when)\
+                        .fetch()
+    acts = list(acts)
+    if len(acts) < 2:
+        return {}
+    ret = calca_activity(acts)
+    ret['name'] = actname
+    return ret
+
+
+@app.route('/activity_chart', methods=['GET'])
+@require_login
+def get_activity_chart(user):
+    # which activity?
+    actname = request.args.get('name')
+    if actname is None:
+        return 'No'
+    
+    return render_template('activity.html', 
+        user=user, 
+        actname=actname)
+
+
 @app.route('/post_message', methods=['POST'])
 @require_login
 def post_message(user):

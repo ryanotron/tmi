@@ -322,3 +322,6 @@ def calca_shower(user, showers):
            'dt_histo': dt_histo}
 
     return res
+
+def calca_activity(acts):
+    return calca_shower(None, acts)
