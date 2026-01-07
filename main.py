@@ -458,8 +458,42 @@ def get_activity_chart(user):
         return 'No'
     
     return render_template('activity.html', 
-        user=user, 
-        actname=actname)
+                           user=user, 
+                           actname=actname)
+
+
+@app.route('/duration_activity_stats', methods=['GET'])
+@require_login
+def get_duration_activity_stats(user):
+    actname = request.args.get('name')
+    if actname is None:
+        return {}
+    
+    now = datetime.datetime.utcnow()
+    then = now - datetime.timedelta(weeks=26)
+    acts = TimedActivityModel.query(TimedActivityModel.userid == str(user.key.id()),
+                                    TimedActivityModel.end >= then,
+                                    TimedActivityModel.name == actname)\
+                             .order(-TimedActivityModel.end)\
+                             .fetch()
+    acts = list(acts)
+    if len(acts) < 1:
+        return {}
+    ret = calca_timacts(acts)
+    ret['name'] = actname
+    return ret
+
+
+@app.route('/duration_activity_chart', methods=['GET'])
+@require_login
+def get_duration_activity_chart(user):
+    actname = request.args.get('name')
+    if actname is None:
+        return 'No'
+    
+    return render_template('duration_activity.html',
+                           user=user,
+                           actname=actname)
 
 
 @app.route('/post_message', methods=['POST'])

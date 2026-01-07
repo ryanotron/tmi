@@ -324,4 +324,118 @@ def calca_shower(user, showers):
     return res
 
 def calca_activity(acts):
-    return calca_shower(None, acts)
+    t_acts = []
+    dt_acts = []
+
+    # collect time between activities
+    mean_dt = 0.
+    for i, act in enumerate(acts):
+        t_local = act.when + datetime.timedelta(hours=act.timezone)
+        tod = t_local.hour + t_local.minute/60.
+        t_acts.append(tod)
+
+        if i >= 1:
+            t_prev_local = acts[i-1].when + datetime.timedelta(hours=acts[i-1].timezone)
+            dt = (t_prev_local - t_local).total_seconds() / 3600.
+            dt_acts.append(dt)
+            mean_dt += dt
+    mean_dt = mean_dt / (len(acts)-1)
+
+    # time bins are always 24 hours
+    t_bins = list(frange(0, 24.5, 0.5))
+
+    # decide dt bins from maximum delta
+    # default is hours
+    dt = 1
+    
+    # but decide from maximum dt
+    # if it's more than 3 days, make it days
+    dt_max = max(dt_acts)
+    if dt_max > 3*24:
+        dt = 1
+        dt_acts = [delta/24. for delta in dt_acts]
+        dt_max /= 24
+    
+    upper = int(math.ceil(dt_max+dt))
+    dt_bins = list(range(0, upper, dt))
+
+    t_histo = histo(t_acts, t_bins)
+    dt_histo = histo(dt_acts, dt_bins)
+
+    t_bins_str = []
+    for i in range(len(t_bins)-1):
+        t_str = '{:.0f}'.format(t_bins[i])
+        t_bins_str.append(t_str)
+
+    dt_bins_str = []
+    for i in range(len(dt_bins)-1):
+        dt_str = '{:.0f}'.format(dt_bins[i])
+        dt_bins_str.append(dt_str)
+
+    latest_dt = (datetime.datetime.utcnow() - acts[0].when).total_seconds() / 3600.
+    latest_str = '{:.2f} hours ago, '.format(latest_dt)
+    
+    latest_str += (acts[0].when + datetime.timedelta(hours=acts[0].timezone))\
+                 .strftime('%H:%M, %d-%b-%Y')
+    latest_str += ' UTC{:+.1f}'.format(acts[0].timezone)
+
+    res = {'latest': latest_str,
+           'mean_dt': '{:.2f}'.format(mean_dt),
+           't_bins': t_bins_str,
+           't_histo': t_histo,
+           'dt_bins': dt_bins_str,
+           'dt_histo': dt_histo}
+    
+    return res
+
+def calca_timacts(timacts : list[TimedActivityModel]):
+    t_begins = []
+    t_ends = []
+    durs = []
+
+    # collect begin/end and duration in histogrammable format
+    for timact in timacts:
+        dur = (timact.end - timact.start).total_seconds() / 3600.
+        t_begin = timact.start + datetime.timedelta(hours=timact.timezone)
+        tod_begin = t_begin.hour + t_begin.minute/60.
+
+        t_end = timact.end + datetime.timedelta(hours=timact.timezone)
+        tod_end = t_end.hour + t_end.minute/60.
+
+        t_begins.append(tod_begin)
+        t_ends.append(tod_end)
+        durs.append(dur)
+
+    # decide binning for duration histogram
+    dur_max = max(durs)
+
+    # more than 2 hours, hour binning
+    if dur_max > 2.:
+        dt = 1
+    # otherwise, minute binning
+    else:
+        durs = [dur/60. for dur in durs]
+        dt = 10 # 10 minute binning
+        dur_max /= 60.
+
+    dur_max = int(math.ceil(dur_max + dt))
+
+    # compute histograms
+    t_bins = list(frange(0, 25, 1))
+    t_begin_histo = histo(t_begins, t_bins)
+    t_end_histo = histo(t_ends, t_bins)
+
+    dur_bins = list(range(0, dur_max, dt))
+    dur_histo = histo(durs, dur_bins)
+
+    # make string labels
+    t_bins_str = [f'{tee:.0f}' for tee in t_bins]
+    dur_bins_str = [f'{dur:.0f}' for dur in dur_bins]
+
+    res = {'t_bins': t_bins_str,
+           't_begin_histo': t_begin_histo,
+           't_end_histo': t_end_histo,
+           'dur_bins': dur_bins_str,
+           'dur_histo': dur_histo}
+    
+    return res
