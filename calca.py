@@ -339,9 +339,9 @@ def calca_activity(acts):
     dt = 1
     
     # but decide from maximum dt
-    # if it's more than 3 days, make it days
+    # if it's more than 4 days, make it days
     dt_max = max(dt_acts)
-    if dt_max > 3*24:
+    if dt_max > 4*24:
         dt = 1
         dt_acts = [delta/24. for delta in dt_acts]
         dt_max /= 24

@@ -238,7 +238,6 @@ def get_reindex_acts(user):
     cur_acts = ActIndex.query(ActIndex.userid==str(user.key.id())).fetch()
     cur_acts = list(cur_acts)
     cur_acts_dict = {}
-    print(f'in database, {len(cur_acts)} acts')
     
     # put in dictionary we're checking for existence later
     for act in cur_acts:
@@ -252,6 +251,7 @@ def get_reindex_acts(user):
 
     acts = ActivityModel.query(ActivityModel.userid == userid,
                                ActivityModel.when >= then)\
+                        .order(ActivityModel.when)\
                         .fetch()
     acts = list(acts)
     
@@ -277,6 +277,7 @@ def get_reindex_acts(user):
     # ---- Duration acts
     dacts = TimedActivityModel.query(TimedActivityModel.userid == userid,
                                      TimedActivityModel.start >= then)\
+                              .order(TimedActivityModel.start)\
                               .fetch()
     d_put_count = 0
     d_put_names = []
@@ -440,11 +441,9 @@ def get_table(user):
     
     # get available activities
     acts = ActIndex.query(ActIndex.userid==str(user.key.id()))\
-                   .order(ActIndex.name)\
                    .fetch()
     actnames = [act.name for act in acts if act.duration == "no"]
     dactnames = [act.name for act in acts if act.duration == "yes"]
-
 
     img_keys = [img.key.id() for img in images]
     return render_template('table.html', 
