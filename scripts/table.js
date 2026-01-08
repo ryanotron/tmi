@@ -13,7 +13,7 @@ function drawChart()
     if (coffee_data.hasOwnProperty('tod_bins'))
     {
         var data = new google.visualization.DataTable();
-        data.addColumn('number', 'time of day');
+        data.addColumn('string', 'time of day');
         data.addColumn('number', 'count');
         for (let i = 0; i < coffee_data.tod_histo.length; i++)
         {

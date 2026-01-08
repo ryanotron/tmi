@@ -213,6 +213,91 @@ def get_panel(user):
     
     return render_template('panel.html', user=user, t_str=t_str)
 
+@app.route('/flush_act_index')
+@require_login
+def get_flush_act_index(user):
+    """Clear act index entries,
+    ideally followed by /reindex_acts
+    """
+
+    # fetch entries
+    acts = ActIndex.query(ActIndex.userid==str(user.key.id())).fetch()
+
+    # then delete them
+    delcount = 0
+    for act in acts:
+        act.key.delete()
+        delcount += 1
+    
+    return f'deleted {delcount} entries'
+
+
+@app.route('/reindex_acts')
+@require_login
+def get_reindex_acts(user):
+    cur_acts = ActIndex.query(ActIndex.userid==str(user.key.id())).fetch()
+    cur_acts = list(cur_acts)
+    cur_acts_dict = {}
+    print(f'in database, {len(cur_acts)} acts')
+    
+    # put in dictionary we're checking for existence later
+    for act in cur_acts:
+        cur_acts_dict[act.name] = act
+
+    # get all activities for the past 26 weeks
+    N_weeks = 26 # half a year
+    now = datetime.datetime.now()
+    then = now - datetime.timedelta(weeks=N_weeks)
+    userid = str(user.key.id())
+
+    acts = ActivityModel.query(ActivityModel.userid == userid,
+                               ActivityModel.when >= then)\
+                        .fetch()
+    acts = list(acts)
+    
+    # put acts that aren't in database yet to database
+    put_count = 0
+    put_names = []
+    for act in acts:
+        # check not in database
+        if act.name in cur_acts_dict:
+            continue
+
+        # check not in running list of new acts
+        if act.name in put_names:
+            continue
+
+        new_act = ActIndex(userid=str(user.key.id()),
+                           name = act.name,
+                           duration = "no")
+        new_act.put()
+        put_count += 1
+        put_names.append(act.name)
+
+    # ---- Duration acts
+    dacts = TimedActivityModel.query(TimedActivityModel.userid == userid,
+                                     TimedActivityModel.start >= then)\
+                              .fetch()
+    d_put_count = 0
+    d_put_names = []
+    for dact in dacts:
+        # check in database
+        if dact.name in cur_acts_dict:
+            continue
+
+        # check in running list
+        if dact.name in d_put_names:
+            continue
+
+        new_dact = ActIndex(userid=userid,
+                            name=dact.name,
+                            duration="yes")
+        new_dact.put()
+        d_put_count += 1
+        d_put_names.append(dact.name)
+
+    return f'{put_count}, {", ".join(put_names)} {d_put_count}, {", ".join(d_put_names)}'
+
 
 @app.route('/post_activity', methods=['POST'])
 @require_login
@@ -227,7 +312,11 @@ def post_activity(user):
                .strftime("%Y-%m-%dT%H:%M")
         timezone = user.timezone
 
-    if name and when and timezone:
+    tz_ok = False
+    if timezone is not None:
+        tz_ok = True
+
+    if name and when and tz_ok:
         pass
     else:
         logging.error("invalid input")
@@ -348,12 +437,22 @@ def get_table(user):
                               ImageModel.category=="profile_img")\
                        .order(-ImageModel.uploaded)\
                        .fetch(8)
+    
+    # get available activities
+    acts = ActIndex.query(ActIndex.userid==str(user.key.id()))\
+                   .order(ActIndex.name)\
+                   .fetch()
+    actnames = [act.name for act in acts if act.duration == "no"]
+    dactnames = [act.name for act in acts if act.duration == "yes"]
+
 
     img_keys = [img.key.id() for img in images]
     return render_template('table.html', 
         user=user, 
         messages=messages_local,
-        imgs=img_keys)
+        imgs=img_keys,
+        actnames=actnames,
+        dactnames=dactnames)
 
 
 @app.route('/coffee_stats', methods=['GET'])
@@ -466,6 +565,7 @@ def get_activity_chart(user):
 @require_login
 def get_duration_activity_stats(user):
     actname = request.args.get('name')
+    print(f'getting data for timact {actname}')
     if actname is None:
         return {}
     
@@ -477,6 +577,7 @@ def get_duration_activity_stats(user):
                              .order(-TimedActivityModel.end)\
                              .fetch()
     acts = list(acts)
+    print(f'there are {len(acts)} records')
     if len(acts) < 1:
         return {}
     ret = calca_timacts(acts)

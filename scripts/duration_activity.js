@@ -52,7 +52,7 @@ function drawChart()
             data.addRow([act_data.t_bins[i], act_data.t_begin_histo[i], act_data.t_end_histo[i]]);
         }
         opts1['title'] = 'begin/end time histogram';
-        opts1.isStacked = true;
+        // opts1.isStacked = true;
         
         var chart = new google.visualization.ColumnChart(document.getElementById('chart_act_begin_histo'));
         chart.draw(data, opts1);

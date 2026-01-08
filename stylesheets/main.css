@@ -125,7 +125,6 @@ div.ChartWrapper
     min-width: 90%;
 }
 
-
 .navi ul 
 {
     list-style: none;
@@ -160,6 +159,18 @@ div.ChartWrapper
 .navi_container a:hover
 {
     color: whitesmoke;
+}
+
+.actlist
+{
+    display: inline-block;
+    margin: 0px;
+    padding: 0px;
+}
+
+.actlist li
+{
+    display: inline;
 }
 
 @media (max-width: 768px)

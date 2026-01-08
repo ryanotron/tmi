@@ -70,6 +70,11 @@ class MealModel(ndb.Model):
     image    = ndb.StringProperty()
     timezone = ndb.FloatProperty()
 
+class ActIndex(ndb.Model):
+    userid = ndb.StringProperty(required=True)
+    name = ndb.StringProperty()
+    duration = ndb.StringProperty()
+
 class UserMessageModel(ndb.Model):
     userid  = ndb.StringProperty(required = True)
     message = ndb.TextProperty()

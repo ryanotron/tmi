@@ -33,6 +33,26 @@
     {% endif %}
   </div>
 
+  {% if actnames|length > 0 %}
+  <div class="TableBlockWide">
+    Activities: <ul class="actlist">
+      {% for actname in actnames %}
+      <li><a href="/activity_chart?name={{actname}}">{{actname}}</a></li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  {% if dactnames|length > 0 %}
+  <div class="TableBlockWide">
+    Duration activities: <ul class="actlist">
+      {% for actname in dactnames %}
+      <li><a href="/duration_activity_chart?name={{actname}}">{{actname}}</a></li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
   <div class="TableBlock">
     <h2>Sleep</h2>
     <ul>
